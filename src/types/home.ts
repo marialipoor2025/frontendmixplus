@@ -12,14 +12,18 @@ export type HomeBanner = {
 export type HomeCategory = {
   id: string;
   title: string;
-  slug: string;
-  iconUrl: string;
+  href: string;
+  imageUrl: string;
 };
 
 export type ProductRailSection = {
   id: string;
   title: string;
+  /** Digikala-style secondary line, e.g. «بر اساس سلیقه شما» */
+  subtitle?: string;
   href?: string;
+  /** Show «کارکرده» badge on used products (only for the used/new rail). */
+  showUsedLabel?: boolean;
   products: Product[];
 };
 
@@ -31,4 +35,5 @@ export type HomePageData = {
   midBanners: HomeBanner[];
   brands: Brand[];
   productRails: ProductRailSection[];
+  bottomBanners: HomeBanner[];
 };

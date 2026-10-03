@@ -1,10 +1,20 @@
+import { AmazingOffers } from "@/components/home/AmazingOffers";
+import { BottomBanners } from "@/components/home/BottomBanners";
+import { BrandShowcase } from "@/components/home/BrandShowcase";
+import { CategoriesSection } from "@/components/home/CategoriesSection";
+import { HeroSlider } from "@/components/home/HeroSlider";
+import { MidBanners } from "@/components/home/MidBanners";
+import { ProductRails } from "@/components/home/ProductRail";
+import { SiteFeatures } from "@/components/home/SiteFeatures";
+import { MainNav } from "@/components/layout/MainNav";
 import { SiteFooter } from "@/components/layout/SiteFooter";
 import { SiteHeader } from "@/components/layout/SiteHeader";
-import { SectionPlaceholder } from "@/components/home/SectionPlaceholder";
 import type { HomePageData } from "@/types/home";
+import type { MainNavData } from "@/types/nav";
 
 type HomePageProps = {
   data: HomePageData;
+  nav: MainNavData;
 };
 
 /**
@@ -12,47 +22,22 @@ type HomePageProps = {
  * Each section below will be replaced with a real component
  * as you share its design reference.
  */
-export function HomePage({ data }: HomePageProps) {
+export function HomePage({ data, nav }: HomePageProps) {
   return (
     <>
-      <SiteHeader />
-      <main className="mx-auto w-full max-w-[1440px] flex-1 space-y-4 px-4 py-4 md:px-6 md:py-6">
-        <SectionPlaceholder
-          name="TopBanner"
-          description={`Promo strip. Mock: ${data.topBanner?.title ?? "none"}`}
-        />
-        <SectionPlaceholder
-          name="MainNav / CategoryMenu"
-          description="Primary category navigation under the header."
-        />
-        <SectionPlaceholder
-          name="HeroSlider"
-          description={`Main carousel. Mock slides: ${data.heroSlides.length}`}
-        />
-        <SectionPlaceholder
-          name="CategoryGrid"
-          description={`Quick category icons. Mock categories: ${data.categories.length}`}
-        />
-        <SectionPlaceholder
-          name="AmazingOffers"
-          description={`Flash / amazing deals rail. Mock products: ${data.amazingOffers.length}`}
-        />
-        <SectionPlaceholder
-          name="MidBanners"
-          description={`Secondary promo banners. Mock banners: ${data.midBanners.length}`}
-        />
-        <SectionPlaceholder
-          name="BrandShowcase"
-          description={`Multi-brand seller logos. Mock brands: ${data.brands.length}`}
-        />
-        <SectionPlaceholder
-          name="ProductRails"
-          description={`Category product carousels. Mock rails: ${data.productRails.length}`}
-        />
-        <SectionPlaceholder
-          name="BottomBanners"
-          description="Extra promotional blocks near the footer."
-        />
+      <div className="sticky top-0 z-40 bg-[var(--color-neutral-000)] shadow-[var(--shadow-header)]">
+        <SiteHeader />
+        <MainNav data={nav} />
+      </div>
+      <main className="mx-auto w-full max-w-[1336px] flex-1 space-y-6 px-4 py-6">
+        <HeroSlider slides={data.heroSlides} />
+        <SiteFeatures />
+        <AmazingOffers products={data.amazingOffers} />
+        <CategoriesSection categories={data.categories} />
+        <MidBanners banners={data.midBanners} />
+        <ProductRails rails={data.productRails} />
+        <BrandShowcase brands={data.brands} />
+        <BottomBanners banners={data.bottomBanners} />
       </main>
       <SiteFooter />
     </>

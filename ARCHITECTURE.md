@@ -13,7 +13,7 @@ Household-appliances marketplace inspired by Digikala. Frontend and backend are 
 Build the homepage from the outside in — shell first, then each Digikala-like section as its design is provided:
 
 1. TopBanner
-2. Header / Search / Auth / Cart
+2. ~~Header / Search / Auth / Cart~~ → `SiteHeader` (+ `HeaderSearch`, `HeaderUserActions`)
 3. MainNav / CategoryMenu
 4. HeroSlider
 5. CategoryGrid

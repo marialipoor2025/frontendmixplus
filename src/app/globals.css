@@ -1,28 +1,73 @@
 @import "tailwindcss";
 
 :root {
-  --background: #f5f5f5;
-  --foreground: #232933;
-  --color-primary: #ef4056;
-  --color-primary-hover: #e03a4f;
-  --color-primary-soft: rgb(239 64 86 / 0.16);
-  --color-surface: #f0f0f1;
-  --color-border: #e0e0e2;
-  --color-text: #232933;
-  --color-muted: #81858b;
+  /* Digikala-inspired marketplace tokens (header + shell) */
+  --font-family: var(--font-vazirmatn), Tahoma, sans-serif;
+  --spacing-base: 4px;
+  --global-radius: 8px;
+  --small-radius: 4px;
+  --medium-radius: 8px;
+  --medium-plus-radius: 12px;
+  --large-radius: 16px;
+
+  --color-app-background: #ffffff;
+  --color-neutral-000: #fff;
+  --color-neutral-100: #f0f0f1;
+  --color-neutral-200: #e0e0e2;
+  --color-neutral-300: #c0c2c5;
+  --color-neutral-400: #a1a3a8;
+  --color-neutral-500: #81858b;
+  --color-neutral-600: #62666d;
+  --color-neutral-650: #424242;
+  --color-neutral-700: #3f4064;
+  --color-neutral-800: #23254e;
+  --color-neutral-900: #0c0c0c;
+
+  --color-primary-500: #ef4056;
+  --color-primary-700: #ef394e;
+  --color-primary-soft-text: #ef4056;
+  --color-brand-primary: #e6123d;
+  --dds-theme-primary-primary-base: #ed1944;
+  --color-hint-object-error: #d32f2f;
+
+  --color-secondary-700: #0d4485;
+  --color-offers-blue: #0090e3;
+  --color-offers-accent: #ff6a00;
+  --color-hint-text-caution: #f57f17;
+
+  --color-icon-low-emphasis: #a1a3a8;
+  --color-icon-high-emphasis: #424750;
+  --color-icon-primary: #ef4056;
+  --color-icon-secondary: #1672dd;
+
+  --color-button-black: #0c0c0c;
+
+  /* App aliases used across components */
+  --background: var(--color-app-background);
+  --foreground: var(--color-neutral-800);
+  --color-primary: var(--dds-theme-primary-primary-base);
+  --color-primary-hover: var(--color-primary-700);
+  --color-primary-soft: rgb(237 25 68 / 0.12);
+  --color-surface: var(--color-neutral-100);
+  --color-border: var(--color-neutral-200);
+  --color-text: #1f1f1f;
+  --color-muted: var(--color-neutral-500);
   --color-success: #00a049;
   --color-warning: #f9a825;
+
+  --header-max-width: 1676px;
+  --shadow-header: 0 1px 0 #00000024, 0 2px 0 #0000000d;
+  --shadow-mega: 0 12px 24px -8px rgb(0 0 0 / 0.12), 0 4px 8px rgb(0 0 0 / 0.06);
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-sans: var(--font-vazirmatn);
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: var(--font-geist-sans), Arial, Helvetica, sans-serif;
+  font-family: var(--font-family);
 }

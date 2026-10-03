@@ -5,26 +5,14 @@ import type { MainNavData } from "@/types/nav";
  * Other Digikala top-level categories (موبایل، مد، …) can be added later.
  */
 export const mockMainNavData: MainNavData = {
-  categoryTriggerLabel: "دسته‌بندی کالاها",
+  categoryTriggerLabel: "دسته‌بندی کالا",
   sellerCta: {
-    title: "در MixPlus بفروشید!",
+    title: "فروشنده شو",
     href: "/sellers/join",
   },
   quickLinks: [
-    { id: "q-amazing", title: "شگفت‌انگیزها", href: "/incredible-offers", icon: "amazing" },
-    { id: "q-best", title: "پرفروش‌ترین‌ها", href: "/best-selling", icon: "trend" },
+    { id: "q-stock", title: "کالاهای استوک", href: "/stock", icon: "stock", badge: "جدید" },
     { id: "q-install", title: "نصب و سرویس", href: "/services/install", icon: "service" },
-    // Technolife-only items (not in Digikala top nav)
-    { id: "q-b2b", title: "خرید سازمانی", href: "/b2b", icon: "b2b" },
-    { id: "q-gift", title: "کارت هدیه", href: "/gift-card", icon: "gift" },
-    {
-      id: "q-stock",
-      title: "کالاهای استوک",
-      href: "/stock",
-      icon: "stock",
-      badge: "جدید",
-    },
-    { id: "q-installment", title: "خرید اقساطی", href: "/installment", icon: "installment" },
   ],
   categories: [
     {

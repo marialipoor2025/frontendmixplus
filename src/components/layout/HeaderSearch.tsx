@@ -1,57 +1,114 @@
 "use client";
 
-import { useEffect, useRef } from "react";
-import { SearchIcon } from "@/components/layout/icons";
+import { useState } from "react";
+import { CameraIcon, SearchIcon } from "@/components/layout/icons";
+import { siteConfig } from "@/config/site";
 
 type HeaderSearchProps = {
-  placeholder?: string;
+  /** Prefix before brand: «جستجو در» */
+  prefix?: string;
+  brandName?: string;
+  /** Desktop Barghchi pill shape; same hint text as mobile */
+  variant?: "default" | "barghchi";
 };
 
 /**
- * Digikala-style desktop search pill (rounded, gray surface, Ctrl+K hint).
- * Opens focus on Ctrl/Cmd+K; full search modal can plug in later.
+ * Search field — same «جستجو در میکس پلاس» hint on mobile + desktop.
+ * Desktop uses Barghchi rounded pill + stroke search icon.
  */
 export function HeaderSearch({
-  placeholder = "جستجو",
+  prefix = "جستجو در",
+  brandName = siteConfig.nameFa,
+  variant = "default",
 }: HeaderSearchProps) {
-  const inputRef = useRef<HTMLInputElement>(null);
+  const [value, setValue] = useState("");
+  const [focused, setFocused] = useState(false);
+  const showHint = !value && !focused;
+  const isBarghchi = variant === "barghchi";
+  const inputId = isBarghchi ? "site-search-desktop" : "site-search";
 
-  useEffect(() => {
-    function onKeyDown(event: KeyboardEvent) {
-      const isModK =
-        (event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "k";
-      if (!isModK) return;
-      event.preventDefault();
-      inputRef.current?.focus();
-    }
+  const hint = showHint ? (
+    <span
+      className="pointer-events-none absolute inset-0 flex items-center gap-1 text-sm font-medium"
+      aria-hidden
+    >
+      <span className="text-[var(--color-neutral-500)]">{prefix}</span>
+      <span
+        className="bg-clip-text font-extrabold text-transparent"
+        style={{
+          backgroundImage: "linear-gradient(135deg, #1672dd 0%, #ed1944 100%)",
+        }}
+      >
+        {brandName}
+      </span>
+    </span>
+  ) : null;
 
-    window.addEventListener("keydown", onKeyDown);
-    return () => window.removeEventListener("keydown", onKeyDown);
-  }, []);
+  if (isBarghchi) {
+    return (
+      <div className="relative min-w-0 flex-1">
+        <label className="sr-only" htmlFor={inputId}>
+          {prefix} {brandName}
+        </label>
+        <form
+          className="relative flex w-full items-center"
+          onSubmit={(event) => event.preventDefault()}
+        >
+          <div className="relative flex w-full items-center rounded-2xl bg-[var(--color-neutral-100)] py-3 pe-5 ps-14">
+            <span className="pointer-events-none absolute start-5 flex items-center border-e border-[var(--color-neutral-300)] pe-2.5 text-[#707EAE]">
+              <SearchIcon />
+            </span>
+            <div className="relative min-w-0 grow">
+              {hint}
+              <input
+                id={inputId}
+                name="s"
+                type="text"
+                autoComplete="off"
+                value={value}
+                onChange={(event) => setValue(event.target.value)}
+                onFocus={() => setFocused(true)}
+                onBlur={() => setFocused(false)}
+                className="h-6 w-full min-w-0 bg-transparent text-sm font-medium text-[var(--color-neutral-700)] outline-none"
+              />
+            </div>
+          </div>
+        </form>
+      </div>
+    );
+  }
 
   return (
     <div className="min-w-0 flex-1">
-      <label className="sr-only" htmlFor="site-search">
-        {placeholder}
+      <label className="sr-only" htmlFor={inputId}>
+        {prefix} {brandName}
       </label>
-      <div className="flex h-11 min-w-0 w-full max-w-[600px] flex-1 items-center rounded-full bg-[var(--color-neutral-100)] px-4 md:w-[500px]">
-        <div className="flex min-w-0 grow items-center justify-between gap-2">
-          <SearchIcon className="text-[var(--color-icon-low-emphasis)]" />
-          <input
-            ref={inputRef}
-            id="site-search"
-            name="search-input"
-            type="search"
-            autoComplete="off"
-            placeholder={placeholder}
-            className="h-10 min-w-0 grow bg-transparent px-2 text-sm font-medium text-[var(--color-neutral-500)] outline-none placeholder:text-[var(--color-neutral-500)]"
-          />
-          <kbd
-            className="pointer-events-none hidden shrink-0 rounded border border-[var(--color-neutral-200)] bg-white px-1.5 py-0.5 text-[11px] font-medium text-[var(--color-neutral-400)] sm:inline-block"
-            aria-hidden="true"
+      <div className="flex h-11 min-w-0 w-full max-w-[600px] flex-1 items-center rounded-full border border-[var(--color-neutral-200)] bg-[var(--color-neutral-100)] px-3 md:w-[500px] md:px-4">
+        <div className="relative flex min-w-0 grow items-center gap-2">
+          <SearchIcon className="shrink-0 text-[#707EAE]" />
+
+          <div className="relative min-w-0 grow">
+            {hint}
+            <input
+              id={inputId}
+              name="search-input"
+              type="search"
+              autoComplete="off"
+              value={value}
+              onChange={(event) => setValue(event.target.value)}
+              onFocus={() => setFocused(true)}
+              onBlur={() => setFocused(false)}
+              className="h-10 w-full min-w-0 bg-transparent text-sm font-medium text-[var(--color-neutral-700)] outline-none [&::-webkit-search-cancel-button]:hidden"
+            />
+          </div>
+
+          <button
+            type="button"
+            aria-label="جستجو با تصویر"
+            className="flex size-8 shrink-0 items-center justify-center rounded-lg text-[#7c5cff] transition hover:bg-white/70"
           >
-            Ctrl+K
-          </kbd>
+            <CameraIcon />
+          </button>
         </div>
       </div>
     </div>

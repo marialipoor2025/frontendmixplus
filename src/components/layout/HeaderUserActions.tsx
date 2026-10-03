@@ -1,88 +1,94 @@
 import Link from "next/link";
 import {
-  CartIcon,
-  NotificationIcon,
-  UserIcon,
+  BottomNavCartIcon,
+  LoginUserIcon,
+  WishlistHeartIcon,
 } from "@/components/layout/icons";
 
 type HeaderUserActionsProps = {
   loginLabel?: string;
-  notificationsHref?: string;
   loginHref?: string;
   cartHref?: string;
+  wishlistHref?: string;
   cartCount?: number;
   emptyCartTitle?: string;
 };
 
 /**
- * Digikala-style header actions: notifications, login/register, cart.
+ * Barghchi-style header actions: cart, wishlist, login/register.
  */
 export function HeaderUserActions({
-  loginLabel = "ورود | ثبت‌نام",
-  notificationsHref = "/profile/notification",
+  loginLabel = "ورود | ثبت نام",
   loginHref = "/users/login",
-  cartHref = "/checkout/cart",
+  cartHref = "/checkout/cart/",
+  wishlistHref = "/profile/wishlist",
   cartCount = 0,
   emptyCartTitle = "سبد خرید شما خالی است!",
 }: HeaderUserActionsProps) {
   return (
-    <div className="flex shrink-0 items-center justify-end">
-      <Link
-        href={notificationsHref}
-        aria-label="اعلان‌ها"
-        className="relative flex shrink-0 cursor-pointer items-center justify-center p-2 ms-3"
-      >
-        <NotificationIcon className="text-[var(--color-icon-high-emphasis)]" />
-      </Link>
-
-      <Link href={loginHref} className="ms-2 shrink-0 lg:ms-0">
-        <span className="relative flex h-10 select-none items-center whitespace-nowrap rounded-[var(--medium-radius)] border border-[var(--color-neutral-200)] bg-white px-3 text-sm font-medium text-[var(--color-text)] transition hover:bg-[var(--color-neutral-100)]">
-          <UserIcon className="me-2 text-[var(--color-icon-high-emphasis)]" />
-          {loginLabel}
-        </span>
-      </Link>
-
-      <span
-        className="mx-3 hidden h-6 w-px bg-[var(--color-neutral-200)] lg:block"
-        aria-hidden="true"
-      />
-
-      <div className="group relative flex flex-col">
+    <div className="flex shrink-0 items-center gap-3 xl:gap-4">
+      <div className="group relative">
         <Link
           href={cartHref}
           aria-label="سبد خرید"
-          className="relative inline-flex rounded bg-white py-2 pe-2 ps-0 lg:p-2"
+          className="relative flex size-11 items-center justify-center rounded-full bg-[rgb(22_114_221_/_0.1)]"
         >
-          <CartIcon className="text-[var(--color-icon-high-emphasis)]" />
-          {cartCount > 0 ? (
-            <span className="absolute end-0 top-0 flex h-4 min-w-4 items-center justify-center rounded-full bg-[var(--color-primary)] px-1 text-[10px] font-bold text-white lg:end-1 lg:top-1">
-              {cartCount > 99 ? "99+" : cartCount}
-            </span>
-          ) : null}
+          <span className="absolute -end-1.5 -top-0.5 flex size-5 items-center justify-center rounded-full bg-[var(--color-primary)] text-[10px] font-bold text-white">
+            {cartCount > 99 ? "99+" : cartCount}
+          </span>
+          <BottomNavCartIcon className="text-[#2B3674]" />
         </Link>
 
-        {/* Mini-cart preview (desktop hover) — empty state for now */}
-        <div className="pointer-events-none absolute end-0 top-full z-20 hidden w-[320px] max-w-[calc(100vw-2rem)] pt-2 opacity-0 transition group-hover:pointer-events-auto group-hover:opacity-100 md:block md:w-[400px] lg:w-[500px]">
-          <div className="overflow-hidden rounded-md bg-white shadow-[0_16px_24px_-8px_#00000014,0_2px_8px_0_#0000000a]">
-            <div className="flex items-center gap-2 rounded-t-md bg-white px-4 pb-2 pt-4">
-              <p className="text-lg font-bold text-[var(--color-text)]">
-                خلاصه سبد خرید شما
-              </p>
-            </div>
-            <div className="flex flex-col items-center justify-center gap-4 px-6 py-8">
-              <div
-                className="flex h-[120px] w-[120px] items-center justify-center rounded-full bg-[var(--color-neutral-100)] text-[var(--color-neutral-400)]"
-                aria-hidden="true"
-              >
-                <CartIcon className="size-12" />
+        <div className="pointer-events-none absolute end-0 top-full z-20 hidden w-80 pt-2 opacity-0 transition group-hover:pointer-events-auto group-hover:opacity-100 lg:block">
+          <div className="rounded-md bg-white p-3 shadow-md">
+            <div className="flex items-center justify-between text-sm text-[var(--color-neutral-400)]">
+              <div className="flex items-center gap-2">
+                <span>{cartCount}</span>
+                <span>عدد</span>
               </div>
-              <p className="text-center text-base font-bold text-[var(--color-text)]">
+              <Link
+                href={cartHref}
+                className="flex items-center gap-1 text-sm font-bold text-[var(--color-icon-secondary)]"
+              >
+                مشاهده سبد خرید
+              </Link>
+            </div>
+            <div className="mt-5 h-10" />
+            <div className="mt-6 border-b border-[var(--color-neutral-200)]" />
+            <div className="mt-2 flex w-full flex-col items-center gap-3">
+              <div className="flex w-full items-center justify-between text-sm font-medium">
+                <span className="text-[var(--color-neutral-400)]">جمع کل</span>
+                <span>۰</span>
+              </div>
+              <p className="w-full text-center text-xs text-[var(--color-muted)]">
                 {emptyCartTitle}
               </p>
+              <Link
+                href={cartHref}
+                className="inline-flex w-full items-center justify-center rounded-md bg-[var(--color-primary)] py-2 text-sm text-white"
+              >
+                سبد خرید
+              </Link>
             </div>
           </div>
         </div>
       </div>
+
+      <Link
+        href={wishlistHref}
+        aria-label="علاقه‌مندی‌ها"
+        className="flex items-center justify-center text-[#2B3674] transition hover:text-[var(--color-primary)]"
+      >
+        <WishlistHeartIcon />
+      </Link>
+
+      <Link
+        href={loginHref}
+        className="flex items-center gap-2 text-sm font-medium text-[var(--color-icon-secondary)]"
+      >
+        <LoginUserIcon className="text-[#2B3674]" />
+        <span className="text-[var(--color-neutral-900)]">{loginLabel}</span>
+      </Link>
     </div>
   );
 }

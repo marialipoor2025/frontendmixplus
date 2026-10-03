@@ -2,47 +2,22 @@
 
 import Link from "next/link";
 import { useState } from "react";
+import { HeaderQuickLinks } from "@/components/layout/HeaderQuickLinks";
 import {
-  AmazingIcon,
-  B2bIcon,
-  BrandsIcon,
+  BottomNavCategoryIcon,
   ChevronLeftIcon,
-  GiftIcon,
-  HamburgerIcon,
-  InstallmentIcon,
   NavCategoryIcon,
-  ServiceIcon,
-  StockIcon,
-  TrendIcon,
 } from "@/components/layout/icons";
+import { NavMenuIcon } from "@/components/layout/NavMenuIcon";
+import {
+  NAV_ICON_CLASS,
+  NAV_LINK_CLASS,
+} from "@/components/layout/navMenuShared";
 import type { MainNavData, MegaMenuCategory, NavQuickLink } from "@/types/nav";
 
 type MainNavProps = {
   data: MainNavData;
 };
-
-function QuickLinkIcon({ name }: { name?: string }) {
-  switch (name) {
-    case "amazing":
-      return <AmazingIcon className="text-[var(--color-icon-low-emphasis)]" />;
-    case "brands":
-      return <BrandsIcon className="text-[var(--color-icon-low-emphasis)]" />;
-    case "trend":
-      return <TrendIcon className="text-[var(--color-icon-low-emphasis)]" />;
-    case "service":
-      return <ServiceIcon className="text-[var(--color-icon-low-emphasis)]" />;
-    case "b2b":
-      return <B2bIcon className="text-[var(--color-icon-low-emphasis)]" />;
-    case "gift":
-      return <GiftIcon className="text-[var(--color-icon-low-emphasis)]" />;
-    case "stock":
-      return <StockIcon className="text-[var(--color-icon-low-emphasis)]" />;
-    case "installment":
-      return <InstallmentIcon className="text-[var(--color-icon-low-emphasis)]" />;
-    default:
-      return null;
-  }
-}
 
 function CategoryMegaMenu({
   label,
@@ -64,18 +39,12 @@ function CategoryMegaMenu({
       <button
         type="button"
         data-cro-id="header-main-menu"
-        className="flex cursor-pointer items-center whitespace-nowrap text-[13px] font-bold leading-none text-[var(--color-neutral-700)]"
+        className={NAV_LINK_CLASS}
         aria-expanded={open}
         aria-haspopup="true"
       >
-        <span className="ms-0 me-1 flex text-[var(--color-neutral-400)]">
-          <HamburgerIcon />
-        </span>
+        <BottomNavCategoryIcon className={NAV_ICON_CLASS} />
         {label}
-        <span
-          className="relative top-2 ms-5 mt-1 min-h-5 min-w-px bg-[var(--color-neutral-200)]"
-          aria-hidden
-        />
       </button>
 
       {open && active ? (
@@ -84,7 +53,6 @@ function CategoryMegaMenu({
           role="menu"
         >
           <div className="flex h-full w-full">
-            {/* Sidebar — end side in RTL (visually right) */}
             <div className="flex w-[220px] shrink-0 flex-col overflow-auto border-e border-[var(--color-neutral-100)] bg-[var(--color-neutral-000)]">
               {categories.map((cat) => {
                 const isActive = cat.id === active.id;
@@ -104,7 +72,7 @@ function CategoryMegaMenu({
                       <NavCategoryIcon name={cat.icon} active={isActive} />
                     </span>
                     <span
-                      className={`text-[12px] font-bold ${
+                      className={`text-[13px] font-medium ${
                         isActive
                           ? "text-[var(--color-primary-700)]"
                           : "text-[var(--color-neutral-700)]"
@@ -117,12 +85,11 @@ function CategoryMegaMenu({
               })}
             </div>
 
-            {/* Columns */}
             <div className="h-full grow overflow-auto border-s border-[var(--color-neutral-100)] px-5 pt-5">
               <Link
                 href={active.href}
                 data-cro-id="mega-menu-all-cat"
-                className="mb-5 flex items-center whitespace-nowrap text-[12px] font-bold text-[var(--color-secondary-700)]"
+                className="mb-5 flex items-center whitespace-nowrap text-[13px] font-medium text-[var(--color-secondary-700)]"
               >
                 {active.allProductsLabel}
                 <span className="ms-1 me-0 flex">
@@ -147,8 +114,8 @@ function CategoryMegaMenu({
                         }
                         className={
                           link.kind === "parent"
-                            ? "relative mb-2 flex items-center py-1 text-[13px] font-bold text-[var(--color-neutral-900)]"
-                            : "relative flex items-center py-1 text-[12px] text-[var(--color-neutral-500)] hover:text-[var(--color-primary-700)]"
+                            ? "relative mb-2 flex items-center py-1 text-[13px] font-medium text-[var(--color-neutral-900)]"
+                            : "relative flex items-center py-1 text-[13px] font-medium text-[var(--color-neutral-500)] hover:text-[var(--color-primary-700)]"
                         }
                       >
                         <span className="truncate">{link.title}</span>
@@ -173,26 +140,25 @@ function CategoryMegaMenu({
 function QuickLinks({ links }: { links: NavQuickLink[] }) {
   return (
     <div className="flex items-center">
-      {links.map((link) => (
-        <div
-          key={link.id}
-          className="flex h-full items-center px-2 md:px-3"
-        >
+      {links.map((link, index) => (
+        <div key={link.id} className="flex items-center">
+          <span
+            className={`h-4 w-px shrink-0 bg-[var(--color-neutral-200)] ${
+              index === 0 ? "mx-3" : "mx-2"
+            }`}
+            aria-hidden
+          />
           <Link
             href={link.href}
             target={link.external ? "_blank" : undefined}
             rel={link.external ? "noopener noreferrer" : undefined}
             data-cro-id="header-main-menu"
-            className="flex cursor-pointer items-center whitespace-nowrap text-[12px] text-[var(--color-neutral-600)]"
+            className={`${NAV_LINK_CLASS} px-1`}
           >
-            {link.icon ? (
-              <span className="ms-0 me-1 flex text-[var(--color-neutral-400)]">
-                <QuickLinkIcon name={link.icon} />
-              </span>
-            ) : null}
+            {link.icon ? <NavMenuIcon name={link.icon} /> : null}
             {link.title}
             {link.badge ? (
-              <span className="ms-1 rounded bg-[var(--color-primary-500)] px-1.5 py-px text-[10px] font-bold leading-none text-white">
+              <span className="rounded bg-[var(--color-primary-500)] px-1.5 py-px text-[10px] font-bold leading-none text-white">
                 {link.badge}
               </span>
             ) : null}
@@ -204,37 +170,25 @@ function QuickLinks({ links }: { links: NavQuickLink[] }) {
 }
 
 /**
- * Digikala-style category bar under SiteHeader:
- * mega menu + quick links + seller CTA.
+ * Barghchi-style nav row:
+ * categories + links (start/right) · gradient action buttons (end/left).
  */
 export function MainNav({ data }: MainNavProps) {
   return (
     <nav
-      className="flex grow flex-col flex-wrap items-center justify-between bg-[var(--color-neutral-000)]"
+      className="hidden bg-[var(--color-neutral-000)] lg:block"
       aria-label="منوی اصلی"
     >
-      <div className="relative mx-auto flex w-full max-w-[var(--header-max-width)] grow px-4 md:px-4">
-        <div className="relative flex min-h-9 items-center">
-          <div className="flex items-center">
-            <CategoryMegaMenu
-              label={data.categoryTriggerLabel}
-              categories={data.categories}
-            />
-          </div>
-
-          <div className="ms-1 flex items-center">
-            <QuickLinks links={data.quickLinks} />
-          </div>
-
-          <div className="ms-1 flex items-center border-s border-[var(--color-neutral-200)] ps-2">
-            <Link
-              href={data.sellerCta.href}
-              className="flex cursor-pointer items-center whitespace-nowrap px-2 py-1 text-[12px] text-[var(--color-neutral-600)] md:px-3"
-            >
-              {data.sellerCta.title}
-            </Link>
-          </div>
+      <div className="site-container relative flex items-center justify-between gap-6 py-2.5">
+        <div className="relative flex min-w-0 items-center">
+          <CategoryMegaMenu
+            label={data.categoryTriggerLabel}
+            categories={data.categories}
+          />
+          <QuickLinks links={data.quickLinks} />
         </div>
+
+        <HeaderQuickLinks variant="desktop" />
       </div>
     </nav>
   );

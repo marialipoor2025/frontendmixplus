@@ -130,7 +130,7 @@ export function MobileBottomNav() {
                   />
                 </span>
               ) : (
-                <BottomNavChatIcon className="h-6 w-6 text-[#2B3674]" />
+                <BottomNavChatIcon className="h-6 w-6 text-[#00BAD1]" />
               )}
             </button>
           </li>

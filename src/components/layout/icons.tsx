@@ -311,40 +311,23 @@ export function LoginUserIcon({ className = "", title }: IconProps) {
 }
 
 /** Barghchi-style dual chat bubbles (bottom-nav support). */
-/** Barghchi-style chat bubbles (stroke) — matches other bottom-nav icons. */
+/** Dual speech-bubble chat mark (filled) shared by desktop FAB and mobile nav. */
 export function BottomNavChatIcon({ className = "", title }: IconProps) {
   return (
     <svg
       className={`${base} ${className}`}
       xmlns="http://www.w3.org/2000/svg"
-      width={22}
-      height={22}
+      width={20}
+      height={20}
       fill="none"
-      viewBox="0 0 24 24"
+      viewBox="0 0 56 54"
       aria-hidden={title ? undefined : true}
       role={title ? "img" : undefined}
     >
       {title ? <title>{title}</title> : null}
       <path
-        stroke="currentColor"
-        strokeWidth="1.5"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        d="M8.5 14.5c.8 1.7 2.5 2.8 4.5 2.8 2.9 0 5.2-2.1 5.2-4.8S15.9 7.7 13 7.7c-.6 0-1.2.1-1.7.3"
-      />
-      <path
-        stroke="currentColor"
-        strokeWidth="1.5"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        d="M4.8 16.2c-.9-1.1-1.4-2.5-1.4-4 0-3.5 3.1-6.4 7-6.4 1.4 0 2.7.4 3.8 1"
-      />
-      <path
-        stroke="currentColor"
-        strokeWidth="1.5"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        d="M7.2 18.8c-1.9.4-3.6 1.3-4.9 2.5.4-1.7.7-3.1.5-4.5"
+        fill="currentColor"
+        d="M23.692 0C10.608 0 0 9.67 0 21.6c0 6.127 2.818 11.638 7.316 15.563-.646 2.119-1.991 4.226-4.464 6.105l-.004.004a1.08 1.08 0 0 0-.694 1.008 1.08 1.08 0 0 0 1.077 1.08q.11-.001.219-.025c4.178-.013 7.743-1.803 10.58-4.046a25 25 0 0 0 4.215 1.316 17.7 17.7 0 0 1-1.014-5.885c0-10.72 9.662-19.44 21.538-19.44 2.977 0 5.814.548 8.397 1.54C45.666 8.206 35.74 0 23.692 0M38.77 21.6c-4.57 0-8.952 1.593-12.184 4.429-3.231 2.835-5.047 6.68-5.047 10.691 0 4.01 1.816 7.856 5.047 10.691 3.232 2.836 7.614 4.429 12.184 4.429a19.4 19.4 0 0 0 6.428-1.101c2.642 1.85 5.838 3.223 9.499 3.236A1.072 1.072 0 0 0 56 52.92a1.08 1.08 0 0 0-.707-1.013c-1.97-1.5-3.234-3.152-3.992-4.834 3.011-2.8 4.692-6.503 4.699-10.353 0-4.01-1.815-7.856-5.047-10.691S43.34 21.6 38.77 21.6"
       />
     </svg>
   );

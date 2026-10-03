@@ -5,19 +5,202 @@ type IconProps = {
 
 const base = "shrink-0";
 
+/** Barghchi-style stroke search. */
 export function SearchIcon({ className = "", title }: IconProps) {
   return (
     <svg
       className={`${base} ${className}`}
-      width={24}
-      height={24}
-      viewBox="0 0 24 24"
-      fill="currentColor"
+      xmlns="http://www.w3.org/2000/svg"
+      width={18}
+      height={19}
+      fill="none"
+      viewBox="0 0 18 19"
       aria-hidden={title ? undefined : true}
       role={title ? "img" : undefined}
     >
       {title ? <title>{title}</title> : null}
-      <path d="M15.5 14h-.79l-.28-.27A6.47 6.47 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5Zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14Z" />
+      <path
+        stroke="currentColor"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth="1.5"
+        d="M13.125 13.375 16.5 16.75"
+      />
+      <path
+        stroke="currentColor"
+        strokeLinejoin="round"
+        strokeWidth="1.5"
+        d="M15 8.5a6.75 6.75 0 1 0-13.5 0 6.75 6.75 0 0 0 13.5 0Z"
+      />
+    </svg>
+  );
+}
+
+/** Barghchi-style invoice / proforma document. */
+export function InvoiceDocIcon({ className = "", title }: IconProps) {
+  return (
+    <svg
+      className={`${base} ${className}`}
+      xmlns="http://www.w3.org/2000/svg"
+      width={18}
+      height={18}
+      fill="none"
+      viewBox="0 0 24 24"
+      aria-hidden={title ? undefined : true}
+      role={title ? "img" : undefined}
+    >
+      {title ? <title>{title}</title> : null}
+      <path
+        stroke="currentColor"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M8 7h8M8 11h5M8 15h6M7 3h10a2 2 0 0 1 2 2v14l-3.5-1.5L12 19l-3.5-1.5L5 19V5a2 2 0 0 1 2-2Z"
+      />
+    </svg>
+  );
+}
+
+/** Barghchi-style organizational / clipboard. */
+export function OrgPurchaseIcon({ className = "", title }: IconProps) {
+  return (
+    <svg
+      className={`${base} ${className}`}
+      xmlns="http://www.w3.org/2000/svg"
+      width={18}
+      height={18}
+      fill="none"
+      viewBox="0 0 24 24"
+      aria-hidden={title ? undefined : true}
+      role={title ? "img" : undefined}
+    >
+      {title ? <title>{title}</title> : null}
+      <path
+        stroke="currentColor"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"
+      />
+      <path
+        stroke="currentColor"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M9 5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v0a2 2 0 0 1-2 2h-2a2 2 0 0 1-2-2v0ZM9 12h6M9 16h4"
+      />
+    </svg>
+  );
+}
+
+/** Barghchi-style seller / storefront. */
+export function SellerShopIcon({ className = "", title }: IconProps) {
+  return (
+    <svg
+      className={`${base} ${className}`}
+      xmlns="http://www.w3.org/2000/svg"
+      width={18}
+      height={18}
+      fill="none"
+      viewBox="0 0 24 24"
+      aria-hidden={title ? undefined : true}
+      role={title ? "img" : undefined}
+    >
+      {title ? <title>{title}</title> : null}
+      <path
+        stroke="currentColor"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M4 10h16v9a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-9Z"
+      />
+      <path
+        stroke="currentColor"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M3 7.5 5.5 4h13L21 7.5H3ZM9 14h6v6H9v-6Z"
+      />
+    </svg>
+  );
+}
+
+/** Barghchi-style open box. */
+export function OpenBoxIcon({ className = "", title }: IconProps) {
+  return (
+    <svg
+      className={`${base} ${className}`}
+      xmlns="http://www.w3.org/2000/svg"
+      width={18}
+      height={18}
+      fill="none"
+      viewBox="0 0 24 24"
+      aria-hidden={title ? undefined : true}
+      role={title ? "img" : undefined}
+    >
+      {title ? <title>{title}</title> : null}
+      <path
+        stroke="currentColor"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M21 8.5 12 3 3 8.5l9 5.5 9-5.5Z"
+      />
+      <path
+        stroke="currentColor"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M3 8.5V16l9 5 9-5V8.5M12 14v7"
+      />
+    </svg>
+  );
+}
+
+/** Barghchi-style wrench / services. */
+export function WrenchServiceIcon({ className = "", title }: IconProps) {
+  return (
+    <svg
+      className={`${base} ${className}`}
+      xmlns="http://www.w3.org/2000/svg"
+      width={18}
+      height={18}
+      fill="none"
+      viewBox="0 0 24 24"
+      aria-hidden={title ? undefined : true}
+      role={title ? "img" : undefined}
+    >
+      {title ? <title>{title}</title> : null}
+      <path
+        stroke="currentColor"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M14.7 6.3a4.5 4.5 0 0 0-6.2 6.2L3 18l3 3 5.5-5.5a4.5 4.5 0 0 0 6.2-6.2l-2.5 2.5-3-3 2.5-2.5Z"
+      />
+    </svg>
+  );
+}
+
+/** Digikala-style visual-search camera (outline). */
+export function CameraIcon({ className = "", title }: IconProps) {
+  return (
+    <svg
+      className={`${base} ${className}`}
+      width={22}
+      height={22}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={1.7}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden={title ? undefined : true}
+      role={title ? "img" : undefined}
+    >
+      {title ? <title>{title}</title> : null}
+      <path d="M4.5 7.5h2.2l1.3-2h8l1.3 2h2.2A1.5 1.5 0 0 1 21 9v9a1.5 1.5 0 0 1-1.5 1.5h-15A1.5 1.5 0 0 1 3 18V9a1.5 1.5 0 0 1 1.5-1.5Z" />
+      <circle cx="12" cy="13" r="3.25" />
     </svg>
   );
 }
@@ -73,6 +256,308 @@ export function CartIcon({ className = "", title }: IconProps) {
   );
 }
 
+/** Barghchi-style outline wishlist heart. */
+export function WishlistHeartIcon({ className = "", title }: IconProps) {
+  return (
+    <svg
+      className={`${base} ${className}`}
+      xmlns="http://www.w3.org/2000/svg"
+      width={21}
+      height={21}
+      fill="none"
+      viewBox="0 0 18 16"
+      aria-hidden={title ? undefined : true}
+      role={title ? "img" : undefined}
+    >
+      {title ? <title>{title}</title> : null}
+      <path
+        stroke="currentColor"
+        strokeLinecap="round"
+        strokeWidth="1.5"
+        d="M14.597 1.996c-2.011-1.234-3.767-.737-4.821.055-.433.325-.649.487-.776.487s-.343-.162-.776-.487c-1.054-.792-2.81-1.29-4.82-.055-2.64 1.619-3.238 6.96 2.85 11.467 1.16.858 1.74 1.287 2.746 1.287s1.586-.43 2.745-1.287c6.089-4.507 5.491-9.848 2.852-11.467Z"
+      />
+    </svg>
+  );
+}
+
+/** Barghchi-style stroke user for login button. */
+export function LoginUserIcon({ className = "", title }: IconProps) {
+  return (
+    <svg
+      className={`${base} ${className}`}
+      xmlns="http://www.w3.org/2000/svg"
+      width={20}
+      height={22}
+      fill="none"
+      viewBox="0 0 20 22"
+      aria-hidden={title ? undefined : true}
+      role={title ? "img" : undefined}
+    >
+      {title ? <title>{title}</title> : null}
+      <path
+        stroke="currentColor"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth="1.5"
+        d="M4.578 14.732c-1.415.842-5.125 2.562-2.865 4.715 1.103 1.051 2.332 1.803 3.878 1.803h8.818c1.545 0 2.775-.752 3.878-1.803 2.26-2.153-1.45-3.873-2.865-4.715a10.66 10.66 0 0 0-10.844 0"
+      />
+      <path
+        stroke="currentColor"
+        strokeWidth="1.5"
+        d="M14.5 5.75a4.5 4.5 0 1 1-9 0 4.5 4.5 0 0 1 9 0Z"
+      />
+    </svg>
+  );
+}
+
+/** Barghchi-style dual chat bubbles (bottom-nav support). */
+/** Barghchi-style chat bubbles (stroke) — matches other bottom-nav icons. */
+export function BottomNavChatIcon({ className = "", title }: IconProps) {
+  return (
+    <svg
+      className={`${base} ${className}`}
+      xmlns="http://www.w3.org/2000/svg"
+      width={22}
+      height={22}
+      fill="none"
+      viewBox="0 0 24 24"
+      aria-hidden={title ? undefined : true}
+      role={title ? "img" : undefined}
+    >
+      {title ? <title>{title}</title> : null}
+      <path
+        stroke="currentColor"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M8.5 14.5c.8 1.7 2.5 2.8 4.5 2.8 2.9 0 5.2-2.1 5.2-4.8S15.9 7.7 13 7.7c-.6 0-1.2.1-1.7.3"
+      />
+      <path
+        stroke="currentColor"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M4.8 16.2c-.9-1.1-1.4-2.5-1.4-4 0-3.5 3.1-6.4 7-6.4 1.4 0 2.7.4 3.8 1"
+      />
+      <path
+        stroke="currentColor"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M7.2 18.8c-1.9.4-3.6 1.3-4.9 2.5.4-1.7.7-3.1.5-4.5"
+      />
+    </svg>
+  );
+}
+
+/** Barghchi-style 2×2 category grid (stroke). */
+export function BottomNavCategoryIcon({ className = "", title }: IconProps) {
+  return (
+    <svg
+      className={`${base} ${className}`}
+      xmlns="http://www.w3.org/2000/svg"
+      width={24}
+      height={24}
+      fill="none"
+      viewBox="0 0 24 24"
+      aria-hidden={title ? undefined : true}
+      role={title ? "img" : undefined}
+    >
+      {title ? <title>{title}</title> : null}
+      <path
+        stroke="currentColor"
+        strokeWidth="1.5"
+        d="M2 18c0-1.54 0-2.31.347-2.876.194-.317.46-.583.777-.777C3.689 14 4.46 14 6 14s2.31 0 2.876.347c.317.194.583.46.777.777C10 15.689 10 16.46 10 18s0 2.31-.347 2.877c-.194.316-.46.582-.777.776C8.311 22 7.54 22 6 22s-2.31 0-2.876-.347a2.35 2.35 0 0 1-.777-.776C2 20.31 2 19.54 2 18ZM14 18c0-1.54 0-2.31.347-2.876.194-.317.46-.583.777-.777C15.689 14 16.46 14 18 14s2.31 0 2.877.347c.316.194.582.46.776.777C22 15.689 22 16.46 22 18s0 2.31-.347 2.877c-.194.316-.46.582-.776.776C20.31 22 19.54 22 18 22s-2.31 0-2.876-.347a2.35 2.35 0 0 1-.777-.776C14 20.31 14 19.54 14 18ZM2 6c0-1.54 0-2.31.347-2.876.194-.317.46-.583.777-.777C3.689 2 4.46 2 6 2s2.31 0 2.876.347c.317.194.583.46.777.777C10 3.689 10 4.46 10 6s0 2.31-.347 2.876c-.194.317-.46.583-.777.777C8.311 10 7.54 10 6 10s-2.31 0-2.876-.347a2.35 2.35 0 0 1-.777-.777C2 8.311 2 7.54 2 6ZM14 6c0-1.54 0-2.31.347-2.876.194-.317.46-.583.777-.777C15.689 2 16.46 2 18 2s2.31 0 2.877.347c.316.194.582.46.776.777C22 3.689 22 4.46 22 6s0 2.31-.347 2.876c-.194.317-.46.583-.776.777C20.31 10 19.54 10 18 10s-2.31 0-2.876-.347a2.35 2.35 0 0 1-.777-.777C14 8.311 14 7.54 14 6Z"
+      />
+    </svg>
+  );
+}
+
+/** Barghchi-style bag cart (stroke). */
+export function BottomNavCartIcon({ className = "", title }: IconProps) {
+  return (
+    <svg
+      className={`${base} ${className}`}
+      xmlns="http://www.w3.org/2000/svg"
+      width={22}
+      height={23}
+      fill="none"
+      viewBox="0 0 22 23"
+      aria-hidden={title ? undefined : true}
+      role={title ? "img" : undefined}
+    >
+      {title ? <title>{title}</title> : null}
+      <path
+        stroke="currentColor"
+        strokeWidth="1.5"
+        d="m2.062 14.443.365-2.071c.432-2.448.647-3.672 1.502-4.397s2.083-.725 4.538-.725h5.066c2.455 0 3.683 0 4.538.725s1.07 1.949 1.502 4.397l.365 2.071c.598 3.388.896 5.082-.023 6.195-.92 1.112-2.62 1.112-6.017 1.112H8.102c-3.398 0-5.097 0-6.017-1.113s-.62-2.806-.023-6.194ZM6.5 7.25l.168-2.014a4.347 4.347 0 0 1 8.664 0L15.5 7.25"
+      />
+      <path
+        stroke="currentColor"
+        strokeLinecap="round"
+        strokeWidth="1.5"
+        d="M14 10.25c-.13 1.413-1.434 2.5-3 2.5s-2.87-1.087-3-2.5"
+      />
+    </svg>
+  );
+}
+
+/** Barghchi-style profile (stroke). */
+export function BottomNavProfileIcon({ className = "", title }: IconProps) {
+  return (
+    <svg
+      className={`${base} ${className}`}
+      xmlns="http://www.w3.org/2000/svg"
+      width={20}
+      height={22}
+      fill="none"
+      viewBox="0 0 20 22"
+      aria-hidden={title ? undefined : true}
+      role={title ? "img" : undefined}
+    >
+      {title ? <title>{title}</title> : null}
+      <path
+        stroke="currentColor"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth="1.5"
+        d="M4.578 14.732c-1.415.842-5.125 2.562-2.865 4.715 1.103 1.051 2.332 1.803 3.878 1.803h8.818c1.545 0 2.775-.752 3.878-1.803 2.26-2.153-1.45-3.873-2.865-4.715a10.66 10.66 0 0 0-10.844 0"
+      />
+      <path
+        stroke="currentColor"
+        strokeWidth="1.5"
+        d="M14.5 5.75a4.5 4.5 0 1 1-9 0 4.5 4.5 0 0 1 9 0Z"
+      />
+    </svg>
+  );
+}
+
+/** Barghchi-style home (stroke). */
+export function BottomNavHomeIcon({ className = "", title }: IconProps) {
+  return (
+    <svg
+      className={`${base} ${className}`}
+      xmlns="http://www.w3.org/2000/svg"
+      width={22}
+      height={22}
+      fill="none"
+      viewBox="0 0 22 22"
+      aria-hidden={title ? undefined : true}
+      role={title ? "img" : undefined}
+    >
+      {title ? <title>{title}</title> : null}
+      <path
+        stroke="currentColor"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth="2"
+        d="M11 16h.009"
+      />
+      <path
+        stroke="currentColor"
+        strokeWidth="1.5"
+        d="M19 7.5v5c0 3.771 0 5.657-1.172 6.828S14.771 20.5 11 20.5s-5.657 0-6.828-1.172S3 16.271 3 12.5v-5"
+      />
+      <path
+        stroke="currentColor"
+        strokeLinecap="round"
+        strokeWidth="1.5"
+        d="m21 9.5-4.343-4.165C13.99 2.778 12.657 1.5 11 1.5S8.01 2.778 5.343 5.335L1 9.5"
+      />
+    </svg>
+  );
+}
+
+/** Digikala-style filled home (active bottom-nav). */
+export function HomeFillIcon({ className = "", title }: IconProps) {
+  return (
+    <svg
+      className={`${base} ${className}`}
+      width={24}
+      height={24}
+      viewBox="0 0 24 24"
+      fill="currentColor"
+      aria-hidden={title ? undefined : true}
+      role={title ? "img" : undefined}
+    >
+      {title ? <title>{title}</title> : null}
+      <path d="M12 3 2 12h3v8a1 1 0 0 0 1 1h4v-6h4v6h4a1 1 0 0 0 1-1v-8h3L12 3Z" />
+    </svg>
+  );
+}
+
+/** Digikala-style outline home (inactive bottom-nav). */
+export function HomeOutlineIcon({ className = "", title }: IconProps) {
+  return (
+    <svg
+      className={`${base} ${className}`}
+      width={24}
+      height={24}
+      viewBox="0 0 24 24"
+      fill="currentColor"
+      aria-hidden={title ? undefined : true}
+      role={title ? "img" : undefined}
+    >
+      {title ? <title>{title}</title> : null}
+      <path d="M12 4.5 4 11.2V20a1 1 0 0 0 1 1h5v-5.5h4V21h5a1 1 0 0 0 1-1v-8.8L12 4.5Zm0 2.3 6 5V19h-3v-5.5a1 1 0 0 0-1-1H10a1 1 0 0 0-1 1V19H6v-7.2l6-5Z" />
+    </svg>
+  );
+}
+
+/** Digikala-style 2×2 category grid. */
+export function CategoryOutlineIcon({ className = "", title }: IconProps) {
+  return (
+    <svg
+      className={`${base} ${className}`}
+      width={24}
+      height={24}
+      viewBox="0 0 24 24"
+      fill="currentColor"
+      aria-hidden={title ? undefined : true}
+      role={title ? "img" : undefined}
+    >
+      {title ? <title>{title}</title> : null}
+      <path d="M4 4h7v7H4V4Zm9 0h7v7h-7V4ZM4 13h7v7H4v-7Zm9 0h7v7h-7v-7Z" />
+    </svg>
+  );
+}
+
+/** Digikala-style community / inquiry bubble. */
+export function CommunityIcon({ className = "", title }: IconProps) {
+  return (
+    <svg
+      className={`${base} ${className}`}
+      width={24}
+      height={24}
+      viewBox="0 0 24 24"
+      fill="currentColor"
+      aria-hidden={title ? undefined : true}
+      role={title ? "img" : undefined}
+    >
+      {title ? <title>{title}</title> : null}
+      <path d="M4 4h16a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H9.5L5 20.5V17H4a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2Zm0 2v9h2.5V17.2L9.2 15H20V6H4Zm3.5 3h9v2h-9V9Zm0 3.5h6v2h-6v-2Z" />
+    </svg>
+  );
+}
+
+/** Digikala-style outline profile (bottom-nav). */
+export function ProfileOutlineIcon({ className = "", title }: IconProps) {
+  return (
+    <svg
+      className={`${base} ${className}`}
+      width={24}
+      height={24}
+      viewBox="0 0 24 24"
+      fill="currentColor"
+      aria-hidden={title ? undefined : true}
+      role={title ? "img" : undefined}
+    >
+      {title ? <title>{title}</title> : null}
+      <path d="M12 4a4 4 0 1 1 0 8 4 4 0 0 1 0-8Zm0 2a2 2 0 1 0 0 4 2 2 0 0 0 0-4Zm0 7c3.87 0 7 2.02 7 4.5V20H5v-2.5C5 15.02 8.13 13 12 13Zm0 2c-2.76 0-5 1.16-5 2.5V18h10v-.5c0-1.34-2.24-2.5-5-2.5Z" />
+    </svg>
+  );
+}
+
 export function HamburgerIcon({ className = "", title }: IconProps) {
   return (
     <svg
@@ -109,6 +594,48 @@ export function ChevronLeftIcon({
     >
       {title ? <title>{title}</title> : null}
       <path d="M15.41 7.41 14 6l-6 6 6 6 1.41-1.41L10.83 12l4.58-4.59Z" />
+    </svg>
+  );
+}
+
+export function ChevronDownIcon({
+  className = "",
+  title,
+  size = 24,
+}: ChevronIconProps) {
+  return (
+    <svg
+      className={`${base} ${className}`}
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="currentColor"
+      aria-hidden={title ? undefined : true}
+      role={title ? "img" : undefined}
+    >
+      {title ? <title>{title}</title> : null}
+      <path d="M7.41 8.59 12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41Z" />
+    </svg>
+  );
+}
+
+export function ChevronUpIcon({
+  className = "",
+  title,
+  size = 24,
+}: ChevronIconProps) {
+  return (
+    <svg
+      className={`${base} ${className}`}
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="currentColor"
+      aria-hidden={title ? undefined : true}
+      role={title ? "img" : undefined}
+    >
+      {title ? <title>{title}</title> : null}
+      <path d="M7.41 15.41 12 10.83l4.59 4.58L18 14l-6-6-6 6 1.41 1.41Z" />
     </svg>
   );
 }
@@ -182,6 +709,46 @@ export function AmazingIcon({ className = "", title }: IconProps) {
     >
       {title ? <title>{title}</title> : null}
       <path d="M12 2 9.5 8.5 3 9l5 4.2L6.5 20 12 16.5 17.5 20 16 13.2 21 9l-6.5-.5L12 2Z" />
+    </svg>
+  );
+}
+
+/** Barghchi-style percent badge for special-offers header link */
+export function SpecialOfferBadgeIcon({
+  className = "",
+  title,
+}: IconProps) {
+  return (
+    <svg
+      className={className}
+      xmlns="http://www.w3.org/2000/svg"
+      width={22}
+      height={22}
+      fill="none"
+      viewBox="0 0 22 22"
+      aria-hidden={title ? undefined : true}
+      role={title ? "img" : undefined}
+    >
+      {title ? <title>{title}</title> : null}
+      <path
+        stroke="currentColor"
+        strokeWidth="1.5"
+        d="M6.692 18.866c.59 0 .886 0 1.155.1q.057.021.111.046c.261.12.47.328.888.746.962.962 1.443 1.443 2.034 1.488q.12.009.24 0c.591-.045 1.072-.526 2.034-1.488.418-.418.627-.626.888-.746q.054-.025.11-.046c.27-.1.565-.1 1.156-.1h.11c1.507 0 2.261 0 2.73-.468s.468-1.223.468-2.73v-.11c0-.59 0-.886.1-1.155q.021-.057.046-.111c.12-.261.328-.47.746-.888.962-.962 1.443-1.443 1.488-2.034q.009-.12 0-.24c-.045-.591-.526-1.072-1.488-2.034-.418-.418-.626-.627-.746-.888a2 2 0 0 1-.046-.11c-.1-.27-.1-.565-.1-1.156v-.11c0-1.507 0-2.261-.468-2.73s-1.223-.468-2.73-.468h-.11c-.59 0-.886 0-1.155-.1a2 2 0 0 1-.111-.046c-.261-.12-.47-.328-.888-.746-.962-.962-1.443-1.443-2.034-1.488a2 2 0 0 0-.24 0c-.591.045-1.072.526-2.034 1.488-.418.418-.627.627-.888.746a2 2 0 0 1-.11.046c-.27.1-.565.1-1.156.1h-.11c-1.507 0-2.261 0-2.73.468s-.468 1.223-.468 2.73v.11c0 .59 0 .886-.1 1.155q-.022.057-.046.111c-.12.261-.328.47-.746.888-.962.962-1.443 1.443-1.488 2.034a2 2 0 0 0 0 .24c.045.591.526 1.072 1.488 2.034.418.418.627.627.746.888q.025.054.046.11c.1.27.1.565.1 1.156v.11c0 1.507 0 2.261.468 2.73s1.223.468 2.73.468z"
+      />
+      <path
+        stroke="currentColor"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth="1.5"
+        d="m14 8.25-6 6"
+      />
+      <path
+        stroke="currentColor"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth="2"
+        d="M14 14.25h-.01m-5.98-6H8"
+      />
     </svg>
   );
 }

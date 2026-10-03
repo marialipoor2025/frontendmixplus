@@ -1,7 +1,10 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  /* config options here */
+  // Keep Turbopack scoped to this app (avoids parent-folder lockfile noise)
+  turbopack: {
+    root: __dirname,
+  },
 };
 
 export default nextConfig;

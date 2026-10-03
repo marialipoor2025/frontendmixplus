@@ -204,20 +204,20 @@ export function SiteFooter() {
 
   return (
     <footer className="mt-12 w-full border-t border-[var(--color-neutral-200)] bg-[var(--color-neutral-000)] pt-8">
-      <div className="mx-auto w-full max-w-[var(--header-max-width)] px-4">
-          {/* First row: logo + back to top — same column as header logo */}
+      <div className="site-container">
+          {/* First row: logo + back to top — aligned with header logo */}
           <div className="flex select-none items-center justify-between">
             <Link
               href="/"
-              className="ms-0 me-5 shrink-0"
+              className="shrink-0"
               aria-label={siteConfig.name}
             >
               <Image
                 src="/brand/mixplus-logo.svg"
                 alt={`${siteConfig.name} - میکپلاس`}
-                width={195}
+                width={133}
                 height={30}
-                className="inline-block h-[30px] w-[195px] object-contain"
+                className="inline-block h-[30px] w-[133px] object-contain"
                 unoptimized
               />
             </Link>
@@ -446,7 +446,7 @@ export function SiteFooter() {
 
       {/* Partners / sister brands strip */}
       <div className="relative z-[3] w-full bg-[var(--color-neutral-100)]">
-        <div className="mx-auto flex w-full max-w-[var(--header-max-width)] flex-wrap items-stretch justify-end px-4">
+        <div className="site-container flex flex-wrap items-stretch justify-end">
           {PARTNERS.map((partner) => (
             <a
               key={partner.icon}

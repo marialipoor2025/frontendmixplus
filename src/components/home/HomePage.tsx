@@ -9,6 +9,7 @@ import { SiteFeatures } from "@/components/home/SiteFeatures";
 import { MainNav } from "@/components/layout/MainNav";
 import { SiteFooter } from "@/components/layout/SiteFooter";
 import { SiteHeader } from "@/components/layout/SiteHeader";
+import { StickyHeaderShell } from "@/components/layout/StickyHeaderShell";
 import type { HomePageData } from "@/types/home";
 import type { MainNavData } from "@/types/nav";
 
@@ -25,11 +26,11 @@ type HomePageProps = {
 export function HomePage({ data, nav }: HomePageProps) {
   return (
     <>
-      <div className="sticky top-0 z-40 bg-[var(--color-neutral-000)] shadow-[var(--shadow-header)]">
+      <StickyHeaderShell>
         <SiteHeader />
         <MainNav data={nav} />
-      </div>
-      <main className="mx-auto w-full max-w-[1336px] flex-1 space-y-6 px-4 py-6">
+      </StickyHeaderShell>
+      <main className="site-container flex-1 space-y-6 py-6">
         <HeroSlider slides={data.heroSlides} />
         <SiteFeatures />
         <AmazingOffers products={data.amazingOffers} />

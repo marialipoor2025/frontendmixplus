@@ -48,19 +48,19 @@ function CountdownBoxes() {
 
   return (
     <div
-      className="flex items-center gap-1 sm:gap-1.5"
+      className="flex h-8 shrink-0 items-center gap-0.5 sm:h-10 sm:gap-1.5"
       aria-label="زمان باقی‌مانده"
       dir="ltr"
     >
       {parts.map((value, index) => (
         <div key={index} className="contents">
           <div className="flex h-8 w-8 items-center justify-center rounded-md bg-white shadow-sm sm:h-10 sm:w-10">
-            <span className="text-center text-sm font-bold text-[var(--color-neutral-800)] sm:text-base">
+            <span className="text-center text-xs font-bold tabular-nums text-[var(--color-neutral-800)] sm:text-base">
               {padFa(value)}
             </span>
           </div>
           {index < parts.length - 1 ? (
-            <span className="w-1.5 text-center text-sm font-bold text-white sm:w-2 sm:text-base">
+            <span className="w-1 text-center text-xs font-bold leading-none text-white sm:w-2 sm:text-base">
               :
             </span>
           ) : null}
@@ -70,25 +70,68 @@ function CountdownBoxes() {
   );
 }
 
-/** Coolblue-style orange % promo column. */
-function OfferPercentDecor() {
+function SeeAllButton({ className = "" }: { className?: string }) {
+  return (
+    <Link
+      href={SEE_ALL_HREF}
+      className={`inline-flex h-8 shrink-0 items-center gap-0.5 whitespace-nowrap rounded-lg bg-white px-2.5 text-xs font-medium text-[var(--color-offers-blue)] sm:h-10 sm:gap-1 sm:px-4 sm:text-sm ${className}`}
+    >
+      مشاهده همه
+      <ChevronLeftIcon
+        size={14}
+        className="fill-[var(--color-offers-blue)] text-[var(--color-offers-blue)] sm:size-[18px]"
+      />
+    </Link>
+  );
+}
+
+/** Mobile: evenly spread % bubbles in a slim horizontal band. */
+function OfferPercentDecorMobile() {
+  const sizes = ["2rem", "1.5rem", "2.35rem", "1.35rem", "1.85rem"] as const;
+  const rotates = ["-12deg", "14deg", "-6deg", "18deg", "-16deg"] as const;
+
+  return (
+    <div
+      className="flex w-full items-center justify-between gap-2 px-1 pb-1 lg:hidden"
+      aria-hidden
+    >
+      {sizes.map((size, index) => (
+        <span
+          key={index}
+          className="flex shrink-0 items-center justify-center rounded-full bg-[var(--color-primary)] font-extrabold text-white shadow-sm"
+          style={{
+            width: size,
+            height: size,
+            fontSize: `calc(${size} * 0.42)`,
+            transform: `rotate(${rotates[index]})`,
+          }}
+        >
+          %
+        </span>
+      ))}
+    </div>
+  );
+}
+
+/** Desktop: tall side stage of scattered % bubbles. */
+function OfferPercentDecorDesktop() {
   const bubbles = [
-    { size: "clamp(1.75rem, 4vw, 3.25rem)", top: "8%", left: "12%", rotate: "-14deg" },
-    { size: "clamp(1.25rem, 3vw, 2.25rem)", top: "28%", left: "55%", rotate: "16deg" },
-    { size: "clamp(2rem, 5vw, 4rem)", top: "46%", left: "20%", rotate: "-8deg" },
-    { size: "clamp(1.5rem, 3.5vw, 2.5rem)", top: "68%", left: "58%", rotate: "22deg" },
-    { size: "clamp(1.1rem, 2.5vw, 1.75rem)", top: "82%", left: "18%", rotate: "-20deg" },
+    { size: "3.25rem", top: "8%", left: "12%", rotate: "-14deg" },
+    { size: "2.25rem", top: "28%", left: "55%", rotate: "16deg" },
+    { size: "4rem", top: "46%", left: "20%", rotate: "-8deg" },
+    { size: "2.5rem", top: "68%", left: "58%", rotate: "22deg" },
+    { size: "1.75rem", top: "82%", left: "18%", rotate: "-20deg" },
   ] as const;
 
   return (
     <div
-      className="relative min-h-[88px] w-full shrink-0 overflow-hidden sm:min-h-[110px] lg:min-h-0 lg:w-[min(220px,24%)] lg:min-w-[180px] lg:self-stretch"
+      className="relative hidden min-h-0 w-[min(220px,24%)] min-w-[180px] shrink-0 self-stretch overflow-hidden lg:block"
       aria-hidden
     >
       {bubbles.map((bubble, index) => (
         <span
           key={index}
-          className="absolute flex items-center justify-center rounded-full bg-[var(--color-offers-accent)] font-extrabold text-white shadow-sm"
+          className="absolute flex items-center justify-center rounded-full bg-[var(--color-primary)] font-extrabold text-white shadow-sm"
           style={{
             width: bubble.size,
             height: bubble.size,
@@ -124,41 +167,35 @@ function SeeAllSlide() {
 }
 
 /**
- * Offers rail — orange % stage + counter row above product cards.
+ * Offers rail — MixPlus blue→red gradient + red % bubbles.
  */
 export function AmazingOffers({ products }: AmazingOffersProps) {
   if (products.length === 0) return null;
 
   return (
     <section className="w-full" aria-label="پیشنهادهای ویژه">
-      <div className="relative flex flex-col gap-3 overflow-hidden rounded-2xl bg-[var(--color-offers-blue)] py-3 pe-0 ps-3 lg:flex-row lg:items-stretch lg:gap-4 lg:rounded-[16px] lg:py-5 lg:ps-4">
-        {/* Orange percent promo section (kept) */}
-        <OfferPercentDecor />
+      <div
+        className="relative flex flex-col gap-2.5 overflow-hidden rounded-2xl px-3 py-3 lg:flex-row lg:items-stretch lg:gap-4 lg:rounded-[16px] lg:px-4 lg:py-5 lg:pe-0"
+        style={{
+          backgroundImage:
+            "linear-gradient(135deg, #1672dd 0%, #ed1944 100%)",
+        }}
+      >
+        <OfferPercentDecorMobile />
+        <OfferPercentDecorDesktop />
 
-        <div className="relative z-10 flex min-w-0 flex-1 flex-col gap-3 lg:gap-4 lg:pe-3">
-          {/* Counter row above cards */}
-          <div className="flex flex-row flex-wrap items-center justify-between gap-3 pe-3 lg:pe-0">
-            <div className="flex flex-row flex-wrap items-center gap-3 sm:gap-4">
-              <p className="text-sm font-bold text-white sm:text-base lg:text-lg">
-                پیشنهادهای ویژه
-              </p>
-              <CountdownBoxes />
-            </div>
-
-            <Link
-              href={SEE_ALL_HREF}
-              className="inline-flex h-9 shrink-0 items-center gap-1 rounded-lg bg-white px-4 text-sm font-medium text-[var(--color-offers-blue)]"
-            >
-              مشاهده همه
-              <ChevronLeftIcon
-                size={18}
-                className="fill-[var(--color-offers-blue)] text-[var(--color-offers-blue)]"
-              />
-            </Link>
+        <div className="relative z-10 flex min-w-0 flex-1 flex-col gap-2.5 lg:gap-4 lg:pe-3">
+          {/* Single row: title · countdown · see-all */}
+          <div className="flex flex-nowrap items-center gap-1.5 sm:gap-3">
+            <p className="min-w-0 shrink truncate text-xs font-bold text-white sm:shrink-0 sm:text-base lg:text-lg">
+              پیشنهادهای ویژه
+            </p>
+            <CountdownBoxes />
+            <SeeAllButton className="ms-auto" />
           </div>
 
           <ScrollHorizontalWrapper>
-            <div className="flex w-max flex-row items-stretch gap-2 pe-2 sm:gap-3">
+            <div className="flex w-max flex-row items-stretch gap-2 pe-1 sm:gap-3 lg:pe-2">
               {products.map((product) => (
                 <ProductCard
                   key={product.id}

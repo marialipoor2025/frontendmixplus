@@ -55,19 +55,75 @@
   --color-success: #00a049;
   --color-warning: #f9a825;
 
-  --header-max-width: 1676px;
-  --shadow-header: 0 1px 0 #00000024, 0 2px 0 #0000000d;
+  /* Shared page width — header, menu, and main use the same gutters */
+  --page-max-width: 1336px;
+  --page-gutter: 1rem;
+  --header-max-width: var(--page-max-width);
+  /* Soft fade under sticky header — no hard rule line */
+  --shadow-header: 0 12px 20px -14px rgb(0 0 0 / 0.14);
   --shadow-mega: 0 12px 24px -8px rgb(0 0 0 / 0.12), 0 4px 8px rgb(0 0 0 / 0.06);
+}
+
+/* Barghchi-like consistent left/right inset for header + content */
+.site-container {
+  width: 100%;
+  max-width: var(--page-max-width);
+  margin-inline: auto;
+  padding-inline: var(--page-gutter);
+}
+
+@media (min-width: 1024px) {
+  :root {
+    --page-gutter: 1.5rem;
+  }
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --font-sans: var(--font-vazirmatn);
+  --animate-slowPing: slowPing 2.4s cubic-bezier(0, 0, 0.2, 1) infinite;
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
   font-family: var(--font-family);
+}
+
+.hide-scrollbar {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+@keyframes slowPing {
+  0% {
+    transform: scale(1);
+    opacity: 0.75;
+  }
+  70% {
+    transform: scale(1.85);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(1.85);
+    opacity: 0;
+  }
+}
+
+@keyframes mobileDrawerIn {
+  from {
+    transform: translateX(100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+.animate-mobile-drawer-in {
+  animation: mobileDrawerIn 280ms ease-out;
 }

@@ -29,5 +29,16 @@ public sealed class SellersModule : IModule
 
         group.MapGet("/health", () => Results.Ok(new { module = Name, status = "ready" }))
             .WithName("SellersHealth");
+
+        group.MapGet("/", async (SellersDbContext db, CancellationToken ct) =>
+            {
+                var rows = await db.Sellers.AsNoTracking()
+                    .Where(x => x.IsActive)
+                    .OrderBy(x => x.Name)
+                    .Select(x => new { id = x.ExternalKey, name = x.Name, slug = x.Slug, rating = x.Rating })
+                    .ToListAsync(ct);
+                return Results.Ok(rows);
+            })
+            .WithName("ListSellers");
     }
 }

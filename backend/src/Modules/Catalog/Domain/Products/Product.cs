@@ -42,7 +42,8 @@ public sealed class Product : AggregateRoot
         string sellerExternalKey,
         string sellerName,
         Money price,
-        bool inStock = true)
+        bool inStock = true,
+        bool isPublished = true)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(externalKey);
         ArgumentException.ThrowIfNullOrWhiteSpace(title);
@@ -65,10 +66,12 @@ public sealed class Product : AggregateRoot
             SellerName = sellerName,
             Price = price,
             InStock = inStock,
-            IsPublished = true,
+            IsPublished = isPublished,
             Condition = ProductCondition.New,
         };
     }
+
+    public void SetPublished(bool isPublished) => IsPublished = isPublished;
 
     public void ApplyDetails(
         string? brandLogoUrl,

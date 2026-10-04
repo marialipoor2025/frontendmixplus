@@ -70,6 +70,8 @@ public sealed class CatalogModule : IModule
                 return Results.Ok(rows);
             })
             .WithName("ListCatalogCategories");
+
+        endpoints.MapAdminCatalogEndpoints();
     }
 
     private static ProductCardDto ToDto(Product product)

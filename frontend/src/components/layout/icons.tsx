@@ -5,7 +5,7 @@ type IconProps = {
 
 const base = "shrink-0";
 
-/** Barghchi-style stroke search. */
+/** stroke search. */
 export function SearchIcon({ className = "", title }: IconProps) {
   return (
     <svg
@@ -36,7 +36,7 @@ export function SearchIcon({ className = "", title }: IconProps) {
   );
 }
 
-/** Barghchi-style invoice / proforma document. */
+/** invoice / proforma document. */
 export function InvoiceDocIcon({ className = "", title }: IconProps) {
   return (
     <svg
@@ -61,7 +61,7 @@ export function InvoiceDocIcon({ className = "", title }: IconProps) {
   );
 }
 
-/** Barghchi-style organizational / clipboard. */
+/** organizational / clipboard. */
 export function OrgPurchaseIcon({ className = "", title }: IconProps) {
   return (
     <svg
@@ -93,7 +93,7 @@ export function OrgPurchaseIcon({ className = "", title }: IconProps) {
   );
 }
 
-/** Barghchi-style seller / storefront. */
+/** seller / storefront. */
 export function SellerShopIcon({ className = "", title }: IconProps) {
   return (
     <svg
@@ -125,7 +125,7 @@ export function SellerShopIcon({ className = "", title }: IconProps) {
   );
 }
 
-/** Barghchi-style open box. */
+/** open box. */
 export function OpenBoxIcon({ className = "", title }: IconProps) {
   return (
     <svg
@@ -157,7 +157,7 @@ export function OpenBoxIcon({ className = "", title }: IconProps) {
   );
 }
 
-/** Barghchi-style wrench / services. */
+/** wrench / services. */
 export function WrenchServiceIcon({ className = "", title }: IconProps) {
   return (
     <svg
@@ -182,7 +182,7 @@ export function WrenchServiceIcon({ className = "", title }: IconProps) {
   );
 }
 
-/** Digikala-style visual-search camera (outline). */
+/** visual-search camera (outline). */
 export function CameraIcon({ className = "", title }: IconProps) {
   return (
     <svg
@@ -256,7 +256,7 @@ export function CartIcon({ className = "", title }: IconProps) {
   );
 }
 
-/** Barghchi-style outline wishlist heart. */
+/** outline wishlist heart. */
 export function WishlistHeartIcon({ className = "", title }: IconProps) {
   return (
     <svg
@@ -280,7 +280,7 @@ export function WishlistHeartIcon({ className = "", title }: IconProps) {
   );
 }
 
-/** Barghchi-style stroke user for login button. */
+/** stroke user for login button. */
 export function LoginUserIcon({ className = "", title }: IconProps) {
   return (
     <svg
@@ -310,7 +310,7 @@ export function LoginUserIcon({ className = "", title }: IconProps) {
   );
 }
 
-/** Barghchi-style dual chat bubbles (bottom-nav support). */
+/** dual chat bubbles (bottom-nav support). */
 /** Dual speech-bubble chat mark (filled) shared by desktop FAB and mobile nav. */
 export function BottomNavChatIcon({ className = "", title }: IconProps) {
   return (
@@ -333,7 +333,7 @@ export function BottomNavChatIcon({ className = "", title }: IconProps) {
   );
 }
 
-/** Barghchi-style 2×2 category grid (stroke). */
+/** 2×2 category grid (stroke). */
 export function BottomNavCategoryIcon({ className = "", title }: IconProps) {
   return (
     <svg
@@ -356,7 +356,7 @@ export function BottomNavCategoryIcon({ className = "", title }: IconProps) {
   );
 }
 
-/** Barghchi-style bag cart (stroke). */
+/** bag cart (stroke). */
 export function BottomNavCartIcon({ className = "", title }: IconProps) {
   return (
     <svg
@@ -385,7 +385,7 @@ export function BottomNavCartIcon({ className = "", title }: IconProps) {
   );
 }
 
-/** Barghchi-style profile (stroke). */
+/** profile (stroke). */
 export function BottomNavProfileIcon({ className = "", title }: IconProps) {
   return (
     <svg
@@ -415,7 +415,7 @@ export function BottomNavProfileIcon({ className = "", title }: IconProps) {
   );
 }
 
-/** Barghchi-style home (stroke). */
+/** home (stroke). */
 export function BottomNavHomeIcon({ className = "", title }: IconProps) {
   return (
     <svg
@@ -451,7 +451,7 @@ export function BottomNavHomeIcon({ className = "", title }: IconProps) {
   );
 }
 
-/** Digikala-style filled home (active bottom-nav). */
+/** filled home (active bottom-nav). */
 export function HomeFillIcon({ className = "", title }: IconProps) {
   return (
     <svg
@@ -469,7 +469,7 @@ export function HomeFillIcon({ className = "", title }: IconProps) {
   );
 }
 
-/** Digikala-style outline home (inactive bottom-nav). */
+/** outline home (inactive bottom-nav). */
 export function HomeOutlineIcon({ className = "", title }: IconProps) {
   return (
     <svg
@@ -487,7 +487,7 @@ export function HomeOutlineIcon({ className = "", title }: IconProps) {
   );
 }
 
-/** Digikala-style 2×2 category grid. */
+/** 2×2 category grid. */
 export function CategoryOutlineIcon({ className = "", title }: IconProps) {
   return (
     <svg
@@ -505,7 +505,7 @@ export function CategoryOutlineIcon({ className = "", title }: IconProps) {
   );
 }
 
-/** Digikala-style community / inquiry bubble. */
+/** community / inquiry bubble. */
 export function CommunityIcon({ className = "", title }: IconProps) {
   return (
     <svg
@@ -523,7 +523,7 @@ export function CommunityIcon({ className = "", title }: IconProps) {
   );
 }
 
-/** Digikala-style outline profile (bottom-nav). */
+/** outline profile (bottom-nav). */
 export function ProfileOutlineIcon({ className = "", title }: IconProps) {
   return (
     <svg
@@ -577,6 +577,52 @@ export function ChevronLeftIcon({
     >
       {title ? <title>{title}</title> : null}
       <path d="M15.41 7.41 14 6l-6 6 6 6 1.41-1.41L10.83 12l4.58-4.59Z" />
+    </svg>
+  );
+}
+
+/** Filled yellow rating star for PDP. */
+export function RatingStarIcon({ className = "", title }: IconProps) {
+  return (
+    <svg
+      className={`${base} ${className}`}
+      xmlns="http://www.w3.org/2000/svg"
+      width={16}
+      height={16}
+      viewBox="0 0 24 24"
+      aria-hidden={title ? undefined : true}
+      role={title ? "img" : undefined}
+    >
+      {title ? <title>{title}</title> : null}
+      <path
+        fill="currentColor"
+        d="M12 2.5 14.9 9l6.9.6-5.2 4.5 1.6 6.7L12 17.2 5.8 20.8l1.6-6.7L2.2 9.6 9.1 9 12 2.5Z"
+      />
+    </svg>
+  );
+}
+
+/** Check mark shown inside selected color swatch. */
+export function DoneCheckIcon({ className = "", title }: IconProps) {
+  return (
+    <svg
+      className={`${base} ${className}`}
+      xmlns="http://www.w3.org/2000/svg"
+      width={24}
+      height={24}
+      viewBox="0 0 24 24"
+      fill="none"
+      aria-hidden={title ? undefined : true}
+      role={title ? "img" : undefined}
+    >
+      {title ? <title>{title}</title> : null}
+      <path
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M5 12.5 10 17.5 19 7"
+      />
     </svg>
   );
 }
@@ -644,7 +690,7 @@ export function ChevronRightIcon({
   );
 }
 
-/** Digikala-style تومان glyph for price rows. */
+/** تومان glyph for price rows. */
 export function TomanIcon({ className = "", title }: IconProps) {
   return (
     <svg
@@ -696,7 +742,7 @@ export function AmazingIcon({ className = "", title }: IconProps) {
   );
 }
 
-/** Barghchi-style percent badge for special-offers header link */
+/** percent badge for special-offers header link */
 export function SpecialOfferBadgeIcon({
   className = "",
   title,
@@ -1025,7 +1071,7 @@ export function AparatIcon({
   );
 }
 
-/** Stroke logout — matches Barghchi navbar icon language. */
+/** Stroke logout. */
 export function LogoutIcon({ className = "", title }: IconProps) {
   return (
     <svg
@@ -1045,6 +1091,434 @@ export function LogoutIcon({ className = "", title }: IconProps) {
         strokeLinecap="round"
         strokeLinejoin="round"
         d="M15 3h3a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-3M10 17l-5-5 5-5M5 12h12"
+      />
+    </svg>
+  );
+}
+
+/** Outline share for PDP gallery actions. */
+export function ShareIcon({ className = "", title }: IconProps) {
+  return (
+    <svg
+      className={`${base} ${className}`}
+      xmlns="http://www.w3.org/2000/svg"
+      width={24}
+      height={24}
+      fill="none"
+      viewBox="0 0 24 24"
+      aria-hidden={title ? undefined : true}
+      role={title ? "img" : undefined}
+    >
+      {title ? <title>{title}</title> : null}
+      <path
+        stroke="currentColor"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M4 12v7a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-7M16 6l-4-4-4 4M12 2v13"
+      />
+    </svg>
+  );
+}
+
+/** Outline bell for amazing-sale notify action. */
+export function NotificationOutlineIcon({ className = "", title }: IconProps) {
+  return (
+    <svg
+      className={`${base} ${className}`}
+      xmlns="http://www.w3.org/2000/svg"
+      width={24}
+      height={24}
+      fill="none"
+      viewBox="0 0 24 24"
+      aria-hidden={title ? undefined : true}
+      role={title ? "img" : undefined}
+    >
+      {title ? <title>{title}</title> : null}
+      <path
+        stroke="currentColor"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M10 21h4M6 9a6 6 0 1 1 12 0c0 3.5 1 4.5 2 6H4c1-1.5 2-2.5 2-6Z"
+      />
+    </svg>
+  );
+}
+
+/** Simple price-trend chart for PDP. */
+export function PriceChartIcon({ className = "", title }: IconProps) {
+  return (
+    <svg
+      className={`${base} ${className}`}
+      xmlns="http://www.w3.org/2000/svg"
+      width={24}
+      height={24}
+      fill="none"
+      viewBox="0 0 24 24"
+      aria-hidden={title ? undefined : true}
+      role={title ? "img" : undefined}
+    >
+      {title ? <title>{title}</title> : null}
+      <path
+        stroke="currentColor"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M4 19h16M6 16l4-5 3 3 5-7"
+      />
+    </svg>
+  );
+}
+
+/** Side-by-side compare for PDP. */
+export function CompareIcon({ className = "", title }: IconProps) {
+  return (
+    <svg
+      className={`${base} ${className}`}
+      xmlns="http://www.w3.org/2000/svg"
+      width={24}
+      height={24}
+      fill="none"
+      viewBox="0 0 24 24"
+      aria-hidden={title ? undefined : true}
+      role={title ? "img" : undefined}
+    >
+      {title ? <title>{title}</title> : null}
+      <path
+        stroke="currentColor"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M8 7H4v10h4M16 7h4v10h-4M10 12h4"
+      />
+    </svg>
+  );
+}
+
+/** Checklist / add-to-list for PDP. */
+export function ListIcon({ className = "", title }: IconProps) {
+  return (
+    <svg
+      className={`${base} ${className}`}
+      xmlns="http://www.w3.org/2000/svg"
+      width={24}
+      height={24}
+      fill="none"
+      viewBox="0 0 24 24"
+      aria-hidden={title ? undefined : true}
+      role={title ? "img" : undefined}
+    >
+      {title ? <title>{title}</title> : null}
+      <path
+        stroke="currentColor"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M9 6h11M9 12h11M9 18h11M4 6h.01M4 12h.01M4 18h.01"
+      />
+    </svg>
+  );
+}
+
+/** Horizontal more dots for gallery overflow thumb. */
+export function MoreHorizIcon({ className = "", title }: IconProps) {
+  return (
+    <svg
+      className={`${base} ${className}`}
+      xmlns="http://www.w3.org/2000/svg"
+      width={24}
+      height={24}
+      fill="none"
+      viewBox="0 0 24 24"
+      aria-hidden={title ? undefined : true}
+      role={title ? "img" : undefined}
+    >
+      {title ? <title>{title}</title> : null}
+      <path
+        fill="currentColor"
+        d="M6 12a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0Zm7.5 0a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0Zm7.5 0a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0Z"
+      />
+    </svg>
+  );
+}
+
+/** Info outline for report / legal row. */
+export function InfoOutlineIcon({ className = "", title }: IconProps) {
+  return (
+    <svg
+      className={`${base} ${className}`}
+      xmlns="http://www.w3.org/2000/svg"
+      width={18}
+      height={18}
+      fill="none"
+      viewBox="0 0 24 24"
+      aria-hidden={title ? undefined : true}
+      role={title ? "img" : undefined}
+    >
+      {title ? <title>{title}</title> : null}
+      <path
+        stroke="currentColor"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18ZM12 11v5M12 8h.01"
+      />
+    </svg>
+  );
+}
+
+/** Filled info circle for buy-box tips. */
+export function InfoFilledIcon({ className = "", title }: IconProps) {
+  return (
+    <svg
+      className={`${base} ${className}`}
+      xmlns="http://www.w3.org/2000/svg"
+      width={18}
+      height={18}
+      viewBox="0 0 24 24"
+      aria-hidden={title ? undefined : true}
+      role={title ? "img" : undefined}
+    >
+      {title ? <title>{title}</title> : null}
+      <path
+        fill="currentColor"
+        d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20Zm1 14h-2v-6h2v6Zm0-8h-2V6h2v2Z"
+      />
+    </svg>
+  );
+}
+
+/** Express freight / marketplace delivery mark. */
+export function DeliveryExpressIcon({ className = "", title }: IconProps) {
+  return (
+    <svg
+      className={`${base} ${className}`}
+      xmlns="http://www.w3.org/2000/svg"
+      width={18}
+      height={18}
+      viewBox="0 0 24 24"
+      aria-hidden={title ? undefined : true}
+      role={title ? "img" : undefined}
+    >
+      {title ? <title>{title}</title> : null}
+      <path
+        fill="currentColor"
+        d="M3 7h11v8H3V7Zm12 2h3.2L21 12.2V15h-6V9Zm-9 8.5a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3Zm10 0a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3Z"
+      />
+    </svg>
+  );
+}
+
+/** Warranty shield for buy box. */
+export function GuaranteeIcon({ className = "", title }: IconProps) {
+  return (
+    <svg
+      className={`${base} ${className}`}
+      xmlns="http://www.w3.org/2000/svg"
+      width={24}
+      height={24}
+      fill="none"
+      viewBox="0 0 24 24"
+      aria-hidden={title ? undefined : true}
+      role={title ? "img" : undefined}
+    >
+      {title ? <title>{title}</title> : null}
+      <path
+        stroke="currentColor"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M12 3 5 6v6c0 4.5 2.8 7.4 7 8.5 4.2-1.1 7-4 7-8.5V6l-7-3Z"
+      />
+      <path
+        stroke="currentColor"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="m9 12 2 2 4-4"
+      />
+    </svg>
+  );
+}
+
+/** In-stock / available product mark. */
+export function ProductAvailableIcon({ className = "", title }: IconProps) {
+  return (
+    <svg
+      className={`${base} ${className}`}
+      xmlns="http://www.w3.org/2000/svg"
+      width={24}
+      height={24}
+      fill="none"
+      viewBox="0 0 24 24"
+      aria-hidden={title ? undefined : true}
+      role={title ? "img" : undefined}
+    >
+      {title ? <title>{title}</title> : null}
+      <path
+        stroke="currentColor"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M4 7h16l-1.5 12H5.5L4 7ZM9 7V5a3 3 0 0 1 6 0v2"
+      />
+    </svg>
+  );
+}
+
+/** Small smile badge used on official/marketplace seller avatar. */
+export function SellerBadgeSmileIcon({ className = "", title }: IconProps) {
+  return (
+    <svg
+      className={`${base} ${className}`}
+      xmlns="http://www.w3.org/2000/svg"
+      width={16}
+      height={16}
+      viewBox="0 0 24 24"
+      aria-hidden={title ? undefined : true}
+      role={title ? "img" : undefined}
+    >
+      {title ? <title>{title}</title> : null}
+      <circle cx="12" cy="12" r="9" fill="currentColor" />
+      <circle cx="9" cy="10" r="1.2" fill="#fff" />
+      <circle cx="15" cy="10" r="1.2" fill="#fff" />
+      <path
+        d="M8.5 14c1 1.4 2.2 2 3.5 2s2.5-.6 3.5-2"
+        stroke="#fff"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        fill="none"
+      />
+    </svg>
+  );
+}
+
+/** Plus membership badge (filled plus-in-circle). */
+export function PlusBadgeIcon({ className = "", title }: IconProps) {
+  return (
+    <svg
+      className={`${base} ${className}`}
+      xmlns="http://www.w3.org/2000/svg"
+      width={24}
+      height={24}
+      viewBox="0 0 24 24"
+      aria-hidden={title ? undefined : true}
+      role={title ? "img" : undefined}
+    >
+      {title ? <title>{title}</title> : null}
+      <path
+        fill="currentColor"
+        d="M12 2.2c1.1 0 2 .2 2.9.6l.7 2.1c.3.1.6.2.9.4l2.1-.5c.7.8 1.2 1.7 1.5 2.7l-1.5 1.5c0 .3.1.6.1.9s0 .6-.1.9l1.5 1.5c-.3 1-.8 1.9-1.5 2.7l-2.1-.5c-.3.2-.6.3-.9.4l-.7 2.1c-.9.4-1.8.6-2.9.6s-2-.2-2.9-.6l-.7-2.1c-.3-.1-.6-.2-.9-.4l-2.1.5c-.7-.8-1.2-1.7-1.5-2.7l1.5-1.5c0-.3-.1-.6-.1-.9s0-.6.1-.9L3.9 8.5c.3-1 .8-1.9 1.5-2.7l2.1.5c.3-.2.6-.3.9-.4l.7-2.1c.9-.4 1.8-.6 2.9-.6Zm0 6.3a3.5 3.5 0 1 0 0 7 3.5 3.5 0 0 0 0-7Z"
+      />
+      <path
+        fill="#fff"
+        d="M11.2 9.5h1.6v2.1h2.1v1.6h-2.1v2.1h-1.6v-2.1H9.1v-1.6h2.1V9.5Z"
+      />
+    </svg>
+  );
+}
+
+/** MixPay / installment wallet mark. */
+export function MixPayIcon({ className = "", title }: IconProps) {
+  return (
+    <svg
+      className={`${base} ${className}`}
+      xmlns="http://www.w3.org/2000/svg"
+      width={24}
+      height={24}
+      viewBox="0 0 24 24"
+      aria-hidden={title ? undefined : true}
+      role={title ? "img" : undefined}
+    >
+      {title ? <title>{title}</title> : null}
+      <path
+        fill="currentColor"
+        d="M3.5 7.5A2.5 2.5 0 0 1 6 5h12a2.5 2.5 0 0 1 2.5 2.5V9H18a3 3 0 0 0 0 6h2.5v1.5A2.5 2.5 0 0 1 18 19H6A2.5 2.5 0 0 1 3.5 16.5v-9ZM18 10.5a1.5 1.5 0 1 1 0 3h-1.2a.8.8 0 0 1 0-1.6H18a.8.8 0 0 0 0-1.4h-1.2a.8.8 0 0 1 0-1.6H18Z"
+      />
+    </svg>
+  );
+}
+
+/** Sort / filter control glyph for PDP comments & questions. */
+export function SortIcon({ className = "", title }: IconProps) {
+  return (
+    <svg
+      className={`${base} ${className}`}
+      xmlns="http://www.w3.org/2000/svg"
+      width={24}
+      height={24}
+      viewBox="0 0 24 24"
+      aria-hidden={title ? undefined : true}
+      role={title ? "img" : undefined}
+    >
+      {title ? <title>{title}</title> : null}
+      <path
+        fill="currentColor"
+        d="M3 6h18v2H3V6Zm4 5h10v2H7v-2Zm3 5h4v2h-4v-2Z"
+      />
+    </svg>
+  );
+}
+
+/** Thumbs-up for comment helpfulness. */
+export function ThumbUpIcon({ className = "", title }: IconProps) {
+  return (
+    <svg
+      className={`${base} ${className}`}
+      xmlns="http://www.w3.org/2000/svg"
+      width={20}
+      height={20}
+      viewBox="0 0 24 24"
+      aria-hidden={title ? undefined : true}
+      role={title ? "img" : undefined}
+    >
+      {title ? <title>{title}</title> : null}
+      <path
+        fill="currentColor"
+        d="M9 21h9a2 2 0 0 0 1.9-1.4l2-7A2 2 0 0 0 20 10h-5.3l.8-3.6.1-.7a1.5 1.5 0 0 0-.4-1.1L14 3 7.6 9.4A2 2 0 0 0 7 10.8V19a2 2 0 0 0 2 2Zm0-2V10.8l4.5-4.5.7 3.2A1 1 0 0 0 15.2 11H20l-2 7H9ZM2 10h4v11H2V10Z"
+      />
+    </svg>
+  );
+}
+
+/** Thumbs-down for comment helpfulness. */
+export function ThumbDownIcon({ className = "", title }: IconProps) {
+  return (
+    <svg
+      className={`${base} ${className}`}
+      xmlns="http://www.w3.org/2000/svg"
+      width={20}
+      height={20}
+      viewBox="0 0 24 24"
+      aria-hidden={title ? undefined : true}
+      role={title ? "img" : undefined}
+    >
+      {title ? <title>{title}</title> : null}
+      <path
+        fill="currentColor"
+        d="M15 3H6a2 2 0 0 0-1.9 1.4l-2 7A2 2 0 0 0 4 14h5.3l-.8 3.6-.1.7a1.5 1.5 0 0 0 .4 1.1L10 21l6.4-6.4A2 2 0 0 0 17 13.2V5a2 2 0 0 0-2-2Zm0 2v8.2l-4.5 4.5-.7-3.2A1 1 0 0 0 8.8 13H4l2-7h9ZM18 3h4v11h-4V3Z"
+      />
+    </svg>
+  );
+}
+
+/** Edit / reply glyph for Q&A answer CTA. */
+export function EditIcon({ className = "", title }: IconProps) {
+  return (
+    <svg
+      className={`${base} ${className}`}
+      xmlns="http://www.w3.org/2000/svg"
+      width={16}
+      height={16}
+      viewBox="0 0 24 24"
+      aria-hidden={title ? undefined : true}
+      role={title ? "img" : undefined}
+    >
+      {title ? <title>{title}</title> : null}
+      <path
+        fill="currentColor"
+        d="M3 17.3V21h3.8l11-11.1-3.7-3.7L3 17.3ZM20.7 7c.4-.4.4-1 0-1.4l-2.3-2.3a1 1 0 0 0-1.4 0l-1.8 1.8 3.7 3.7L20.7 7Z"
       />
     </svg>
   );

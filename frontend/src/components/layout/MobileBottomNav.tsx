@@ -69,7 +69,7 @@ export function MobileBottomNav() {
   }, [pathname]);
 
   // Auth screens are full-bleed Digikala-style cards — hide marketplace chrome.
-  if (pathname.startsWith("/users")) {
+  if (pathname.startsWith("/users") || pathname.startsWith("/admin")) {
     return null;
   }
 

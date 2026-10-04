@@ -6,14 +6,14 @@ import { BottomNavChatIcon } from "@/components/layout/icons";
 import { MobileSupportChat } from "@/components/layout/MobileSupportChat";
 
 /**
- * Barghchi-style floating chat FAB (desktop only) with ping ring.
+ * Floating chat FAB (desktop only) with ping ring.
  * Opens the same support panel used on mobile.
  */
 export function DesktopSupportChat() {
   const pathname = usePathname() || "/";
   const [open, setOpen] = useState(false);
 
-  if (pathname.startsWith("/users")) {
+  if (pathname.startsWith("/users") || pathname.startsWith("/admin")) {
     return null;
   }
 

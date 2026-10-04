@@ -1,7 +1,7 @@
 @import "tailwindcss";
 
 :root {
-  /* Digikala-inspired marketplace tokens (header + shell) */
+  /* Marketplace tokens (header + shell) */
   --font-family: var(--font-vazirmatn), Tahoma, sans-serif;
   --spacing-base: 4px;
   --global-radius: 8px;
@@ -30,6 +30,7 @@
   --dds-theme-primary-primary-base: #ed1944;
   --color-hint-object-error: #d32f2f;
 
+  --color-secondary-500: #1672dd;
   --color-secondary-700: #0d4485;
   --color-offers-blue: #0090e3;
   --color-offers-accent: #ff6a00;
@@ -37,10 +38,19 @@
 
   --color-icon-low-emphasis: #a1a3a8;
   --color-icon-high-emphasis: #424750;
+  --color-icon-neutral-hint: #81858b;
   --color-icon-primary: #ef4056;
   --color-icon-secondary: #1672dd;
 
   --color-button-black: #0c0c0c;
+  --color-gradient-silver: #f2f2f2;
+  --color-icon-rating: #f9bc00;
+  --color-rating-4-5: #00a049;
+  --color-neutral-850: #212121;
+  --color-info-icon: #3f69f2;
+  --color-plus-500: #b12ba4;
+  --color-mixpay: #0040ff;
+  --color-delivery-express: #e6123d;
 
   /* App aliases used across components */
   --background: var(--color-app-background);
@@ -79,8 +89,9 @@
   --dk-radius-lg: 12px;
 }
 
-/* Auth pages: drop mobile bottom-nav padding from root body */
-body:has([data-auth-page]) {
+/* Auth / admin pages: drop mobile bottom-nav padding from root body */
+body:has([data-auth-page]),
+body:has([data-admin-page]) {
   padding-bottom: 0;
 }
 

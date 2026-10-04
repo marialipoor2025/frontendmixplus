@@ -1,0 +1,701 @@
+{
+  "categoryTriggerLabel": "دسته‌بندی کالا",
+  "sellerCta": {
+    "title": "فروشنده شو",
+    "href": "/sellers/join"
+  },
+  "quickLinks": [
+    {
+      "id": "q-stock",
+      "title": "کالاهای استوک",
+      "href": "/stock",
+      "icon": "stock",
+      "badge": "جدید"
+    },
+    {
+      "id": "q-install",
+      "title": "نصب و سرویس",
+      "href": "/services/install",
+      "icon": "service"
+    }
+  ],
+  "categories": [
+    {
+      "id": "cat-home-appliance",
+      "title": "لوازم خانگی برقی",
+      "href": "/categories/home-appliance",
+      "icon": "appliance",
+      "allProductsLabel": "همه محصولات لوازم خانگی برقی",
+      "columns": [
+        {
+          "id": "col-1",
+          "links": [
+            {
+              "id": "p-dowry",
+              "title": "جهیزیه",
+              "href": "/landing/dowry",
+              "kind": "parent"
+            },
+            {
+              "id": "p-air",
+              "title": "تهویه، سرمایش و گرمایش",
+              "href": "/categories/airtreatment",
+              "kind": "parent"
+            },
+            {
+              "id": "l-heater",
+              "title": "هیتر و بخاری برقی",
+              "href": "/categories/heater",
+              "kind": "leaf"
+            },
+            {
+              "id": "l-radiator",
+              "title": "شوفاژ برقی",
+              "href": "/categories/radiator",
+              "kind": "leaf"
+            },
+            {
+              "id": "l-ts-rad",
+              "title": "رادیاتور",
+              "href": "/categories/ts-radiator",
+              "kind": "leaf"
+            },
+            {
+              "id": "l-purifier",
+              "title": "تصفیه کننده هوا",
+              "href": "/categories/air-purifier",
+              "kind": "leaf"
+            },
+            {
+              "id": "l-cell",
+              "title": "کولر سلولزی",
+              "href": "/categories/iranian-cooler/cellulus",
+              "kind": "leaf"
+            },
+            {
+              "id": "l-ac",
+              "title": "کولر گازی",
+              "href": "/categories/air-conditioner",
+              "kind": "leaf"
+            },
+            {
+              "id": "l-cooler",
+              "title": "کولر آبی",
+              "href": "/categories/iranian-cooler",
+              "kind": "leaf"
+            },
+            {
+              "id": "l-fan",
+              "title": "پنکه",
+              "href": "/categories/fan",
+              "kind": "leaf"
+            },
+            {
+              "id": "l-fan-usb",
+              "title": "پنکه شارژی",
+              "href": "/categories/handheld-fan",
+              "kind": "leaf"
+            },
+            {
+              "id": "l-boiler",
+              "title": "پکیج دیواری",
+              "href": "/categories/wall-hung-boiler",
+              "kind": "leaf"
+            },
+            {
+              "id": "l-water-heater",
+              "title": "آبگرمکن",
+              "href": "/categories/water-heater",
+              "kind": "leaf"
+            },
+            {
+              "id": "l-gas-heater",
+              "title": "بخاری گازی",
+              "href": "/categories/gas-heater",
+              "kind": "leaf"
+            },
+            {
+              "id": "p-washer",
+              "title": "ماشین لباسشویی",
+              "href": "/categories/washing-machines",
+              "kind": "parent"
+            },
+            {
+              "id": "l-washer-lg",
+              "title": "ماشین لباسشویی ال جی",
+              "href": "/categories/washing-machines/lg",
+              "kind": "leaf"
+            },
+            {
+              "id": "l-washer-daewoo",
+              "title": "ماشین لباسشویی دوو",
+              "href": "/categories/washing-machines/daewoo",
+              "kind": "leaf"
+            },
+            {
+              "id": "l-washer-xvision",
+              "title": "ماشین لباسشویی ایکس ویژن",
+              "href": "/categories/washing-machines/x-vision",
+              "kind": "leaf"
+            },
+            {
+              "id": "l-washer-pak",
+              "title": "ماشین لباسشویی پاکشوما",
+              "href": "/categories/washing-machines/pakshoma",
+              "kind": "leaf"
+            },
+            {
+              "id": "l-washer-snowa",
+              "title": "ماشین لباسشویی اسنوا",
+              "href": "/categories/washing-machines/snowa",
+              "kind": "leaf"
+            },
+            {
+              "id": "l-miniwash",
+              "title": "مینی واش",
+              "href": "/categories/diaper-cleaner",
+              "kind": "leaf"
+            },
+            {
+              "id": "p-vacuum",
+              "title": "جاروبرقی",
+              "href": "/categories/vaccum-cleaner",
+              "kind": "parent"
+            },
+            {
+              "id": "l-robot",
+              "title": "جارو رباتیک",
+              "href": "/categories/robotic-vacuum-cleaner",
+              "kind": "leaf"
+            },
+            {
+              "id": "l-handheld",
+              "title": "جارو شارژی",
+              "href": "/categories/handheld-vacuum",
+              "kind": "leaf"
+            },
+            {
+              "id": "l-vac-acc",
+              "title": "لوازم جانبی جاروبرقی و بخارشور",
+              "href": "/categories/vacuum-cleaner-consumption",
+              "kind": "leaf"
+            },
+            {
+              "id": "p-dishwasher",
+              "title": "ماشین ظرفشویی",
+              "href": "/categories/dishwasher",
+              "kind": "parent"
+            },
+            {
+              "id": "l-dw-bosch",
+              "title": "ماشین ظرفشویی بوش",
+              "href": "/categories/dishwasher/bosch",
+              "kind": "leaf"
+            },
+            {
+              "id": "l-dw-lg",
+              "title": "ماشین ظرفشویی ال جی",
+              "href": "/categories/dishwasher/lg",
+              "kind": "leaf"
+            },
+            {
+              "id": "l-dw-daewoo",
+              "title": "ماشین ظرفشویی دوو",
+              "href": "/categories/dishwasher/daewoo",
+              "kind": "leaf"
+            },
+            {
+              "id": "l-dw-pak",
+              "title": "ماشین ظرفشویی پاکشوما",
+              "href": "/categories/dishwasher/pakshoma",
+              "kind": "leaf"
+            },
+            {
+              "id": "l-dw-xvision",
+              "title": "ماشین ظرفشویی ایکس ویژن",
+              "href": "/categories/dishwasher/x-vision",
+              "kind": "leaf"
+            },
+            {
+              "id": "p-av",
+              "title": "صوتی و تصویری",
+              "href": "/categories/video-audio-entertainment",
+              "kind": "parent"
+            },
+            {
+              "id": "l-radio",
+              "title": "رادیو",
+              "href": "/categories/radio",
+              "kind": "leaf"
+            },
+            {
+              "id": "l-soundbar",
+              "title": "ساندبار",
+              "href": "/categories/soundbar",
+              "kind": "leaf"
+            },
+            {
+              "id": "l-projector",
+              "title": "ویدیو پروژکتور",
+              "href": "/categories/data-video-projector",
+              "kind": "leaf"
+            },
+            {
+              "id": "l-android-box",
+              "title": "اندروید باکس",
+              "href": "/categories/android-box",
+              "kind": "leaf"
+            },
+            {
+              "id": "l-player",
+              "title": "پخش کننده خانگی",
+              "href": "/categories/home-multimedia-player",
+              "kind": "leaf"
+            },
+            {
+              "id": "l-av-acc",
+              "title": "لوازم جانبی صوتی و تصویری",
+              "href": "/categories/multimedia-accessories",
+              "kind": "leaf"
+            },
+            {
+              "id": "l-remote",
+              "title": "ریموت کنترل",
+              "href": "/categories/remote-control",
+              "kind": "leaf"
+            }
+          ]
+        },
+        {
+          "id": "col-2",
+          "links": [
+            {
+              "id": "p-fridge",
+              "title": "یخچال فریزر",
+              "href": "/categories/refrigerator-freezer",
+              "kind": "parent"
+            },
+            {
+              "id": "l-side",
+              "title": "یخچال فریزر ساید بای ساید",
+              "href": "/categories/refrigerator-freezer/side-by-side",
+              "kind": "leaf"
+            },
+            {
+              "id": "l-twin",
+              "title": "یخچال فریزر دوقلو",
+              "href": "/categories/refrigerator-freezer/twin",
+              "kind": "leaf"
+            },
+            {
+              "id": "l-hotel",
+              "title": "یخچال فریزر هتلی",
+              "href": "/categories/refrigerator-freezer/hotel",
+              "kind": "leaf"
+            },
+            {
+              "id": "l-combi",
+              "title": "یخچال فریزر بالا پایین(کمبی)",
+              "href": "/categories/refrigerator-freezer/combi",
+              "kind": "leaf"
+            },
+            {
+              "id": "p-tv",
+              "title": "تلویزیون",
+              "href": "/categories/tv",
+              "kind": "parent"
+            },
+            {
+              "id": "l-tv-sony",
+              "title": "تلویزیون سونی",
+              "href": "/categories/tv/sony",
+              "kind": "leaf"
+            },
+            {
+              "id": "l-tv-hisense",
+              "title": "تلویزیون هایسنس",
+              "href": "/categories/tv/hisense",
+              "kind": "leaf"
+            },
+            {
+              "id": "l-tv-gplus",
+              "title": "تلویزیون جی پلاس",
+              "href": "/categories/tv/g-plus",
+              "kind": "leaf"
+            },
+            {
+              "id": "l-tv-xvision",
+              "title": "تلویزیون ایکس ویژن",
+              "href": "/categories/tv/x-vision",
+              "kind": "leaf"
+            },
+            {
+              "id": "l-tv-android",
+              "title": "تلویزیون اندروید",
+              "href": "/categories/tv/android",
+              "kind": "leaf"
+            },
+            {
+              "id": "l-tv-4k",
+              "title": "تلویزیون 4k",
+              "href": "/categories/tv/4k",
+              "kind": "leaf"
+            },
+            {
+              "id": "l-tv-gaming",
+              "title": "تلویزیون گیمینگ",
+              "href": "/categories/tv/gaming",
+              "kind": "leaf"
+            },
+            {
+              "id": "l-tv-oled",
+              "title": "تلویزیون OLED",
+              "href": "/categories/tv/oled",
+              "kind": "leaf"
+            },
+            {
+              "id": "l-tv-qled",
+              "title": "تلویزیون QLED",
+              "href": "/categories/tv/qled",
+              "kind": "leaf"
+            },
+            {
+              "id": "p-tv-size",
+              "title": "تلویزیون براساس سایز",
+              "href": "/categories/tv",
+              "kind": "parent"
+            },
+            {
+              "id": "l-tv-85",
+              "title": "تلویزیون ۸۵ اینچ",
+              "href": "/categories/tv/size-85",
+              "kind": "leaf"
+            },
+            {
+              "id": "l-tv-75",
+              "title": "تلویزیون ۷۵ اینچ",
+              "href": "/categories/tv/size-75",
+              "kind": "leaf"
+            },
+            {
+              "id": "l-tv-70",
+              "title": "تلویزیون ۷۰ اینچ",
+              "href": "/categories/tv/size-70",
+              "kind": "leaf"
+            },
+            {
+              "id": "l-tv-65",
+              "title": "تلویزیون ۶۵ اینچ",
+              "href": "/categories/tv/size-65",
+              "kind": "leaf"
+            },
+            {
+              "id": "l-tv-60",
+              "title": "تلویزیون ۶۰ اینچ",
+              "href": "/categories/tv/size-60",
+              "kind": "leaf"
+            },
+            {
+              "id": "l-tv-55",
+              "title": "تلویزیون ۵۵ اینچ",
+              "href": "/categories/tv/size-55",
+              "kind": "leaf"
+            },
+            {
+              "id": "l-tv-50",
+              "title": "تلویزیون ۵۰ اینچ",
+              "href": "/categories/tv/size-50",
+              "kind": "leaf"
+            }
+          ]
+        },
+        {
+          "id": "col-3",
+          "links": [
+            {
+              "id": "p-cooking",
+              "title": "لوازم پخت و پز",
+              "href": "/categories/cooking",
+              "kind": "parent"
+            },
+            {
+              "id": "l-egg",
+              "title": "تخم مرغ پز",
+              "href": "/tags/egg-cooker",
+              "kind": "leaf"
+            },
+            {
+              "id": "l-airfryer",
+              "title": "سرخ کن بدون روغن (air fryer)",
+              "href": "/categories/airfryer",
+              "kind": "leaf"
+            },
+            {
+              "id": "l-microwave",
+              "title": "مایکروویو، مایکروفر",
+              "href": "/categories/microwave",
+              "kind": "leaf"
+            },
+            {
+              "id": "l-oven",
+              "title": "اجاق گاز",
+              "href": "/categories/oven",
+              "kind": "leaf"
+            },
+            {
+              "id": "l-rice",
+              "title": "پلوپز",
+              "href": "/categories/electric-rice-cooker",
+              "kind": "leaf"
+            },
+            {
+              "id": "l-sandwich",
+              "title": "ساندویچ ساز و وافل ساز",
+              "href": "/categories/sandwich-makers",
+              "kind": "leaf"
+            },
+            {
+              "id": "l-toaster-oven",
+              "title": "آون توستر",
+              "href": "/categories/oven-toaster",
+              "kind": "leaf"
+            },
+            {
+              "id": "l-grill",
+              "title": "گریل و باربیکیو",
+              "href": "/categories/grill-barbecue",
+              "kind": "leaf"
+            },
+            {
+              "id": "l-toaster",
+              "title": "توستر",
+              "href": "/categories/toaster",
+              "kind": "leaf"
+            },
+            {
+              "id": "p-iron",
+              "title": "اتو",
+              "href": "/categories/iron",
+              "kind": "parent"
+            },
+            {
+              "id": "l-iron-press",
+              "title": "اتو پرس",
+              "href": "/categories/iron/press",
+              "kind": "leaf"
+            },
+            {
+              "id": "l-iron-stand",
+              "title": "اتو ایستاده",
+              "href": "/categories/iron/standing",
+              "kind": "leaf"
+            },
+            {
+              "id": "l-iron-steam",
+              "title": "اتو بخار",
+              "href": "/categories/iron/steam",
+              "kind": "leaf"
+            },
+            {
+              "id": "l-steamer",
+              "title": "بخارگر",
+              "href": "/categories/iron/steamer",
+              "kind": "leaf"
+            },
+            {
+              "id": "p-drink",
+              "title": "نوشیدنی ساز",
+              "href": "/categories/drink-maker",
+              "kind": "parent"
+            },
+            {
+              "id": "l-coffee",
+              "title": "قهوه ساز",
+              "href": "/categories/coffee-makers",
+              "kind": "leaf"
+            },
+            {
+              "id": "l-espresso",
+              "title": "اسپرسو ساز",
+              "href": "/categories/espresso-makers",
+              "kind": "leaf"
+            },
+            {
+              "id": "l-tea",
+              "title": "چای ساز",
+              "href": "/categories/tea-makers",
+              "kind": "leaf"
+            },
+            {
+              "id": "l-kettle",
+              "title": "کتری برقی",
+              "href": "/categories/boiler",
+              "kind": "leaf"
+            },
+            {
+              "id": "l-samovar",
+              "title": "سماور برقی",
+              "href": "/categories/electric-samovar",
+              "kind": "leaf"
+            },
+            {
+              "id": "l-cooler-water",
+              "title": "آبسرد کن",
+              "href": "/categories/watercooler",
+              "kind": "leaf"
+            },
+            {
+              "id": "l-juicer",
+              "title": "آبمیوه گیری",
+              "href": "/categories/juicer",
+              "kind": "leaf"
+            },
+            {
+              "id": "l-citrus",
+              "title": "آب مرکبات گیر",
+              "href": "/categories/citrus-juicer",
+              "kind": "leaf"
+            },
+            {
+              "id": "l-grinder-coffee",
+              "title": "آسیاب قهوه",
+              "href": "/categories/grinder",
+              "kind": "leaf"
+            },
+            {
+              "id": "p-sewing",
+              "title": "چرخ خیاطی",
+              "href": "/categories/sewing-machine",
+              "kind": "parent"
+            },
+            {
+              "id": "l-sewing-ind",
+              "title": "چرخ خیاطی صنعتی",
+              "href": "/categories/sewing-machine/industrial",
+              "kind": "leaf"
+            },
+            {
+              "id": "l-sewing-home",
+              "title": "چرخ خیاطی خانگی",
+              "href": "/categories/sewing-machine/household",
+              "kind": "leaf"
+            },
+            {
+              "id": "l-sewing-janome",
+              "title": "چرخ خیاطی ژانومه",
+              "href": "/categories/sewing-machine/janome",
+              "kind": "leaf"
+            },
+            {
+              "id": "l-sewing-kachiran",
+              "title": "چرخ خیاطی کاچیران",
+              "href": "/categories/sewing-machine/kachiran",
+              "kind": "leaf"
+            }
+          ]
+        },
+        {
+          "id": "col-4",
+          "links": [
+            {
+              "id": "p-foodproc",
+              "title": "خردکن و غذاساز",
+              "href": "/categories/chopper-foodprocessor",
+              "kind": "parent"
+            },
+            {
+              "id": "l-hand-blender",
+              "title": "گوشت کوب برقی",
+              "href": "/categories/hand-blender",
+              "kind": "leaf"
+            },
+            {
+              "id": "l-food-proc",
+              "title": "غذاساز",
+              "href": "/categories/food-processor",
+              "kind": "leaf"
+            },
+            {
+              "id": "l-mixer",
+              "title": "همزن",
+              "href": "/categories/mixer",
+              "kind": "leaf"
+            },
+            {
+              "id": "l-blender",
+              "title": "مخلوط کن",
+              "href": "/categories/blenders",
+              "kind": "leaf"
+            },
+            {
+              "id": "l-mincer",
+              "title": "چرخ گوشت",
+              "href": "/categories/meat-mincers",
+              "kind": "leaf"
+            },
+            {
+              "id": "l-chopper",
+              "title": "خردکن",
+              "href": "/categories/chopper",
+              "kind": "leaf"
+            },
+            {
+              "id": "l-grinder",
+              "title": "آسیاب",
+              "href": "/categories/grinder",
+              "kind": "leaf"
+            },
+            {
+              "id": "p-steam",
+              "title": "بخار شو",
+              "href": "/categories/steam-cleaner",
+              "kind": "parent"
+            },
+            {
+              "id": "p-water-filter",
+              "title": "تصفیه آب",
+              "href": "/categories/water-filters",
+              "kind": "parent"
+            },
+            {
+              "id": "l-filter",
+              "title": "فیلتر تصفیه آب",
+              "href": "/categories/water-filter-cartridge",
+              "kind": "leaf"
+            },
+            {
+              "id": "p-builtin",
+              "title": "لوازم توکار",
+              "href": "/categories/built-in-appliances",
+              "kind": "parent"
+            },
+            {
+              "id": "l-builtin-oven",
+              "title": "فر",
+              "href": "/categories/built-in-oven",
+              "kind": "leaf"
+            },
+            {
+              "id": "l-hood",
+              "title": "هود",
+              "href": "/categories/hood",
+              "kind": "leaf"
+            },
+            {
+              "id": "l-cooktop",
+              "title": "گاز صفحه ای",
+              "href": "/categories/built-in-stove",
+              "kind": "leaf"
+            },
+            {
+              "id": "l-sink",
+              "title": "سینک ظرفشویی",
+              "href": "/categories/sink",
+              "kind": "leaf"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

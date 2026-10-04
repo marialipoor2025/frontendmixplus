@@ -1,0 +1,12 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <RootNamespace>MixPlus.Modules.Support</RootNamespace>
+    <AssemblyName>MixPlus.Modules.Support</AssemblyName>
+  </PropertyGroup>
+  <ItemGroup>
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\BuildingBlocks\MixPlus.BuildingBlocks\MixPlus.BuildingBlocks.csproj" />
+  </ItemGroup>
+</Project>

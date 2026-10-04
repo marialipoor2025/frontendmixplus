@@ -1,0 +1,31 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+  <PropertyGroup>
+    <RootNamespace>MixPlus.Api</RootNamespace>
+    <AssemblyName>MixPlus.Api</AssemblyName>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.11">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="Npgsql" Version="8.0.6" />
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="6.9.0" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\BuildingBlocks\MixPlus.BuildingBlocks\MixPlus.BuildingBlocks.csproj" />
+    <ProjectReference Include="..\..\Modules\Catalog\MixPlus.Modules.Catalog.csproj" />
+    <ProjectReference Include="..\..\Modules\Sellers\MixPlus.Modules.Sellers.csproj" />
+    <ProjectReference Include="..\..\Modules\Merchandising\MixPlus.Modules.Merchandising.csproj" />
+    <ProjectReference Include="..\..\Modules\Navigation\MixPlus.Modules.Navigation.csproj" />
+    <ProjectReference Include="..\..\Modules\Promotions\MixPlus.Modules.Promotions.csproj" />
+    <ProjectReference Include="..\..\Modules\Identity\MixPlus.Modules.Identity.csproj" />
+    <ProjectReference Include="..\..\Modules\Cart\MixPlus.Modules.Cart.csproj" />
+    <ProjectReference Include="..\..\Modules\Search\MixPlus.Modules.Search.csproj" />
+    <ProjectReference Include="..\..\Modules\Support\MixPlus.Modules.Support.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Update="Seed\data\**\*">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+</Project>

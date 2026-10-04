@@ -1,0 +1,25 @@
+## .NET
+bin/
+obj/
+.nuget-packages/
+*.user
+*.suo
+*.userprefs
+*.DotSettings.user
+.vs/
+.idea/
+*.swp
+
+## Secrets / local
+appsettings.*.local.json
+*.pfx
+.env
+.env.*
+
+## Test / coverage
+TestResults/
+coverage/
+
+## OS
+Thumbs.db
+.DS_Store

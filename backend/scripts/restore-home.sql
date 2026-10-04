@@ -1,0 +1,1060 @@
+UPDATE merchandising."HomePages"
+SET "PayloadJson" = $json${
+  "topBanner": {
+    "id": "top-1",
+    "title": "Free delivery on appliances over $500",
+    "imageUrl": "/placeholders/top-banner.svg",
+    "href": "/promotions/free-delivery",
+    "alt": "Free delivery promotion"
+  },
+  "heroSlides": [
+    {
+      "id": "hero-1",
+      "title": "FC27",
+      "imageUrl": "/images/hero/banner_SlideBanner_E5BmGK_a48a7ba8-cbeb-4f2d-8a07-6832deaf4ca2.png",
+      "href": "/promotions/hero-1",
+      "alt": "FC27"
+    },
+    {
+      "id": "hero-2",
+      "title": "پیشنهاد ویژه لوازم خانگی",
+      "imageUrl": "/images/hero/banner_SlideBanner_iVsVSM_2b5ef5b1-9d36-4dfa-ac46-c2d0b5181778.png",
+      "href": "/promotions/hero-2",
+      "alt": "پیشنهاد ویژه لوازم خانگی"
+    },
+    {
+      "id": "hero-3",
+      "title": "تخفیف‌های منتخب",
+      "imageUrl": "/images/hero/banner_SlideBanner_YcHnlH_d942b596-8bba-47b8-96ce-0e4e7c11cdeb.png",
+      "href": "/promotions/hero-3",
+      "alt": "تخفیف‌های منتخب"
+    }
+  ],
+  "categories": [
+    {
+      "id": "cat-fridge",
+      "title": "یخچال فریزر",
+      "href": "/categories/refrigerator-freezer",
+      "imageUrl": "/images/categories/fridge.jpg"
+    },
+    {
+      "id": "cat-washer",
+      "title": "ماشین لباسشویی",
+      "href": "/categories/washing-machines",
+      "imageUrl": "/images/categories/washer.jpg"
+    },
+    {
+      "id": "cat-dishwasher",
+      "title": "ماشین ظرفشویی",
+      "href": "/categories/dishwasher",
+      "imageUrl": "/images/categories/dishwasher.jpg"
+    },
+    {
+      "id": "cat-vacuum",
+      "title": "جاروبرقی",
+      "href": "/categories/vaccum-cleaner",
+      "imageUrl": "/images/categories/vacuum.jpg"
+    },
+    {
+      "id": "cat-air",
+      "title": "تهویه، سرمایش و گرمایش",
+      "href": "/categories/airtreatment",
+      "imageUrl": "/images/categories/air.jpg"
+    },
+    {
+      "id": "cat-tv",
+      "title": "تلویزیون",
+      "href": "/categories/tv",
+      "imageUrl": "/images/categories/tv.jpg"
+    },
+    {
+      "id": "cat-cooking",
+      "title": "لوازم پخت و پز",
+      "href": "/categories/cooking",
+      "imageUrl": "/images/categories/cooking.jpg"
+    },
+    {
+      "id": "cat-drink",
+      "title": "نوشیدنی ساز",
+      "href": "/categories/drink-maker",
+      "imageUrl": "/images/categories/drink.jpg"
+    },
+    {
+      "id": "cat-foodproc",
+      "title": "خردکن و غذاساز",
+      "href": "/categories/chopper-foodprocessor",
+      "imageUrl": "/images/categories/foodproc.jpg"
+    },
+    {
+      "id": "cat-iron",
+      "title": "اتو",
+      "href": "/categories/iron",
+      "imageUrl": "/images/categories/iron.jpg"
+    },
+    {
+      "id": "cat-water",
+      "title": "تصفیه آب",
+      "href": "/categories/water-filters",
+      "imageUrl": "/images/categories/water.jpg"
+    },
+    {
+      "id": "cat-steam",
+      "title": "بخار شو",
+      "href": "/categories/steam-cleaner",
+      "imageUrl": "/images/categories/steam.jpg"
+    },
+    {
+      "id": "cat-sewing",
+      "title": "چرخ خیاطی",
+      "href": "/categories/sewing-machine",
+      "imageUrl": "/images/categories/sewing.jpg"
+    },
+    {
+      "id": "cat-builtin",
+      "title": "لوازم توکار",
+      "href": "/categories/built-in-appliances",
+      "imageUrl": "/images/categories/builtin.jpg"
+    },
+    {
+      "id": "cat-dowry",
+      "title": "جهیزیه",
+      "href": "/landing/dowry",
+      "imageUrl": "/images/categories/dowry.jpg"
+    },
+    {
+      "id": "cat-av",
+      "title": "صوتی و تصویری",
+      "href": "/categories/video-audio-entertainment",
+      "imageUrl": "/images/categories/av.jpg"
+    }
+  ],
+  "amazingOffers": [
+    {
+      "id": "ao-1",
+      "title": "یخچال فریزر ساید بای ساید سامسونگ مدل RS50",
+      "slug": "samsung-side-by-side-rs50",
+      "imageUrl": "/placeholders/product-appliance.png",
+      "brandId": "b-samsung",
+      "brandName": "سامسونگ",
+      "sellerId": "s-1",
+      "sellerName": "فروشگاه هوم‌تک",
+      "price": {
+        "amount": 89900000,
+        "currency": "IRT"
+      },
+      "originalPrice": {
+        "amount": 108500000,
+        "currency": "IRT"
+      },
+      "discountPercent": 17,
+      "rating": 4.6,
+      "reviewCount": 214,
+      "badges": [
+        "mixplus-choice",
+        "opportunity"
+      ],
+      "inStock": true
+    },
+    {
+      "id": "ao-2",
+      "title": "ماشین لباسشویی ال‌جی مدل F4V5VYP0W ظرفیت ۹ کیلوگرم",
+      "slug": "lg-washer-f4v5",
+      "imageUrl": "/placeholders/product-appliance.png",
+      "brandId": "b-lg",
+      "brandName": "ال‌جی",
+      "sellerId": "s-2",
+      "sellerName": "آپلاینس هاب",
+      "price": {
+        "amount": 42500000,
+        "currency": "IRT"
+      },
+      "originalPrice": {
+        "amount": 53900000,
+        "currency": "IRT"
+      },
+      "discountPercent": 21,
+      "rating": 4.5,
+      "reviewCount": 98,
+      "badges": [
+        "mixplus-choice"
+      ],
+      "inStock": true
+    },
+    {
+      "id": "ao-3",
+      "title": "ماشین ظرفشویی توکار بوش مدل SMV4HCX48E",
+      "slug": "bosch-dishwasher-smv4",
+      "imageUrl": "/placeholders/product-appliance.png",
+      "brandId": "b-bosch",
+      "brandName": "بوش",
+      "sellerId": "s-1",
+      "sellerName": "فروشگاه هوم‌تک",
+      "price": {
+        "amount": 51900000,
+        "currency": "IRT"
+      },
+      "originalPrice": {
+        "amount": 63500000,
+        "currency": "IRT"
+      },
+      "discountPercent": 18,
+      "rating": 4.7,
+      "reviewCount": 156,
+      "badges": [
+        "mixplus-choice",
+        "opportunity"
+      ],
+      "inStock": true
+    },
+    {
+      "id": "ao-4",
+      "title": "جاروبرقی رباتیک شیائومی مدل Vacuum S10",
+      "slug": "xiaomi-vacuum-s10",
+      "imageUrl": "/placeholders/product-appliance.png",
+      "brandId": "b-xiaomi",
+      "brandName": "شیائومی",
+      "sellerId": "s-2",
+      "sellerName": "آپلاینس هاب",
+      "price": {
+        "amount": 12990000,
+        "currency": "IRT"
+      },
+      "originalPrice": {
+        "amount": 18500000,
+        "currency": "IRT"
+      },
+      "discountPercent": 30,
+      "rating": 4.3,
+      "reviewCount": 79,
+      "badges": [
+        "opportunity"
+      ],
+      "inStock": true
+    },
+    {
+      "id": "ao-5",
+      "title": "تلویزیون ۵۵ اینچ سامسونگ مدل Crystal UHD CU7000",
+      "slug": "samsung-tv-cu7000-55",
+      "imageUrl": "/placeholders/product-appliance.png",
+      "brandId": "b-samsung",
+      "brandName": "سامسونگ",
+      "sellerId": "s-1",
+      "sellerName": "فروشگاه هوم‌تک",
+      "price": {
+        "amount": 28400000,
+        "currency": "IRT"
+      },
+      "originalPrice": {
+        "amount": 36900000,
+        "currency": "IRT"
+      },
+      "discountPercent": 23,
+      "rating": 4.4,
+      "reviewCount": 61,
+      "badges": [
+        "mixplus-choice"
+      ],
+      "inStock": false
+    },
+    {
+      "id": "ao-6",
+      "title": "مایکروویو ال‌جی مدل MH8265CIS",
+      "slug": "lg-microwave-mh8265",
+      "imageUrl": "/placeholders/product-appliance.png",
+      "brandId": "b-lg",
+      "brandName": "ال‌جی",
+      "sellerId": "s-2",
+      "sellerName": "آپلاینس هاب",
+      "price": {
+        "amount": 9850000,
+        "currency": "IRT"
+      },
+      "originalPrice": {
+        "amount": 14200000,
+        "currency": "IRT"
+      },
+      "discountPercent": 31,
+      "rating": 4.2,
+      "reviewCount": 44,
+      "badges": [
+        "opportunity"
+      ],
+      "inStock": true
+    },
+    {
+      "id": "ao-7",
+      "title": "کولر گازی اسپلیت ۲۴ هزار اسنوا مدل STH-24LH",
+      "slug": "snowa-ac-sth-24lh",
+      "imageUrl": "/placeholders/product-appliance.png",
+      "brandId": "b-snowa",
+      "brandName": "اسنوا",
+      "sellerId": "s-1",
+      "sellerName": "فروشگاه هوم‌تک",
+      "price": {
+        "amount": 33900000,
+        "currency": "IRT"
+      },
+      "originalPrice": {
+        "amount": 42500000,
+        "currency": "IRT"
+      },
+      "discountPercent": 20,
+      "rating": 4.1,
+      "reviewCount": 37,
+      "inStock": false
+    },
+    {
+      "id": "ao-8",
+      "title": "اتو بخار فیلیپس مدل DST8041",
+      "slug": "philips-iron-dst8041",
+      "imageUrl": "/placeholders/product-appliance.png",
+      "brandId": "b-philips",
+      "brandName": "فیلیپس",
+      "sellerId": "s-2",
+      "sellerName": "آپلاینس هاب",
+      "price": {
+        "amount": 4290000,
+        "currency": "IRT"
+      },
+      "originalPrice": {
+        "amount": 6800000,
+        "currency": "IRT"
+      },
+      "discountPercent": 37,
+      "rating": 4.8,
+      "reviewCount": 122,
+      "badges": [
+        "mixplus-choice",
+        "opportunity"
+      ],
+      "inStock": true
+    }
+  ],
+  "midBanners": [
+    {
+      "id": "mid-1",
+      "title": "بنر تبلیغاتی ۱",
+      "imageUrl": "/images/marketings/mid-1.webp",
+      "href": "/promotions/mid-1",
+      "alt": "بنر تبلیغاتی ۱"
+    },
+    {
+      "id": "mid-2",
+      "title": "لوازم ورزش و سفر",
+      "imageUrl": "/images/marketings/mid-2.png",
+      "href": "/promotions/mid-2",
+      "alt": "لوازم ورزش و سفر"
+    },
+    {
+      "id": "mid-3",
+      "title": "هندزفری",
+      "imageUrl": "/images/marketings/mid-3.png",
+      "href": "/promotions/mid-3",
+      "alt": "هندزفری"
+    },
+    {
+      "id": "mid-4",
+      "title": "بنر تبلیغاتی ۴",
+      "imageUrl": "/images/marketings/mid-4.webp",
+      "href": "/promotions/mid-4",
+      "alt": "بنر تبلیغاتی ۴"
+    }
+  ],
+  "brands": [
+    {
+      "id": "b-samsung",
+      "name": "سامسونگ",
+      "slug": "samsung",
+      "logoUrl": "/images/brands/samsung.webp"
+    },
+    {
+      "id": "b-huawei",
+      "name": "هوآوی",
+      "slug": "huawei",
+      "logoUrl": "/images/brands/huawei.webp"
+    }
+  ],
+  "bottomBanners": [
+    {
+      "id": "bottom-1",
+      "title": "خرید سر ماه",
+      "imageUrl": "/images/marketings/bottom-1.png",
+      "href": "/promotions/payday",
+      "alt": "خرید سر ماه — هر لوازم خانه و آشپزخانه‌ای که بخوای اینجاست"
+    }
+  ],
+  "productRails": [
+    {
+      "id": "rail-fridge",
+      "title": "یخچال فریزر",
+      "subtitle": "بر اساس سلیقه شما",
+      "href": "/categories/refrigerator-freezer",
+      "products": [
+        {
+          "id": "rail-p-1",
+          "title": "یخچال فریزر ساید بای ساید سامسونگ مدل RS50 نوفراست ظرفیت ۲۸ فوت",
+          "slug": "samsung-side-by-side-rs50",
+          "imageUrl": "/placeholders/product-appliance.png",
+          "brandId": "b-samsung",
+          "brandName": "سامسونگ",
+          "sellerId": "s-1",
+          "sellerName": "فروشگاه هوم‌تک",
+          "price": {
+            "amount": 89900000,
+            "currency": "IRT"
+          },
+          "inStock": true
+        },
+        {
+          "id": "rail-p-2",
+          "title": "یخچال فریزر کمبی ال‌جی مدل GC-B22FTLPL نوفراست",
+          "slug": "lg-combi-gc-b22",
+          "imageUrl": "/placeholders/product-appliance.png",
+          "brandId": "b-lg",
+          "brandName": "ال‌جی",
+          "sellerId": "s-2",
+          "sellerName": "آپلاینس هاب",
+          "price": {
+            "amount": 64500000,
+            "currency": "IRT"
+          },
+          "inStock": true
+        },
+        {
+          "id": "rail-p-3",
+          "title": "یخچال فریزر دوقلو اسنوا مدل SN5-2021WI سری هایپر",
+          "slug": "snowa-twin-sn5",
+          "imageUrl": "/placeholders/product-appliance.png",
+          "brandId": "b-snowa",
+          "brandName": "اسنوا",
+          "sellerId": "s-1",
+          "sellerName": "فروشگاه هوم‌تک",
+          "price": {
+            "amount": 72800000,
+            "currency": "IRT"
+          },
+          "inStock": true
+        },
+        {
+          "id": "rail-p-4",
+          "title": "یخچال فریزر پایین فریزر بوش مدل KGN56XI40U",
+          "slug": "bosch-bottom-freezer-kgn56",
+          "imageUrl": "/placeholders/product-appliance.png",
+          "brandId": "b-bosch",
+          "brandName": "بوش",
+          "sellerId": "s-2",
+          "sellerName": "آپلاینس هاب",
+          "price": {
+            "amount": 98900000,
+            "currency": "IRT"
+          },
+          "inStock": true
+        },
+        {
+          "id": "rail-p-5",
+          "title": "یخچال فریزر ساید بای ساید دوو مدل D2S-3133SS",
+          "slug": "daewoo-side-d2s-3133",
+          "imageUrl": "/placeholders/product-appliance.png",
+          "brandId": "b-daewoo",
+          "brandName": "دوو",
+          "sellerId": "s-1",
+          "sellerName": "فروشگاه هوم‌تک",
+          "price": {
+            "amount": 55400000,
+            "currency": "IRT"
+          },
+          "originalPrice": {
+            "amount": 57100000,
+            "currency": "IRT"
+          },
+          "discountPercent": 3,
+          "inStock": true
+        },
+        {
+          "id": "rail-p-6",
+          "title": "یخچال فریزر کمبی پاکشوما مدل PDR-1901 نوفراست",
+          "slug": "pakshoma-combi-pdr1901",
+          "imageUrl": "/placeholders/product-appliance.png",
+          "brandId": "b-pakshoma",
+          "brandName": "پاکشوما",
+          "sellerId": "s-2",
+          "sellerName": "آپلاینس هاب",
+          "price": {
+            "amount": 48900000,
+            "currency": "IRT"
+          },
+          "inStock": true
+        },
+        {
+          "id": "rail-p-7",
+          "title": "یخچال فریزر بالا فریزر ایکس ویژن مدل TT580-AWD",
+          "slug": "xvision-top-tt580",
+          "imageUrl": "/placeholders/product-appliance.png",
+          "brandId": "b-xvision",
+          "brandName": "ایکس ویژن",
+          "sellerId": "s-1",
+          "sellerName": "فروشگاه هوم‌تک",
+          "price": {
+            "amount": 36750000,
+            "currency": "IRT"
+          },
+          "inStock": true
+        },
+        {
+          "id": "rail-p-8",
+          "title": "یخچال فریزر ساید بای ساید ال‌جی مدل GC-J247CSBV",
+          "slug": "lg-side-gc-j247",
+          "imageUrl": "/placeholders/product-appliance.png",
+          "brandId": "b-lg",
+          "brandName": "ال‌جی",
+          "sellerId": "s-2",
+          "sellerName": "آپلاینس هاب",
+          "price": {
+            "amount": 112500000,
+            "currency": "IRT"
+          },
+          "inStock": true
+        }
+      ]
+    },
+    {
+      "id": "rail-bestsellers",
+      "title": "پرفروش‌ترین‌ها",
+      "subtitle": "محبوب‌ترین کالاها نزد خریداران",
+      "href": "/search/?sort=bestsellers",
+      "products": [
+        {
+          "id": "bs-1",
+          "title": "ماشین لباسشویی ال‌جی مدل F4V5VYP0W ظرفیت ۹ کیلوگرم",
+          "slug": "lg-washer-f4v5-bs",
+          "imageUrl": "/placeholders/product-appliance.png",
+          "brandId": "b-lg",
+          "brandName": "ال‌جی",
+          "sellerId": "s-2",
+          "sellerName": "آپلاینس هاب",
+          "price": {
+            "amount": 42500000,
+            "currency": "IRT"
+          },
+          "originalPrice": {
+            "amount": 53900000,
+            "currency": "IRT"
+          },
+          "discountPercent": 21,
+          "rating": 4.7,
+          "reviewCount": 412,
+          "badges": [
+            "mixplus-choice"
+          ],
+          "inStock": true
+        },
+        {
+          "id": "bs-2",
+          "title": "جاروبرقی رباتیک شیائومی مدل Vacuum S10",
+          "slug": "xiaomi-vacuum-s10-bs",
+          "imageUrl": "/placeholders/product-appliance.png",
+          "brandId": "b-xiaomi",
+          "brandName": "شیائومی",
+          "sellerId": "s-2",
+          "sellerName": "آپلاینس هاب",
+          "price": {
+            "amount": 12990000,
+            "currency": "IRT"
+          },
+          "originalPrice": {
+            "amount": 18500000,
+            "currency": "IRT"
+          },
+          "discountPercent": 30,
+          "rating": 4.5,
+          "reviewCount": 890,
+          "badges": [
+            "opportunity"
+          ],
+          "inStock": true
+        },
+        {
+          "id": "bs-3",
+          "title": "تلویزیون ۵۵ اینچ سامسونگ مدل Crystal UHD CU7000",
+          "slug": "samsung-tv-cu7000-55-bs",
+          "imageUrl": "/placeholders/product-appliance.png",
+          "brandId": "b-samsung",
+          "brandName": "سامسونگ",
+          "sellerId": "s-1",
+          "sellerName": "فروشگاه هوم‌تک",
+          "price": {
+            "amount": 28400000,
+            "currency": "IRT"
+          },
+          "originalPrice": {
+            "amount": 36900000,
+            "currency": "IRT"
+          },
+          "discountPercent": 23,
+          "rating": 4.6,
+          "reviewCount": 640,
+          "badges": [
+            "mixplus-choice"
+          ],
+          "inStock": true
+        },
+        {
+          "id": "bs-4",
+          "title": "ماشین ظرفشویی توکار بوش مدل SMV4HCX48E",
+          "slug": "bosch-dishwasher-smv4-bs",
+          "imageUrl": "/placeholders/product-appliance.png",
+          "brandId": "b-bosch",
+          "brandName": "بوش",
+          "sellerId": "s-1",
+          "sellerName": "فروشگاه هوم‌تک",
+          "price": {
+            "amount": 51900000,
+            "currency": "IRT"
+          },
+          "rating": 4.8,
+          "reviewCount": 318,
+          "inStock": true
+        },
+        {
+          "id": "bs-5",
+          "title": "اتو بخار فیلیپس مدل DST8041",
+          "slug": "philips-iron-dst8041-bs",
+          "imageUrl": "/placeholders/product-appliance.png",
+          "brandId": "b-philips",
+          "brandName": "فیلیپس",
+          "sellerId": "s-2",
+          "sellerName": "آپلاینس هاب",
+          "price": {
+            "amount": 4290000,
+            "currency": "IRT"
+          },
+          "originalPrice": {
+            "amount": 6800000,
+            "currency": "IRT"
+          },
+          "discountPercent": 37,
+          "rating": 4.4,
+          "reviewCount": 1024,
+          "badges": [
+            "opportunity"
+          ],
+          "inStock": true
+        },
+        {
+          "id": "bs-6",
+          "title": "کولر گازی اسپلیت ۲۴ هزار اسنوا مدل STH-24LH",
+          "slug": "snowa-ac-sth-24lh-bs",
+          "imageUrl": "/placeholders/product-appliance.png",
+          "brandId": "b-snowa",
+          "brandName": "اسنوا",
+          "sellerId": "s-1",
+          "sellerName": "فروشگاه هوم‌تک",
+          "price": {
+            "amount": 33900000,
+            "currency": "IRT"
+          },
+          "rating": 4.3,
+          "reviewCount": 215,
+          "inStock": true
+        },
+        {
+          "id": "bs-7",
+          "title": "یخچال فریزر ساید بای ساید سامسونگ مدل RS50",
+          "slug": "samsung-side-rs50-bs",
+          "imageUrl": "/placeholders/product-appliance.png",
+          "brandId": "b-samsung",
+          "brandName": "سامسونگ",
+          "sellerId": "s-1",
+          "sellerName": "فروشگاه هوم‌تک",
+          "price": {
+            "amount": 89900000,
+            "currency": "IRT"
+          },
+          "rating": 4.6,
+          "reviewCount": 214,
+          "inStock": true
+        },
+        {
+          "id": "bs-8",
+          "title": "یخچال فریزر کمبی پاکشوما مدل PDR-1901 نوفراست",
+          "slug": "pakshoma-combi-pdr1901-bs",
+          "imageUrl": "/placeholders/product-appliance.png",
+          "brandId": "b-pakshoma",
+          "brandName": "پاکشوما",
+          "sellerId": "s-2",
+          "sellerName": "آپلاینس هاب",
+          "price": {
+            "amount": 48900000,
+            "currency": "IRT"
+          },
+          "rating": 4.1,
+          "reviewCount": 156,
+          "inStock": true
+        }
+      ]
+    },
+    {
+      "id": "rail-used",
+      "title": "کارکرده",
+      "subtitle": "کالای دست‌دوم با ضمانت اصالت",
+      "href": "/search/?condition=used",
+      "showUsedLabel": true,
+      "products": [
+        {
+          "id": "st-1",
+          "title": "ماشین لباسشویی ال‌جی مدل F4V5VYP0W ظرفیت ۹ کیلوگرم",
+          "slug": "lg-washer-f4v5-used",
+          "imageUrl": "/placeholders/product-appliance.png",
+          "brandId": "b-lg",
+          "brandName": "ال‌جی",
+          "sellerId": "s-2",
+          "sellerName": "آپلاینس هاب",
+          "price": {
+            "amount": 28900000,
+            "currency": "IRT"
+          },
+          "originalPrice": {
+            "amount": 42500000,
+            "currency": "IRT"
+          },
+          "discountPercent": 32,
+          "rating": 4.2,
+          "reviewCount": 41,
+          "condition": "used",
+          "badges": [
+            "opportunity"
+          ],
+          "inStock": true
+        },
+        {
+          "id": "st-2",
+          "title": "جاروبرقی رباتیک شیائومی مدل Vacuum S10",
+          "slug": "xiaomi-vacuum-s10-used",
+          "imageUrl": "/placeholders/product-appliance.png",
+          "brandId": "b-xiaomi",
+          "brandName": "شیائومی",
+          "sellerId": "s-2",
+          "sellerName": "آپلاینس هاب",
+          "price": {
+            "amount": 8450000,
+            "currency": "IRT"
+          },
+          "originalPrice": {
+            "amount": 12990000,
+            "currency": "IRT"
+          },
+          "discountPercent": 35,
+          "rating": 4,
+          "reviewCount": 27,
+          "condition": "used",
+          "inStock": true
+        },
+        {
+          "id": "st-3",
+          "title": "اتو بخار فیلیپس مدل DST8041",
+          "slug": "philips-iron-dst8041-used",
+          "imageUrl": "/placeholders/product-appliance.png",
+          "brandId": "b-philips",
+          "brandName": "فیلیپس",
+          "sellerId": "s-2",
+          "sellerName": "آپلاینس هاب",
+          "price": {
+            "amount": 2790000,
+            "currency": "IRT"
+          },
+          "originalPrice": {
+            "amount": 4290000,
+            "currency": "IRT"
+          },
+          "discountPercent": 35,
+          "rating": 4.3,
+          "reviewCount": 19,
+          "condition": "used",
+          "inStock": true
+        },
+        {
+          "id": "st-4",
+          "title": "تلویزیون ۵۵ اینچ سامسونگ مدل Crystal UHD CU7000",
+          "slug": "samsung-tv-cu7000-55-used",
+          "imageUrl": "/placeholders/product-appliance.png",
+          "brandId": "b-samsung",
+          "brandName": "سامسونگ",
+          "sellerId": "s-1",
+          "sellerName": "فروشگاه هوم‌تک",
+          "price": {
+            "amount": 22400000,
+            "currency": "IRT"
+          },
+          "originalPrice": {
+            "amount": 28400000,
+            "currency": "IRT"
+          },
+          "discountPercent": 21,
+          "rating": 4.4,
+          "reviewCount": 33,
+          "condition": "used",
+          "inStock": true
+        },
+        {
+          "id": "st-5",
+          "title": "یخچال فریزر ساید بای ساید سامسونگ مدل RS50",
+          "slug": "samsung-side-rs50-used",
+          "imageUrl": "/placeholders/product-appliance.png",
+          "brandId": "b-samsung",
+          "brandName": "سامسونگ",
+          "sellerId": "s-1",
+          "sellerName": "فروشگاه هوم‌تک",
+          "price": {
+            "amount": 64900000,
+            "currency": "IRT"
+          },
+          "originalPrice": {
+            "amount": 89900000,
+            "currency": "IRT"
+          },
+          "discountPercent": 28,
+          "rating": 4.3,
+          "reviewCount": 52,
+          "condition": "used",
+          "inStock": true
+        },
+        {
+          "id": "st-6",
+          "title": "ماشین ظرفشویی توکار بوش مدل SMV4HCX48E",
+          "slug": "bosch-dishwasher-smv4-used",
+          "imageUrl": "/placeholders/product-appliance.png",
+          "brandId": "b-bosch",
+          "brandName": "بوش",
+          "sellerId": "s-1",
+          "sellerName": "فروشگاه هوم‌تک",
+          "price": {
+            "amount": 36900000,
+            "currency": "IRT"
+          },
+          "originalPrice": {
+            "amount": 51900000,
+            "currency": "IRT"
+          },
+          "discountPercent": 29,
+          "rating": 4.5,
+          "reviewCount": 24,
+          "condition": "used",
+          "inStock": true
+        },
+        {
+          "id": "st-7",
+          "title": "کولر گازی اسپلیت ۲۴ هزار اسنوا مدل STH-24LH",
+          "slug": "snowa-ac-sth-24lh-used",
+          "imageUrl": "/placeholders/product-appliance.png",
+          "brandId": "b-snowa",
+          "brandName": "اسنوا",
+          "sellerId": "s-1",
+          "sellerName": "فروشگاه هوم‌تک",
+          "price": {
+            "amount": 24900000,
+            "currency": "IRT"
+          },
+          "originalPrice": {
+            "amount": 33900000,
+            "currency": "IRT"
+          },
+          "discountPercent": 27,
+          "rating": 4.1,
+          "reviewCount": 18,
+          "condition": "used",
+          "inStock": true
+        },
+        {
+          "id": "st-8",
+          "title": "مایکروویو ال‌جی مدل MH8265CIS",
+          "slug": "lg-microwave-mh8265-used",
+          "imageUrl": "/placeholders/product-appliance.png",
+          "brandId": "b-lg",
+          "brandName": "ال‌جی",
+          "sellerId": "s-2",
+          "sellerName": "آپلاینس هاب",
+          "price": {
+            "amount": 6450000,
+            "currency": "IRT"
+          },
+          "originalPrice": {
+            "amount": 9850000,
+            "currency": "IRT"
+          },
+          "discountPercent": 34,
+          "rating": 4,
+          "reviewCount": 14,
+          "condition": "used",
+          "inStock": true
+        }
+      ]
+    },
+    {
+      "id": "rail-new-arrivals",
+      "title": "جدیدترین‌ها",
+      "subtitle": "تازه‌واردهای لوازم خانگی",
+      "href": "/search/?sort=newest",
+      "products": [
+        {
+          "id": "nw-1",
+          "title": "ماشین ظرفشویی توکار بوش مدل SMV4HCX48E",
+          "slug": "bosch-dishwasher-smv4-new",
+          "imageUrl": "/placeholders/product-appliance.png",
+          "brandId": "b-bosch",
+          "brandName": "بوش",
+          "sellerId": "s-1",
+          "sellerName": "فروشگاه هوم‌تک",
+          "price": {
+            "amount": 51900000,
+            "currency": "IRT"
+          },
+          "originalPrice": {
+            "amount": 63500000,
+            "currency": "IRT"
+          },
+          "discountPercent": 18,
+          "rating": 4.7,
+          "reviewCount": 12,
+          "badges": [
+            "mixplus-choice",
+            "opportunity"
+          ],
+          "inStock": true
+        },
+        {
+          "id": "nw-2",
+          "title": "یخچال فریزر بالا فریزر ایکس ویژن مدل TT580-AWD",
+          "slug": "xvision-top-tt580-new",
+          "imageUrl": "/placeholders/product-appliance.png",
+          "brandId": "b-xvision",
+          "brandName": "ایکس ویژن",
+          "sellerId": "s-1",
+          "sellerName": "فروشگاه هوم‌تک",
+          "price": {
+            "amount": 36750000,
+            "currency": "IRT"
+          },
+          "rating": 4,
+          "reviewCount": 8,
+          "inStock": true
+        },
+        {
+          "id": "nw-3",
+          "title": "کولر گازی اسپلیت ۲۴ هزار اسنوا مدل STH-24LH",
+          "slug": "snowa-ac-sth-24lh-new",
+          "imageUrl": "/placeholders/product-appliance.png",
+          "brandId": "b-snowa",
+          "brandName": "اسنوا",
+          "sellerId": "s-1",
+          "sellerName": "فروشگاه هوم‌تک",
+          "price": {
+            "amount": 33900000,
+            "currency": "IRT"
+          },
+          "originalPrice": {
+            "amount": 42500000,
+            "currency": "IRT"
+          },
+          "discountPercent": 20,
+          "rating": 4.2,
+          "reviewCount": 5,
+          "badges": [
+            "opportunity"
+          ],
+          "inStock": true
+        },
+        {
+          "id": "nw-4",
+          "title": "یخچال فریزر ساید بای ساید دوو مدل D2S-3133SS",
+          "slug": "daewoo-side-d2s-3133-new",
+          "imageUrl": "/placeholders/product-appliance.png",
+          "brandId": "b-daewoo",
+          "brandName": "دوو",
+          "sellerId": "s-1",
+          "sellerName": "فروشگاه هوم‌تک",
+          "price": {
+            "amount": 55400000,
+            "currency": "IRT"
+          },
+          "rating": 4.1,
+          "reviewCount": 3,
+          "inStock": true
+        },
+        {
+          "id": "nw-5",
+          "title": "تلویزیون ۵۵ اینچ سامسونگ مدل Crystal UHD CU7000",
+          "slug": "samsung-tv-cu7000-55-new",
+          "imageUrl": "/placeholders/product-appliance.png",
+          "brandId": "b-samsung",
+          "brandName": "سامسونگ",
+          "sellerId": "s-1",
+          "sellerName": "فروشگاه هوم‌تک",
+          "price": {
+            "amount": 28400000,
+            "currency": "IRT"
+          },
+          "rating": 4.5,
+          "reviewCount": 15,
+          "badges": [
+            "mixplus-choice"
+          ],
+          "inStock": true
+        },
+        {
+          "id": "nw-6",
+          "title": "مایکروویو ال‌جی مدل MH8265CIS",
+          "slug": "lg-microwave-mh8265-new",
+          "imageUrl": "/placeholders/product-appliance.png",
+          "brandId": "b-lg",
+          "brandName": "ال‌جی",
+          "sellerId": "s-2",
+          "sellerName": "آپلاینس هاب",
+          "price": {
+            "amount": 9850000,
+            "currency": "IRT"
+          },
+          "rating": 4.3,
+          "reviewCount": 9,
+          "inStock": true
+        },
+        {
+          "id": "nw-7",
+          "title": "جاروبرقی رباتیک شیائومی مدل Vacuum S10",
+          "slug": "xiaomi-vacuum-s10-new",
+          "imageUrl": "/placeholders/product-appliance.png",
+          "brandId": "b-xiaomi",
+          "brandName": "شیائومی",
+          "sellerId": "s-2",
+          "sellerName": "آپلاینس هاب",
+          "price": {
+            "amount": 12990000,
+            "currency": "IRT"
+          },
+          "rating": 4.4,
+          "reviewCount": 6,
+          "inStock": true
+        },
+        {
+          "id": "nw-8",
+          "title": "اتو بخار فیلیپس مدل DST8041",
+          "slug": "philips-iron-dst8041-new",
+          "imageUrl": "/placeholders/product-appliance.png",
+          "brandId": "b-philips",
+          "brandName": "فیلیپس",
+          "sellerId": "s-2",
+          "sellerName": "آپلاینس هاب",
+          "price": {
+            "amount": 4290000,
+            "currency": "IRT"
+          },
+          "rating": 4.6,
+          "reviewCount": 4,
+          "inStock": true
+        }
+      ]
+    }
+  ]
+}$json$::jsonb,
+    "UpdatedAtUtc" = NOW() AT TIME ZONE 'utc'
+WHERE "Key" = 'default';
+SELECT "PayloadJson"->'heroSlides'->0->>'title' AS title FROM merchandising."HomePages" WHERE "Key" = 'default';

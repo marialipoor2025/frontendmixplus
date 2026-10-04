@@ -1024,3 +1024,28 @@ export function AparatIcon({
     "M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2Zm-1.2 5.5h2.4l.6 3.6 2.7-2.5 1.7 1.7-2.5 2.7 3.6.6v2.4l-3.6.6 2.5 2.7-1.7 1.7-2.7-2.5-.6 3.6h-2.4l-.6-3.6-2.7 2.5-1.7-1.7 2.5-2.7-3.6-.6v-2.4l3.6-.6-2.5-2.7 1.7-1.7 2.7 2.5.6-3.6Z",
   );
 }
+
+/** Stroke logout — matches Barghchi navbar icon language. */
+export function LogoutIcon({ className = "", title }: IconProps) {
+  return (
+    <svg
+      className={`${base} ${className}`}
+      xmlns="http://www.w3.org/2000/svg"
+      width={18}
+      height={18}
+      fill="none"
+      viewBox="0 0 24 24"
+      aria-hidden={title ? undefined : true}
+      role={title ? "img" : undefined}
+    >
+      {title ? <title>{title}</title> : null}
+      <path
+        stroke="currentColor"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M15 3h3a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-3M10 17l-5-5 5-5M5 12h12"
+      />
+    </svg>
+  );
+}

@@ -1,9 +1,13 @@
+"use client";
+
 import Link from "next/link";
 import {
   BottomNavCartIcon,
   LoginUserIcon,
   WishlistHeartIcon,
 } from "@/components/layout/icons";
+import { identityLabel } from "@/components/profile/profileNav";
+import { useAuth } from "@/lib/auth/useAuth";
 
 type HeaderUserActionsProps = {
   loginLabel?: string;
@@ -15,7 +19,7 @@ type HeaderUserActionsProps = {
 };
 
 /**
- * Barghchi-style header actions: cart, wishlist, login/register.
+ * Barghchi-style header actions: cart, wishlist, login/profile.
  */
 export function HeaderUserActions({
   loginLabel = "ورود | ثبت نام",
@@ -25,6 +29,11 @@ export function HeaderUserActions({
   cartCount = 0,
   emptyCartTitle = "سبد خرید شما خالی است!",
 }: HeaderUserActionsProps) {
+  const { ready, isAuthenticated, user } = useAuth();
+  const accountHref = isAuthenticated ? "/profile" : loginHref;
+  const accountLabel =
+    ready && isAuthenticated && user ? identityLabel(user) : loginLabel;
+
   return (
     <div className="flex shrink-0 items-center gap-3 xl:gap-4">
       <div className="group relative">
@@ -83,11 +92,14 @@ export function HeaderUserActions({
       </Link>
 
       <Link
-        href={loginHref}
-        className="flex items-center gap-2 text-sm font-medium text-[var(--color-icon-secondary)]"
+        href={accountHref}
+        className="flex max-w-[10rem] items-center gap-2 text-sm font-medium text-[var(--color-icon-secondary)]"
+        title={accountLabel}
       >
-        <LoginUserIcon className="text-[#2B3674]" />
-        <span className="text-[var(--color-neutral-900)]">{loginLabel}</span>
+        <LoginUserIcon className="shrink-0 text-[#2B3674]" />
+        <span className="truncate text-[var(--color-neutral-900)]" dir="ltr">
+          {accountLabel}
+        </span>
       </Link>
     </div>
   );

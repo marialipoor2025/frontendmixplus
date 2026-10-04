@@ -28,6 +28,8 @@ type NavId = "chat" | "categories" | "cart" | "profile" | "home";
 /** Routes that already have a real page — others stay on-page and only switch active. */
 const REAL_PAGES: Partial<Record<NavId, string>> = {
   home: "/",
+  categories: "/categories",
+  profile: "/profile",
 };
 
 const MENU_ROW =
@@ -36,6 +38,7 @@ const MENU_ROW =
 function pathToNavId(pathname: string): NavId | null {
   if (pathname === "/") return "home";
   if (pathname.startsWith("/categories")) return "categories";
+  if (pathname.startsWith("/profile")) return "profile";
   return null;
 }
 
@@ -64,6 +67,11 @@ export function MobileBottomNav() {
     setMenuOpen(false);
     setCategoriesExpanded(false);
   }, [pathname]);
+
+  // Auth screens are full-bleed Digikala-style cards — hide marketplace chrome.
+  if (pathname.startsWith("/users")) {
+    return null;
+  }
 
   const pathId = pathToNavId(pathname);
 
@@ -167,8 +175,11 @@ export function MobileBottomNav() {
 
           <li>
             <Link
-              href="/profile/"
-              onClick={onStubClick("profile")}
+              href={REAL_PAGES.profile!}
+              onClick={() => {
+                closeAllOverlays();
+                setSelectedId(null);
+              }}
               className="relative flex h-11 w-11 items-center justify-center"
               aria-label="پروفایل"
               aria-current={activeId === "profile" ? "page" : undefined}

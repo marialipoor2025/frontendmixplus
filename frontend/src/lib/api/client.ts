@@ -37,7 +37,14 @@ export async function apiClient<T>(
   });
 
   if (!response.ok) {
-    throw new Error(`API ${response.status}: ${path}`);
+    let message = `API ${response.status}: ${path}`;
+    try {
+      const payload = (await response.json()) as { error?: string };
+      if (payload?.error) message = payload.error;
+    } catch {
+      // keep default message
+    }
+    throw new Error(message);
   }
 
   return response.json() as Promise<T>;

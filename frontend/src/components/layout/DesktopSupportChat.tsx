@@ -1,5 +1,6 @@
 "use client";
 
+import { usePathname } from "next/navigation";
 import { useState } from "react";
 import { BottomNavChatIcon } from "@/components/layout/icons";
 import { MobileSupportChat } from "@/components/layout/MobileSupportChat";
@@ -9,7 +10,12 @@ import { MobileSupportChat } from "@/components/layout/MobileSupportChat";
  * Opens the same support panel used on mobile.
  */
 export function DesktopSupportChat() {
+  const pathname = usePathname() || "/";
   const [open, setOpen] = useState(false);
+
+  if (pathname.startsWith("/users")) {
+    return null;
+  }
 
   return (
     <>

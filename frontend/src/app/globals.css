@@ -62,9 +62,29 @@
   /* Soft fade under sticky header — no hard rule line */
   --shadow-header: 0 12px 20px -14px rgb(0 0 0 / 0.14);
   --shadow-mega: 0 12px 24px -8px rgb(0 0 0 / 0.12), 0 4px 8px rgb(0 0 0 / 0.06);
+
+  /* Auth form tokens */
+  --dk-bg-primary: #ffffff;
+  --dk-bg-secondary: #f2f2f2;
+  --dk-text-primary: #1f1f1f;
+  --dk-text-secondary: #848484;
+  --dk-text-muted: #81858b;
+  --dk-text-error: #b2001a;
+  --dk-object-error: #d32f2f;
+  --dk-button-primary: #ef4056;
+  --dk-border-default: #c1c1c1;
+  --dk-border-focus: #333333;
+  --dk-info: #19bfd3;
+  --dk-radius-md: 8px;
+  --dk-radius-lg: 12px;
 }
 
-/* Barghchi-like consistent left/right inset for header + content */
+/* Auth pages: drop mobile bottom-nav padding from root body */
+body:has([data-auth-page]) {
+  padding-bottom: 0;
+}
+
+/* Consistent left/right inset for header + content */
 .site-container {
   width: 100%;
   max-width: var(--page-max-width);

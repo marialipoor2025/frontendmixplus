@@ -1,20 +1,33 @@
-# MixPlus Frontend (`frontendmixplus`)
+# MixPlus
 
-Marketplace frontend for household appliances (multi-seller, multi-brand), inspired by Digikala. Built with **React + Next.js**. Backend will be **ASP.NET Core** later; the UI currently uses mocks.
+Household-appliances marketplace (RTL). Monorepo layout:
+
+| Folder | Stack |
+|--------|--------|
+| [`frontend/`](./frontend) | Next.js 16 + React 19 + Tailwind |
+| [`backend/`](./backend) | ASP.NET Core modular monolith + PostgreSQL |
 
 ## Run locally
 
+Terminal 1 — API:
+
 ```bash
-cd frontendmixplus
+cd backend/src/Host/MixPlus.Api
+dotnet run --urls http://127.0.0.1:5080
+```
+
+Terminal 2 — site:
+
+```bash
+cd frontend
 npm run dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000).
 
-## Architecture
+Frontend env (`frontend/.env.local`):
 
-See [ARCHITECTURE.md](./ARCHITECTURE.md) for the outside-in homepage plan, folder map, and mock → API switch.
-
-## Next step
-
-Share the first Digikala homepage section (screenshot or link to a specific block). We will inspect it and replace the matching placeholder component.
+```env
+NEXT_PUBLIC_API_BASE_URL=http://127.0.0.1:5080
+NEXT_PUBLIC_USE_MOCKS=false
+```

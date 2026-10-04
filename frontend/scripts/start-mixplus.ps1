@@ -1,6 +1,6 @@
 # Start MixPlus Next.js production server on port 3000 (all interfaces)
 $ErrorActionPreference = "Continue"
-$appDir = "C:\Users\Administrator\frontendmixplus"
+$appDir = "C:\Users\Administrator\frontendmixplus\frontend"
 $node = "C:\Program Files\nodejs\node.exe"
 $nextBin = Join-Path $appDir "node_modules\next\dist\bin\next"
 $logDir = Join-Path $appDir "logs"

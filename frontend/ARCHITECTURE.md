@@ -5,8 +5,8 @@ Household-appliances marketplace inspired by Digikala. Frontend and backend are 
 ## Stack
 
 - **Frontend:** React + Next.js (App Router) + TypeScript + Tailwind CSS
-- **Backend (later):** ASP.NET Core
-- **Data today:** local mocks via `src/lib/mocks` + `src/lib/api`
+- **Backend:** ASP.NET Core modular monolith in [`../backend/`](../backend/README.md) (.NET 8 + EF Core + PostgreSQL; SQL Server swappable via config)
+- **Data:** live API via `src/lib/api` (mocks still available with `NEXT_PUBLIC_USE_MOCKS=true`)
 
 ## Outside-in homepage plan
 
@@ -42,13 +42,15 @@ src/
 ## Mock → real API switch
 
 1. Keep UI components consuming only `src/lib/api/*` functions.
-2. Develop ASP.NET Core endpoints that return the same shapes as `src/types/*`.
+2. Implement matching endpoints in `backend/` modules (see `backend/docs/CONTRACTS.md`).
 3. Set in `.env.local`:
 
 ```env
-NEXT_PUBLIC_API_BASE_URL=https://localhost:7xxx
+NEXT_PUBLIC_API_BASE_URL=http://localhost:5080
 NEXT_PUBLIC_USE_MOCKS=false
 ```
+
+Homepage-driven modules: Catalog, Sellers, Merchandising, Navigation, Promotions. Incremental order: `../backend/docs/ROADMAP.md`.
 
 ## How we will build each component
 

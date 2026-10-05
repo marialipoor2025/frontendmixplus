@@ -1,4 +1,6 @@
 import { mockHomePageData } from "@/lib/mocks/home";
+import { fetchSearchSuggestions } from "@/lib/api/search";
+import { siteConfig } from "@/config/site";
 import type { Product } from "@/types/product";
 
 export type SearchSuggestion = {
@@ -18,8 +20,7 @@ function allProducts(): Product[] {
   return [...map.values()];
 }
 
-/** Client-side autocomplete suggestions until Search suggest API exists. */
-export function getSearchSuggestions(query: string, limit = 8): SearchSuggestion[] {
+function getMockSuggestions(query: string, limit = 8): SearchSuggestion[] {
   const q = query.trim().toLowerCase();
   if (q.length < 2) return [];
 
@@ -62,4 +63,16 @@ export function getSearchSuggestions(query: string, limit = 8): SearchSuggestion
   }
 
   return suggestions.slice(0, limit);
+}
+
+/** Autocomplete — live Search suggest API with mock fallback. */
+export async function getSearchSuggestions(
+  query: string,
+  limit = 8,
+): Promise<SearchSuggestion[]> {
+  if (!siteConfig.useMocks && siteConfig.apiBaseUrl) {
+    const live = await fetchSearchSuggestions(query, limit);
+    if (live) return live;
+  }
+  return getMockSuggestions(query, limit);
 }

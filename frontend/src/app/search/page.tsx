@@ -1,5 +1,6 @@
 import { ProductListingShell } from "@/components/catalog/ProductListingShell";
 import { getMainNavData } from "@/lib/api/nav";
+import { searchProductsApi } from "@/lib/api/search";
 import { mockHomePageData } from "@/lib/mocks/home";
 import {
   applyProductListing,
@@ -21,8 +22,8 @@ function collectMockProducts(): Product[] {
   return [...map.values()];
 }
 
-/** Lightweight fuzzy-ish match for Phase-2 frontend until Search module ships. */
-function searchProducts(products: Product[], q: string): Product[] {
+/** Lightweight fuzzy-ish match for mock mode. */
+function searchProductsLocal(products: Product[], q: string): Product[] {
   const needle = q.trim().toLowerCase();
   if (!needle) return products;
 
@@ -30,7 +31,6 @@ function searchProducts(products: Product[], q: string): Product[] {
   return products.filter((p) => {
     const hay = `${p.title} ${p.slug} ${p.brandName}`.toLowerCase();
     if (hay.includes(needle)) return true;
-    // tolerate 1-char typos by checking token prefixes / includes
     return tokens.every((token) => {
       if (hay.includes(token)) return true;
       if (token.length < 3) return false;
@@ -75,7 +75,12 @@ export async function generateMetadata({ searchParams }: PageProps) {
 export default async function SearchPage({ searchParams }: PageProps) {
   const sp = await searchParams;
   const query = parseListingSearchParams(sp);
-  const matched = searchProducts(collectMockProducts(), query.q ?? "");
+  const q = query.q ?? "";
+
+  const live = await searchProductsApi(q);
+  const matched =
+    live ?? searchProductsLocal(collectMockProducts(), q);
+
   const listing = applyProductListing(matched, query);
   const nav = await getMainNavData();
 
@@ -83,7 +88,7 @@ export default async function SearchPage({ searchParams }: PageProps) {
     <ProductListingShell
       nav={nav}
       context={{
-        title: query.q ? `نتایج جستجو برای «${query.q}»` : "جستجو در میکپلاس",
+        title: q ? `نتایج جستجو برای «${q}»` : "جستجو در میکپلاس",
         subtitle: "فیلتر و مرتب‌سازی نتایج جستجو",
         basePath: "/search",
       }}

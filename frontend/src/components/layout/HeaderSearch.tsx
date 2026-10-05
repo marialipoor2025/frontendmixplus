@@ -38,7 +38,14 @@ export function HeaderSearch({
   const showSuggestions = focused && suggestions.length > 0;
 
   useEffect(() => {
-    setSuggestions(getSearchSuggestions(deferred));
+    let cancelled = false;
+    void (async () => {
+      const next = await getSearchSuggestions(deferred);
+      if (!cancelled) setSuggestions(next);
+    })();
+    return () => {
+      cancelled = true;
+    };
   }, [deferred]);
 
   const onSubmit = (event: FormEvent) => {

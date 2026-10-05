@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using MixPlus.Modules.Cart.Infrastructure.Persistence;
 using MixPlus.Modules.Catalog.Infrastructure.Persistence;
 using MixPlus.Modules.Identity.Infrastructure.Persistence;
 using MixPlus.Modules.Media.Infrastructure.Persistence;
@@ -25,6 +26,7 @@ public static class DatabaseInitializer
         PromotionsDbContext.Schema,
         IdentityDbContext.Schema,
         MediaDbContext.Schema,
+        CartDbContext.Schema,
     ];
 
     public static async Task InitializeAsync(WebApplication app)
@@ -63,6 +65,7 @@ public static class DatabaseInitializer
             services.GetRequiredService<PromotionsDbContext>(),
             services.GetRequiredService<IdentityDbContext>(),
             services.GetRequiredService<MediaDbContext>(),
+            services.GetRequiredService<CartDbContext>(),
         ];
 
         // Schema-only reset (app role cannot recreate the database).

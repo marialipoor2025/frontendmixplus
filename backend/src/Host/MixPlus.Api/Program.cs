@@ -1,4 +1,5 @@
 using System.Text.Json.Serialization;
+using MixPlus.Api;
 using MixPlus.Api.Seed;
 using MixPlus.BuildingBlocks.Application;
 using MixPlus.Modules.Cart.Api;
@@ -82,6 +83,8 @@ foreach (var module in modules)
 {
     module.MapEndpoints(app);
 }
+
+app.MapAdminDashboardEndpoints();
 
 app.Run();
 

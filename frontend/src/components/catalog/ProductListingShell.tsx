@@ -51,7 +51,7 @@ export function ProductListingShell({
             <div className="mb-4" />
           )}
 
-          <div className="grid gap-6 lg:grid-cols-[240px_minmax(0,1fr)]">
+          <div className="grid gap-6 lg:grid-cols-[280px_minmax(0,1fr)]">
             <ProductListingFilters
               basePath={context.basePath}
               query={listing.query}

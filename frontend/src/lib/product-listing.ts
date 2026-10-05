@@ -56,6 +56,10 @@ function isSort(value: string): value is ProductSort {
     "newest",
     "popular",
     "discount",
+    "bestseller",
+    "shipping",
+    "buyers",
+    "selected",
   ].includes(value);
 }
 
@@ -115,14 +119,18 @@ function applySort(products: Product[], sort: ProductSort, q?: string) {
     case "price-desc":
       return copy.sort((a, b) => b.price.amount - a.price.amount);
     case "popular":
+    case "bestseller":
+    case "buyers":
       return copy.sort(
         (a, b) => (b.reviewCount ?? 0) - (a.reviewCount ?? 0) || (b.rating ?? 0) - (a.rating ?? 0),
       );
     case "discount":
+    case "selected":
       return copy.sort(
         (a, b) => (b.discountPercent ?? 0) - (a.discountPercent ?? 0),
       );
     case "newest":
+    case "shipping":
       return copy.reverse();
     case "relevance":
     default:
@@ -195,8 +203,11 @@ export function applyProductListing(
 export const PRODUCT_SORT_OPTIONS: { value: ProductSort; label: string }[] = [
   { value: "relevance", label: "مرتبط‌ترین" },
   { value: "popular", label: "پربازدیدترین" },
+  { value: "newest", label: "جدیدترین" },
+  { value: "bestseller", label: "پرفروش‌ترین" },
   { value: "price-asc", label: "ارزان‌ترین" },
   { value: "price-desc", label: "گران‌ترین" },
-  { value: "discount", label: "بیشترین تخفیف" },
-  { value: "newest", label: "جدیدترین" },
+  { value: "shipping", label: "سریع‌ترین ارسال" },
+  { value: "buyers", label: "پیشنهاد خریداران" },
+  { value: "selected", label: "منتخب" },
 ];

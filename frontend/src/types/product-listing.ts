@@ -7,7 +7,11 @@ export type ProductSort =
   | "price-desc"
   | "newest"
   | "popular"
-  | "discount";
+  | "discount"
+  | "bestseller"
+  | "shipping"
+  | "buyers"
+  | "selected";
 
 export type ProductListingFilters = {
   brands: string[];

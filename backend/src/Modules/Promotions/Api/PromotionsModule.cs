@@ -33,5 +33,7 @@ public sealed class PromotionsModule : IModule
 
         group.MapGet("/health", () => Results.Ok(new { module = Name, status = "ready" }))
             .WithName("PromotionsHealth");
+
+        endpoints.MapAdminPromotionEndpoints();
     }
 }

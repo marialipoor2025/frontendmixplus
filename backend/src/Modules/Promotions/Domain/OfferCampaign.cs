@@ -50,6 +50,14 @@ public sealed class OfferCampaign : AggregateRoot
         ProductKeysJson = JsonSerializer.Serialize(keys);
     }
 
+    public void Update(string title, DateTime? startsAtUtc, DateTime? endsAtUtc, bool isActive)
+    {
+        Title = title.Trim();
+        StartsAtUtc = startsAtUtc;
+        EndsAtUtc = endsAtUtc;
+        IsActive = isActive;
+    }
+
     public IReadOnlyList<string> GetProductKeys()
     {
         if (string.IsNullOrWhiteSpace(ProductKeysJson))

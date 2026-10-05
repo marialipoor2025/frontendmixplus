@@ -153,6 +153,7 @@ public sealed class CatalogModule : IModule
         endpoints.MapAdminBrandEndpoints();
         endpoints.MapVariantEndpoints();
         endpoints.MapInventoryEndpoints();
+        endpoints.MapOfferEndpoints();
         endpoints.MapProductMediaEndpoints();
         endpoints.MapSpecEndpoints();
     }

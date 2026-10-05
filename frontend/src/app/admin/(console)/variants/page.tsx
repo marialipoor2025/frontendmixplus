@@ -12,14 +12,21 @@ import {
   type AdminColumn,
 } from "@/components/admin/AdminUi";
 import { RequireAdmin } from "@/components/admin/RequireAdmin";
-import { listAdminVariants } from "@/lib/api/variants";
+import {
+  deleteAdminVariant,
+  listAdminVariants,
+  upsertAdminVariant,
+} from "@/lib/api/variants";
+import { siteConfig } from "@/config/site";
 import { mockAdminVariants } from "@/lib/mocks/admin";
 import type { AdminVariant } from "@/types/admin";
 import { paginateLocal } from "@/types/paging";
 
 export default function AdminVariantsPage() {
   const [rows, setRows] = useState(mockAdminVariants);
-  const [source, setSource] = useState<"mock" | "api">("mock");
+  const [source, setSource] = useState<"mock" | "api">(
+    siteConfig.useMocks || !siteConfig.apiBaseUrl ? "mock" : "api",
+  );
 
   useEffect(() => {
     let cancelled = false;
@@ -27,7 +34,9 @@ export default function AdminVariantsPage() {
       const live = await listAdminVariants();
       if (!cancelled && live) {
         setRows(live);
-        setSource("api");
+        if (!siteConfig.useMocks && siteConfig.apiBaseUrl) {
+          setSource("api");
+        }
       }
     })();
     return () => {
@@ -74,9 +83,14 @@ export default function AdminVariantsPage() {
             setEditing(r);
           }}
           onDelete={() => {
-            setRows((prev) => prev.filter((x) => x.id !== r.id));
-            setNotice("تنوع حذف شد (mock محلی)");
-            window.setTimeout(() => setNotice(null), 2000);
+            void (async () => {
+              const live = await deleteAdminVariant(r.productId, r.id);
+              setRows((prev) => prev.filter((x) => x.id !== r.id));
+              setNotice(
+                live ? "تنوع از Catalog حذف شد" : "تنوع حذف شد (mock محلی)",
+              );
+              window.setTimeout(() => setNotice(null), 2000);
+            })();
           }}
         />
       ),
@@ -89,7 +103,7 @@ export default function AdminVariantsPage() {
         title="مدیریت تنوع‌ها"
         description={
           source === "api"
-            ? "داده‌ها از Catalog API خوانده می‌شوند"
+            ? "SKUها از Catalog خوانده و ذخیره می‌شوند"
             : "تنوع رنگ، ظرفیت و سایر ترکیب‌های فروش (mock تا اتصال کامل API)"
         }
         actions={
@@ -131,16 +145,24 @@ export default function AdminVariantsPage() {
               setEditing(null);
             }}
             onSave={(variant) => {
-              setRows((prev) => {
-                const exists = prev.some((x) => x.id === variant.id);
-                return exists
-                  ? prev.map((x) => (x.id === variant.id ? variant : x))
-                  : [variant, ...prev];
-              });
-              setCreating(false);
-              setEditing(null);
-              setNotice("تنوع ذخیره شد (mock محلی — بک‌اند مرحله بعد)");
-              window.setTimeout(() => setNotice(null), 2200);
+              void (async () => {
+                const live = await upsertAdminVariant(variant);
+                const saved = live ?? variant;
+                setRows((prev) => {
+                  const exists = prev.some((x) => x.id === saved.id);
+                  return exists
+                    ? prev.map((x) => (x.id === saved.id ? saved : x))
+                    : [saved, ...prev];
+                });
+                setCreating(false);
+                setEditing(null);
+                setNotice(
+                  live
+                    ? "تنوع در Catalog ذخیره شد"
+                    : "تنوع ذخیره شد (mock محلی)",
+                );
+                window.setTimeout(() => setNotice(null), 2200);
+              })();
             }}
           />
         </div>

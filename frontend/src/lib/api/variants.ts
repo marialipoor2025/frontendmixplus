@@ -111,3 +111,95 @@ export async function listAdminVariants(): Promise<AdminVariant[] | null> {
     return null;
   }
 }
+
+type UpsertSkuBody = {
+  sku: string;
+  optionValueIds: string[];
+  price: number;
+  originalPrice?: number | null;
+  discountPercent?: number | null;
+  stock: number;
+};
+
+export async function upsertAdminVariant(
+  variant: AdminVariant,
+): Promise<AdminVariant | null> {
+  if (siteConfig.useMocks || !siteConfig.apiBaseUrl) return null;
+  if (!variant.productId.trim()) return null;
+
+  const body: UpsertSkuBody = {
+    sku: variant.sku,
+    optionValueIds: [],
+    price: variant.price,
+    originalPrice: variant.originalPrice ?? null,
+    discountPercent: null,
+    stock: variant.stock,
+  };
+
+  try {
+    const productKey = encodeURIComponent(variant.productId);
+    const isUpdate =
+      Boolean(variant.id) &&
+      /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(
+        variant.id,
+      );
+
+    const response = await fetch(
+      isUpdate
+        ? `${siteConfig.apiBaseUrl.replace(/\/$/, "")}/api/admin/catalog/products/${productKey}/skus/${encodeURIComponent(variant.id)}`
+        : `${siteConfig.apiBaseUrl.replace(/\/$/, "")}/api/admin/catalog/products/${productKey}/skus`,
+      {
+        method: isUpdate ? "PUT" : "POST",
+        headers: {
+          Accept: "application/json",
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(body),
+      },
+    );
+    if (!response.ok) return null;
+
+    const sku = (await response.json()) as {
+      id: string;
+      sku: string;
+      price: number;
+      originalPrice?: number | null;
+      stock: number;
+      inStock: boolean;
+    };
+
+    return {
+      ...variant,
+      id: sku.id,
+      sku: sku.sku,
+      price: sku.price,
+      originalPrice: sku.originalPrice ?? undefined,
+      stock: sku.stock,
+      inStock: sku.inStock,
+      attributes:
+        variant.attributes ||
+        variant.options
+          .filter((o) => o.value)
+          .map((o) => `${o.name}: ${o.value}`)
+          .join(" · "),
+    };
+  } catch {
+    return null;
+  }
+}
+
+export async function deleteAdminVariant(
+  productId: string,
+  skuId: string,
+): Promise<boolean> {
+  if (siteConfig.useMocks || !siteConfig.apiBaseUrl) return false;
+  try {
+    const response = await fetch(
+      `${siteConfig.apiBaseUrl.replace(/\/$/, "")}/api/admin/catalog/products/${encodeURIComponent(productId)}/skus/${encodeURIComponent(skuId)}`,
+      { method: "DELETE" },
+    );
+    return response.ok;
+  } catch {
+    return false;
+  }
+}

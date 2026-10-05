@@ -25,7 +25,7 @@ const empty: AdminVariant = {
   inStock: true,
 };
 
-/** Mock create/edit form matching the storefront variant contract. */
+/** Create/edit form for Catalog SKUs (productKey + price/stock). */
 export function AdminVariantForm({
   initial,
   onCancel,
@@ -58,6 +58,12 @@ export function AdminVariantForm({
           ...form,
           id: form.id || `v-${Date.now()}`,
           inStock: form.stock > 0,
+          attributes:
+            form.attributes ||
+            form.options
+              .filter((o) => o.value)
+              .map((o) => `${o.name}: ${o.value}`)
+              .join(" · "),
         });
       }}
     >
@@ -66,9 +72,25 @@ export function AdminVariantForm({
       </h3>
 
       <label className="block space-y-1 text-sm">
-        <span className="text-[var(--color-neutral-600)]">عنوان محصول</span>
+        <span className="text-[var(--color-neutral-600)]">
+          کلید محصول (slug / external key)
+        </span>
         <input
           required
+          dir="ltr"
+          value={form.productId}
+          onChange={(e) =>
+            setForm((prev) => ({ ...prev, productId: e.target.value }))
+          }
+          className="w-full rounded-lg border border-[var(--color-neutral-200)] px-3 py-2"
+          placeholder="product-slug"
+          disabled={Boolean(initial?.id)}
+        />
+      </label>
+
+      <label className="block space-y-1 text-sm">
+        <span className="text-[var(--color-neutral-600)]">عنوان محصول</span>
+        <input
           value={form.productTitle}
           onChange={(e) =>
             setForm((prev) => ({ ...prev, productTitle: e.target.value }))
@@ -95,7 +117,6 @@ export function AdminVariantForm({
           <label key={opt.code} className="block space-y-1 text-sm">
             <span className="text-[var(--color-neutral-600)]">{opt.name}</span>
             <input
-              required
               value={opt.value}
               onChange={(e) => updateOption(index, e.target.value)}
               className="w-full rounded-lg border border-[var(--color-neutral-200)] px-3 py-2"
@@ -128,7 +149,7 @@ export function AdminVariantForm({
             required
             type="number"
             min={0}
-            value={form.stock}
+            value={form.stock || ""}
             onChange={(e) =>
               setForm((prev) => ({
                 ...prev,
@@ -140,11 +161,11 @@ export function AdminVariantForm({
         </label>
       </div>
 
-      <div className="flex justify-end gap-2">
+      <div className="flex gap-2">
+        <AdminButton type="submit">ذخیره</AdminButton>
         <AdminOutlineButton type="button" onClick={onCancel}>
           انصراف
         </AdminOutlineButton>
-        <AdminButton type="submit">ذخیره (mock)</AdminButton>
       </div>
     </form>
   );

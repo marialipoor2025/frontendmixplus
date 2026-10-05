@@ -1,18 +1,22 @@
 import { siteConfig } from "@/config/site";
-import type { AdminStat } from "@/types/admin";
+import type { AdminOrder, AdminStat } from "@/types/admin";
 
 type ApiStatsResponse = {
   stats: AdminStat[];
+  recentOrders?: AdminOrder[];
 };
 
 function apiBase() {
   return siteConfig.apiBaseUrl.replace(/\/$/, "");
 }
 
-export async function getAdminDashboardStats(): Promise<AdminStat[] | null> {
+export async function getAdminDashboardStats(): Promise<{
+  stats: AdminStat[];
+  recentOrders: AdminOrder[];
+} | null> {
   if (siteConfig.useMocks || !siteConfig.apiBaseUrl) {
-    const { mockAdminStats } = await import("@/lib/mocks/admin");
-    return mockAdminStats;
+    const { mockAdminStats, mockAdminOrders } = await import("@/lib/mocks/admin");
+    return { stats: mockAdminStats, recentOrders: mockAdminOrders };
   }
   try {
     const response = await fetch(`${apiBase()}/api/admin/dashboard/stats`, {
@@ -21,7 +25,19 @@ export async function getAdminDashboardStats(): Promise<AdminStat[] | null> {
     });
     if (!response.ok) return null;
     const payload = (await response.json()) as ApiStatsResponse;
-    return payload.stats ?? null;
+    return {
+      stats: payload.stats ?? [],
+      recentOrders: (payload.recentOrders ?? []).map((o) => ({
+        ...o,
+        status:
+          o.status === "processing" ||
+          o.status === "shipped" ||
+          o.status === "delivered" ||
+          o.status === "cancelled"
+            ? o.status
+            : "new",
+      })),
+    };
   } catch {
     return null;
   }

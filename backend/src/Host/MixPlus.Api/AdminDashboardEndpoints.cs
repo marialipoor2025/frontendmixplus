@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using MixPlus.Modules.Cart.Infrastructure.Persistence;
 using MixPlus.Modules.Catalog.Infrastructure.Persistence;
 using MixPlus.Modules.Identity.Infrastructure.Persistence;
 using MixPlus.Modules.Promotions.Infrastructure.Persistence;
@@ -19,6 +20,7 @@ internal static class AdminDashboardEndpoints
         SellersDbContext sellers,
         IdentityDbContext identity,
         PromotionsDbContext promotions,
+        CartDbContext cart,
         CancellationToken ct)
     {
         var productCount = await catalog.Products.AsNoTracking().CountAsync(ct);
@@ -29,6 +31,19 @@ internal static class AdminDashboardEndpoints
         var customerCount = await identity.Users.AsNoTracking().CountAsync(ct);
         var activeCampaigns = await promotions.OfferCampaigns.AsNoTracking()
             .CountAsync(x => x.IsActive, ct);
+
+        var recentOrders = await cart.Orders.AsNoTracking()
+            .OrderByDescending(x => x.CreatedAtUtc)
+            .Take(5)
+            .Select(x => new
+            {
+                id = x.ExternalKey,
+                customer = x.CustomerName,
+                total = x.TotalAmount,
+                status = x.Status,
+                createdAt = x.CreatedAtUtc.ToString("yyyy-MM-dd HH:mm"),
+            })
+            .ToListAsync(ct);
 
         var stats = new[]
         {
@@ -62,6 +77,6 @@ internal static class AdminDashboardEndpoints
             },
         };
 
-        return Results.Ok(new { stats });
+        return Results.Ok(new { stats, recentOrders });
     }
 }

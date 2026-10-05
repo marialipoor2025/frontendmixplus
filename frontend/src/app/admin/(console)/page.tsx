@@ -12,13 +12,14 @@ import { hasPermission } from "@/lib/admin/permissions";
 import { useAdminAuth } from "@/lib/admin/useAdminAuth";
 import { getAdminDashboardStats } from "@/lib/api/dashboard";
 import { mockAdminOrders, mockAdminStats } from "@/lib/mocks/admin";
-import type { AdminStat } from "@/types/admin";
+import type { AdminOrder, AdminStat } from "@/types/admin";
 import { formatPrice } from "@/lib/format";
 import { siteConfig } from "@/config/site";
 
 export default function AdminDashboardPage() {
   const { user } = useAdminAuth();
   const [stats, setStats] = useState<AdminStat[]>(mockAdminStats);
+  const [orders, setOrders] = useState<AdminOrder[]>(mockAdminOrders);
   const [source, setSource] = useState<"mock" | "api">("mock");
 
   useEffect(() => {
@@ -26,7 +27,8 @@ export default function AdminDashboardPage() {
     void (async () => {
       const live = await getAdminDashboardStats();
       if (!cancelled && live) {
-        setStats(live);
+        setStats(live.stats);
+        setOrders(live.recentOrders);
         if (!siteConfig.useMocks && siteConfig.apiBaseUrl) {
           setSource("api");
         }
@@ -43,7 +45,7 @@ export default function AdminDashboardPage() {
         title="داشبورد"
         description={
           source === "api"
-            ? "آمار زنده از Catalog، Identity، Sellers و Promotions"
+            ? "آمار و سفارش‌های اخیر از API زنده"
             : "نمای کلی فعالیت کسب‌وکار و موارد نیازمند اقدام"
         }
       />
@@ -76,31 +78,35 @@ export default function AdminDashboardPage() {
               </Link>
             ) : null}
           </div>
-          <ul className="divide-y divide-[var(--color-neutral-100)]">
-            {mockAdminOrders.map((order) => (
-              <li
-                key={order.id}
-                className="flex items-center justify-between gap-3 py-2.5 text-sm"
-              >
-                <div>
-                  <p className="font-medium text-[var(--color-neutral-800)]">
-                    {order.id}
-                  </p>
-                  <p className="text-xs text-[var(--color-muted)]">
-                    {order.customer}
-                  </p>
-                </div>
-                <div className="text-end">
-                  <p dir="ltr" className="tabular-nums font-medium">
-                    {formatPrice(order.total)}
-                  </p>
-                  <p className="text-[11px] text-[var(--color-muted)]">
-                    {order.createdAt}
-                  </p>
-                </div>
-              </li>
-            ))}
-          </ul>
+          {orders.length === 0 ? (
+            <p className="text-sm text-[var(--color-muted)]">سفارشی ثبت نشده است.</p>
+          ) : (
+            <ul className="divide-y divide-[var(--color-neutral-100)]">
+              {orders.map((order) => (
+                <li
+                  key={order.id}
+                  className="flex items-center justify-between gap-3 py-2.5 text-sm"
+                >
+                  <div>
+                    <p className="font-medium text-[var(--color-neutral-800)]">
+                      {order.id}
+                    </p>
+                    <p className="text-xs text-[var(--color-muted)]">
+                      {order.customer}
+                    </p>
+                  </div>
+                  <div className="text-end">
+                    <p dir="ltr" className="tabular-nums font-medium">
+                      {formatPrice(order.total)}
+                    </p>
+                    <p className="text-[11px] text-[var(--color-muted)]">
+                      {order.createdAt}
+                    </p>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          )}
         </AdminCard>
 
         <AdminCard>
@@ -143,7 +149,7 @@ export default function AdminDashboardPage() {
           </div>
           <p className="mt-4 text-xs text-[var(--color-muted)]">
             {source === "api"
-              ? "آمار داشبورد از API زنده است؛ سفارش‌ها هنوز mock هستند."
+              ? "آمار و سفارش‌های داشبورد از API زنده هستند."
               : "داده‌های فعلی mock هستند؛ پس از ماژول بک‌اند به API واقعی وصل می‌شوند."}
           </p>
         </AdminCard>

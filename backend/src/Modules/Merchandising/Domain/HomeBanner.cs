@@ -53,6 +53,8 @@ public sealed class HomeBanner : AggregateRoot
         Alt = alt;
         SortOrder = sortOrder;
     }
+
+    public void SetActive(bool isActive) => IsActive = isActive;
 }
 
 public enum BannerSlot

@@ -42,5 +42,7 @@ public sealed class MerchandisingModule : IModule
                 Results.Ok(new { module = Name, status = "ready" }))
             .WithTags("Merchandising")
             .WithName("MerchandisingHealth");
+
+        endpoints.MapAdminCmsEndpoints();
     }
 }

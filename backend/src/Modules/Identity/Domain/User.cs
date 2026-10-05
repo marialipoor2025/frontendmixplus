@@ -14,6 +14,7 @@ public sealed class User : AggregateRoot
     public string DisplayName { get; private set; } = string.Empty;
     public DateTime CreatedAtUtc { get; private set; }
     public DateTime? LastLoginAtUtc { get; private set; }
+    public bool IsBlocked { get; private set; }
 
     public static User CreatePhone(string normalizedPhone)
     {
@@ -26,6 +27,7 @@ public sealed class User : AggregateRoot
             Phone = normalizedPhone,
             DisplayName = MaskPhone(normalizedPhone),
             CreatedAtUtc = DateTime.UtcNow,
+            IsBlocked = false,
         };
     }
 
@@ -40,6 +42,7 @@ public sealed class User : AggregateRoot
             Email = normalizedEmail,
             DisplayName = normalizedEmail,
             CreatedAtUtc = DateTime.UtcNow,
+            IsBlocked = false,
         };
     }
 
@@ -47,6 +50,8 @@ public sealed class User : AggregateRoot
     {
         LastLoginAtUtc = DateTime.UtcNow;
     }
+
+    public void SetBlocked(bool blocked) => IsBlocked = blocked;
 
     private static string MaskPhone(string phone)
     {

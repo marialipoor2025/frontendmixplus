@@ -1,5 +1,13 @@
 import { siteConfig } from "@/config/site";
 import type { AdminReview } from "@/types/admin";
+import type { ProductComment } from "@/types/product-detail";
+
+export type SubmitProductReviewInput = {
+  rating: number;
+  body: string;
+  isAnonymous: boolean;
+  customerName: string;
+};
 
 type ApiReview = {
   id: string;
@@ -10,11 +18,21 @@ type ApiReview = {
   status: string;
 };
 
+type ApiStorefrontReview = {
+  id: string;
+  authorName: string;
+  rating: number;
+  body: string;
+  dateLabel: string;
+  isAnonymous?: boolean;
+  isPending?: boolean;
+};
+
 function apiBase() {
   return siteConfig.apiBaseUrl.replace(/\/$/, "");
 }
 
-function mapReview(row: ApiReview): AdminReview {
+function mapAdminReview(row: ApiReview): AdminReview {
   const status =
     row.status === "approved" || row.status === "rejected"
       ? row.status
@@ -29,6 +47,19 @@ function mapReview(row: ApiReview): AdminReview {
   };
 }
 
+function mapStorefrontReview(row: ApiStorefrontReview): ProductComment {
+  return {
+    id: row.id,
+    authorName: row.authorName,
+    dateLabel: row.dateLabel,
+    rating: row.rating,
+    body: row.body,
+    likes: 0,
+    dislikes: 0,
+    expertLabel: row.isPending ? "در انتظار تایید" : undefined,
+  };
+}
+
 export async function listAdminReviews(): Promise<AdminReview[] | null> {
   if (siteConfig.useMocks || !siteConfig.apiBaseUrl) {
     const { mockAdminReviews } = await import("@/lib/mocks/admin");
@@ -40,7 +71,7 @@ export async function listAdminReviews(): Promise<AdminReview[] | null> {
       headers: { Accept: "application/json" },
     });
     if (!response.ok) return null;
-    return ((await response.json()) as ApiReview[]).map(mapReview);
+    return ((await response.json()) as ApiReview[]).map(mapAdminReview);
   } catch {
     return null;
   }
@@ -64,7 +95,7 @@ export async function setAdminReviewStatus(
       },
     );
     if (!response.ok) return null;
-    return mapReview((await response.json()) as ApiReview);
+    return mapAdminReview((await response.json()) as ApiReview);
   } catch {
     return null;
   }
@@ -84,8 +115,65 @@ export async function createAdminReview(
       body: JSON.stringify(review),
     });
     if (!response.ok) return null;
-    return mapReview((await response.json()) as ApiReview);
+    return mapAdminReview((await response.json()) as ApiReview);
   } catch {
     return null;
   }
+}
+
+/** Approved storefront reviews for a product PDP. */
+export async function getProductReviews(
+  productSlug: string,
+): Promise<ProductComment[]> {
+  if (siteConfig.useMocks || !siteConfig.apiBaseUrl) return [];
+
+  const res = await fetch(
+    `${apiBase()}/api/catalog/products/${encodeURIComponent(productSlug)}/reviews`,
+    { next: { revalidate: 60 } },
+  );
+  if (!res.ok) return [];
+  const rows = (await res.json()) as ApiStorefrontReview[];
+  return rows.map(mapStorefrontReview);
+}
+
+/** Submit a new product review (pending moderation). */
+export async function submitProductReview(
+  productSlug: string,
+  input: SubmitProductReviewInput,
+): Promise<{ ok: true; message: string } | { ok: false; error: string }> {
+  if (siteConfig.useMocks || !siteConfig.apiBaseUrl) {
+    return {
+      ok: true,
+      message: "دیدگاه شما ثبت شد و پس از بررسی نمایش داده می‌شود.",
+    };
+  }
+
+  const res = await fetch(
+    `${apiBase()}/api/catalog/products/${encodeURIComponent(productSlug)}/reviews`,
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        rating: input.rating,
+        body: input.body,
+        isAnonymous: input.isAnonymous,
+        customerName: input.customerName,
+      }),
+    },
+  );
+
+  if (!res.ok) {
+    const payload = (await res.json().catch(() => null)) as {
+      error?: string;
+    } | null;
+    return { ok: false, error: payload?.error ?? "ثبت دیدگاه ناموفق بود." };
+  }
+
+  const payload = (await res.json()) as { message?: string };
+  return {
+    ok: true,
+    message:
+      payload.message ??
+      "دیدگاه شما ثبت شد و پس از بررسی نمایش داده می‌شود.",
+  };
 }

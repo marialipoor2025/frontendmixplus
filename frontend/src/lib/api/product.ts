@@ -2,7 +2,9 @@ import { siteConfig } from "@/config/site";
 import { getCatalogProductBySlug } from "@/lib/api/catalog";
 import { getProductMedia } from "@/lib/api/product-media";
 import { getProductSpecs } from "@/lib/api/specs";
+import { getProductReviews } from "@/lib/api/reviews";
 import { getProductVariants } from "@/lib/api/variants";
+import type { ProductComment } from "@/types/product-detail";
 import { getMockProductDetail } from "@/lib/mocks/product-detail";
 import type { ProductDetailPageData } from "@/types/product-detail";
 
@@ -16,12 +18,14 @@ export async function getProductDetail(
     return data;
   }
 
-  const [liveCard, liveVariants, liveMedia, liveSpecs] = await Promise.all([
-    getCatalogProductBySlug(slug).catch(() => null),
-    getProductVariants(slug).catch(() => null),
-    getProductMedia(slug).catch(() => null),
-    getProductSpecs(slug).catch(() => null),
-  ]);
+  const [liveCard, liveVariants, liveMedia, liveSpecs, liveReviews] =
+    await Promise.all([
+      getCatalogProductBySlug(slug).catch(() => null),
+      getProductVariants(slug).catch(() => null),
+      getProductMedia(slug).catch(() => null),
+      getProductSpecs(slug).catch(() => null),
+      getProductReviews(slug).catch(() => [] as ProductComment[]),
+    ]);
 
   if (!data && !liveCard) return null;
 
@@ -146,6 +150,35 @@ export async function getProductDetail(
           url: m.url,
           alt: m.alt || next.title,
         })),
+      },
+    };
+  }
+
+  if (liveReviews.length > 0) {
+    const mockComments = next.content.comments.comments;
+    const mergedComments = [...liveReviews, ...mockComments];
+    const ratings = mergedComments
+      .map((c) => c.rating)
+      .filter((r): r is number => r != null);
+    const averageRating =
+      ratings.length > 0
+        ? ratings.reduce((sum, r) => sum + r, 0) / ratings.length
+        : next.content.comments.averageRating;
+
+    next = {
+      ...next,
+      content: {
+        ...next.content,
+        comments: {
+          ...next.content.comments,
+          comments: mergedComments,
+          totalCount: mergedComments.length,
+          ratingCount: Math.max(
+            next.content.comments.ratingCount,
+            ratings.length,
+          ),
+          averageRating,
+        },
       },
     };
   }

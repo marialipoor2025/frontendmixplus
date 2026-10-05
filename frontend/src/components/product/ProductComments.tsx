@@ -2,7 +2,8 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useState } from "react";
+import { useMemo, useState } from "react";
+import { ProductWriteReviewSheet } from "@/components/product/ProductWriteReviewSheet";
 import {
   ChevronDownIcon,
   ChevronLeftIcon,
@@ -21,6 +22,8 @@ import type {
 
 type ProductCommentsProps = {
   data: ProductCommentsContent;
+  productSlug: string;
+  productTitle: string;
 };
 
 const SORT_OPTIONS = [
@@ -181,56 +184,95 @@ function CommentCard({ comment }: { comment: ProductComment }) {
 /**
  * «امتیاز و دیدگاه کاربران» — summary, photos, sort, filters, list.
  */
-export function ProductComments({ data }: ProductCommentsProps) {
+function WriteReviewButton({
+  onClick,
+  className = "",
+}: {
+  onClick: () => void;
+  className?: string;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={`flex h-10 items-center justify-center rounded-[var(--medium-radius)] border border-[var(--color-primary-500)] text-xs font-medium text-[var(--color-primary-500)] ${className}`}
+    >
+      ثبت دیدگاه
+    </button>
+  );
+}
+
+export function ProductComments({
+  data,
+  productSlug,
+  productTitle,
+}: ProductCommentsProps) {
   const [sortId, setSortId] = useState<(typeof SORT_OPTIONS)[number]["id"]>(
     "helpful",
   );
   const [showAll, setShowAll] = useState(false);
+  const [sheetOpen, setSheetOpen] = useState(false);
+  const [refreshKey, setRefreshKey] = useState(0);
+
+  const merged = useMemo(() => {
+    void refreshKey;
+    return data;
+  }, [data, refreshKey]);
+
   const previewCount = 4;
+  const sortedComments = [...merged.comments].sort((a, b) => {
+    if (sortId === "newest") return 0;
+    if (sortId === "buyers") {
+      return Number(b.isBuyer) - Number(a.isBuyer);
+    }
+    return b.likes - a.likes;
+  });
   const visible = showAll
-    ? data.comments
-    : data.comments.slice(0, previewCount);
-  const remaining = Math.max(0, data.totalCount - visible.length);
+    ? sortedComments
+    : sortedComments.slice(0, previewCount);
+  const remaining = Math.max(0, merged.totalCount - visible.length);
 
   return (
     <section
       id="pdp-comments"
       className="scroll-mt-40 w-screen border-b border-[var(--color-neutral-200)] pb-3 lg:mt-4 lg:w-auto"
     >
-      <div className="px-5 lg:px-0">
+      <div className="flex items-center justify-between gap-3 px-5 lg:px-0">
         <ProductSectionTitle title="امتیاز و دیدگاه کاربران" as="p" />
+        <WriteReviewButton
+          onClick={() => setSheetOpen(true)}
+          className="shrink-0 px-4 lg:hidden"
+        />
       </div>
 
       <div className="mt-3 flex items-start justify-start px-5 lg:px-0">
         <div className="sticky top-[12.5rem] ml-12 hidden shrink-0 lg:block lg:w-48">
           <div className="flex items-center">
             <p className="ml-1 text-3xl font-bold leading-none text-[var(--color-neutral-900)]">
-              {formatFa(data.averageRating)}
+              {formatFa(merged.averageRating)}
             </p>
             <p className="text-sm text-[var(--color-neutral-700)]">از ۵</p>
           </div>
           <div className="mt-1 flex items-center">
-            <StarRow rating={data.averageRating} />
+            <StarRow rating={merged.averageRating} />
             <p className="mr-2 text-[13px] text-[var(--color-neutral-400)]">
-              از مجموع {formatFa(data.ratingCount, 0)} امتیاز
+              از مجموع {formatFa(merged.ratingCount, 0)} امتیاز
             </p>
           </div>
           <p className="mt-4 mb-3 text-[11px] text-[var(--color-neutral-700)]">
             شما هم درباره این کالا دیدگاه ثبت کنید
           </p>
-          <button
-            type="button"
-            className="mt-2 flex h-10 w-full items-center justify-center rounded-[var(--medium-radius)] border border-[var(--color-primary-500)] text-xs font-medium text-[var(--color-primary-500)]"
-          >
-            ثبت دیدگاه
-          </button>
+          <WriteReviewButton
+            onClick={() => setSheetOpen(true)}
+            className="mt-2 w-full"
+          />
         </div>
 
         <div className="min-w-0 grow">
-          {data.photos.length > 0 ? (
+          {merged.photos.length > 0 ? (
             <div className="mt-5 border-b border-[var(--color-neutral-200)]">
               <div className="flex gap-2 overflow-x-auto pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-                {data.photos.map((photo) => (
+                {merged.photos.map((photo) => (
                   <div
                     key={photo.id}
                     className="my-2 ml-2 size-[57px] shrink-0 cursor-pointer overflow-hidden rounded-lg border border-[var(--color-neutral-200)]"
@@ -283,17 +325,17 @@ export function ProductComments({ data }: ProductCommentsProps) {
               ))}
             </div>
             <span className="mr-auto hidden whitespace-nowrap text-[13px] text-[var(--color-neutral-500)] xl:block">
-              {formatFa(data.totalCount, 0)} دیدگاه
+              {formatFa(merged.totalCount, 0)} دیدگاه
             </span>
           </div>
 
-          {data.topicFilters.length > 0 ? (
+          {merged.topicFilters.length > 0 ? (
             <div className="border-b border-[var(--color-neutral-200)] py-4">
               <p className="mb-2 text-sm font-medium text-[var(--color-neutral-900)]">
                 فیلتر بر اساس موضوع
               </p>
               <div className="flex gap-2 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-                {data.topicFilters.map((topic) => (
+                {merged.topicFilters.map((topic) => (
                   <button
                     key={topic}
                     type="button"
@@ -328,6 +370,14 @@ export function ProductComments({ data }: ProductCommentsProps) {
           </div>
         </div>
       </div>
+
+      <ProductWriteReviewSheet
+        open={sheetOpen}
+        onClose={() => setSheetOpen(false)}
+        productSlug={productSlug}
+        productTitle={productTitle}
+        onSubmitted={() => setRefreshKey((k) => k + 1)}
+      />
     </section>
   );
 }

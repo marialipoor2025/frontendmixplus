@@ -87,7 +87,11 @@ export function ProductPage({ data, nav }: ProductPageProps) {
             <ProductIntro data={data.content.intro} />
             <ProductExpertReview data={data.content.expertReview} />
             <ProductSpecs groups={data.content.specs} />
-            <ProductComments data={data.content.comments} />
+            <ProductComments
+              data={data.content.comments}
+              productSlug={data.slug}
+              productTitle={data.title}
+            />
             <ProductQuestions data={data.content.questions} />
           </div>
 

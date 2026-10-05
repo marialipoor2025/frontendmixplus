@@ -194,7 +194,10 @@ public sealed class CatalogDbContext : DbContext, ICatalogDbContext
             entity.Ignore(x => x.DomainEvents);
             entity.Property(x => x.ExternalKey).HasMaxLength(100).IsRequired();
             entity.HasIndex(x => x.ExternalKey).IsUnique();
+            entity.Property(x => x.ProductSlug).HasMaxLength(200).IsRequired();
+            entity.HasIndex(x => x.ProductSlug);
             entity.Property(x => x.ProductTitle).HasMaxLength(300).IsRequired();
+            entity.Property(x => x.IsAnonymous).IsRequired();
             entity.Property(x => x.CustomerName).HasMaxLength(200).IsRequired();
             entity.Property(x => x.Excerpt).HasMaxLength(1000).IsRequired();
             entity.Property(x => x.Status).HasMaxLength(32).IsRequired();

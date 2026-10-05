@@ -151,8 +151,21 @@ export async function getProductDetail(
   }
 
   if (liveSpecs && liveSpecs.length > 0) {
+    const highlightFeatures = liveSpecs
+      .flatMap((group) =>
+        group.attributes.map((attr, index) => ({
+          id: `${group.id}-${attr.id || index}`,
+          label: attr.label,
+          value: attr.values.filter(Boolean).join("، "),
+        })),
+      )
+      .filter((f) => f.label && f.value)
+      .slice(0, 6);
+
     next = {
       ...next,
+      features:
+        highlightFeatures.length > 0 ? highlightFeatures : next.features,
       content: {
         ...next.content,
         specs: liveSpecs,

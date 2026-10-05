@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useState, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import {
   CompareIcon,
   InfoOutlineIcon,
@@ -18,6 +18,9 @@ import type {
 } from "@/types/product-detail";
 
 const VISIBLE_THUMBS = 5;
+const ZOOM_MIN = 1;
+const ZOOM_MAX = 3;
+const ZOOM_STEP = 0.5;
 
 type ProductGalleryProps = {
   title: string;
@@ -38,6 +41,7 @@ function formatSoldPercent(percent: number): string {
 
 /**
  * PDP image column: special-sale strip, action icons, main image, thumbs, SKU.
+ * Clicking the main image opens a zoom lightbox (#30).
  */
 export function ProductGallery({
   title,
@@ -47,12 +51,48 @@ export function ProductGallery({
 }: ProductGalleryProps) {
   const safeImages = images.length
     ? images
-    : [{ id: "placeholder", url: "/placeholders/product-appliance.png", alt: title }];
+    : [
+        {
+          id: "placeholder",
+          url: "/placeholders/product-appliance.png",
+          alt: title,
+        },
+      ];
   const [activeIndex, setActiveIndex] = useState(0);
+  const [zoomOpen, setZoomOpen] = useState(false);
+  const [zoomScale, setZoomScale] = useState(ZOOM_MIN);
   const active = safeImages[Math.min(activeIndex, safeImages.length - 1)]!;
   const visibleThumbs = safeImages.slice(0, VISIBLE_THUMBS);
   const hasMore = safeImages.length > VISIBLE_THUMBS;
   const moreThumb = safeImages[VISIBLE_THUMBS] ?? safeImages[0]!;
+
+  useEffect(() => {
+    if (!zoomOpen) return;
+    const previous = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setZoomOpen(false);
+      if (event.key === "ArrowLeft") {
+        setActiveIndex((i) => (i + 1) % safeImages.length);
+        setZoomScale(ZOOM_MIN);
+      }
+      if (event.key === "ArrowRight") {
+        setActiveIndex((i) => (i - 1 + safeImages.length) % safeImages.length);
+        setZoomScale(ZOOM_MIN);
+      }
+    };
+    window.addEventListener("keydown", onKey);
+    return () => {
+      document.body.style.overflow = previous;
+      window.removeEventListener("keydown", onKey);
+    };
+  }, [zoomOpen, safeImages.length]);
+
+  const openZoom = () => {
+    if (active.kind === "video") return;
+    setZoomScale(ZOOM_MIN);
+    setZoomOpen(true);
+  };
 
   const actions: GalleryAction[] = [
     {
@@ -145,23 +185,21 @@ export function ProductGallery({
           </div>
 
           <div className="relative flex flex-1 items-center">
-            <button
-              type="button"
-              className="w-full cursor-pointer leading-none"
-              aria-label={active.alt || title}
-              onClick={() =>
-                setActiveIndex((i) => (i + 1) % safeImages.length)
-              }
-            >
-              {active.kind === "video" ? (
-                <video
-                  src={active.url}
-                  className="aspect-square w-full overflow-hidden rounded-[var(--large-radius)] object-contain bg-[var(--color-neutral-50)]"
-                  controls
-                  playsInline
-                  preload="metadata"
-                />
-              ) : (
+            {active.kind === "video" ? (
+              <video
+                src={active.url}
+                className="aspect-square w-full overflow-hidden rounded-[var(--large-radius)] bg-[var(--color-neutral-50)] object-contain"
+                controls
+                playsInline
+                preload="metadata"
+              />
+            ) : (
+              <button
+                type="button"
+                className="w-full cursor-zoom-in leading-none"
+                aria-label={`بزرگ‌نمایی تصویر ${active.alt || title}`}
+                onClick={openZoom}
+              >
                 <Image
                   src={active.url}
                   alt={active.alt || title}
@@ -172,8 +210,8 @@ export function ProductGallery({
                   sizes="(min-width: 1280px) 580px, (min-width: 1024px) 368px, 100vw"
                   priority
                 />
-              )}
-            </button>
+              </button>
+            )}
           </div>
         </div>
 
@@ -244,6 +282,109 @@ export function ProductGallery({
           </span>
         </div>
       </div>
+
+      {zoomOpen ? (
+        <div
+          className="fixed inset-0 z-[70] flex flex-col bg-black/90"
+          role="dialog"
+          aria-modal="true"
+          aria-label="بزرگ‌نمایی تصویر محصول"
+        >
+          <div className="flex shrink-0 items-center justify-between gap-3 px-4 py-3 text-white">
+            <p className="truncate text-sm font-medium">{title}</p>
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                className="rounded-lg border border-white/30 px-3 py-1.5 text-sm disabled:opacity-40"
+                disabled={zoomScale <= ZOOM_MIN}
+                onClick={() =>
+                  setZoomScale((z) => Math.max(ZOOM_MIN, z - ZOOM_STEP))
+                }
+                aria-label="کوچک‌نمایی"
+              >
+                −
+              </button>
+              <span className="min-w-[3rem] text-center text-xs tabular-nums">
+                {Math.round(zoomScale * 100)}%
+              </span>
+              <button
+                type="button"
+                className="rounded-lg border border-white/30 px-3 py-1.5 text-sm disabled:opacity-40"
+                disabled={zoomScale >= ZOOM_MAX}
+                onClick={() =>
+                  setZoomScale((z) => Math.min(ZOOM_MAX, z + ZOOM_STEP))
+                }
+                aria-label="بزرگ‌نمایی"
+              >
+                +
+              </button>
+              <button
+                type="button"
+                className="ms-2 rounded-lg bg-white/15 px-3 py-1.5 text-sm"
+                onClick={() => setZoomOpen(false)}
+                aria-label="بستن"
+              >
+                بستن
+              </button>
+            </div>
+          </div>
+
+          <div className="relative min-h-0 flex-1 overflow-auto">
+            <button
+              type="button"
+              className="absolute inset-0 cursor-zoom-out"
+              aria-label="بستن بزرگ‌نمایی"
+              onClick={() => setZoomOpen(false)}
+            />
+            <div className="pointer-events-none relative z-[1] flex min-h-full items-center justify-center p-4">
+              {/* Native img so scale() works without next/image layout constraints */}
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={active.url}
+                alt={active.alt || title}
+                className="pointer-events-auto max-h-[85vh] max-w-full object-contain transition-transform duration-150"
+                style={{ transform: `scale(${zoomScale})` }}
+                onClick={(event) => {
+                  event.stopPropagation();
+                  setZoomScale((z) =>
+                    z >= ZOOM_MAX ? ZOOM_MIN : Math.min(ZOOM_MAX, z + ZOOM_STEP),
+                  );
+                }}
+              />
+            </div>
+          </div>
+
+          {safeImages.length > 1 ? (
+            <div className="flex shrink-0 justify-center gap-2 overflow-x-auto px-4 py-3">
+              {safeImages.map((image, index) =>
+                image.kind === "video" ? null : (
+                  <button
+                    key={image.id}
+                    type="button"
+                    className={`shrink-0 rounded border p-0.5 ${
+                      index === activeIndex
+                        ? "border-white"
+                        : "border-white/30"
+                    }`}
+                    onClick={() => {
+                      setActiveIndex(index);
+                      setZoomScale(ZOOM_MIN);
+                    }}
+                  >
+                    <Image
+                      src={image.url}
+                      alt=""
+                      width={56}
+                      height={56}
+                      className="size-14 object-contain"
+                    />
+                  </button>
+                ),
+              )}
+            </div>
+          ) : null}
+        </div>
+      ) : null}
     </div>
   );
 }

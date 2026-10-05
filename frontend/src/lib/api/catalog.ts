@@ -130,6 +130,21 @@ export async function getProductsByCategorySlug(
     if (rows.length > 0) return rows.map(mapProduct);
 
     if (slugParts.length > 1) {
+      // Try each ancestor leaf → root so nested paths still resolve.
+      for (let i = slugParts.length - 2; i >= 0; i -= 1) {
+        const ancestor = await apiClient<CatalogProductDto[]>(
+          "/api/catalog/products",
+          {
+            query: {
+              categorySlug: slugParts[i],
+              q: q?.trim() || undefined,
+              sort: sort || undefined,
+            },
+          },
+        );
+        if (ancestor.length > 0) return ancestor.map(mapProduct);
+      }
+
       const joined = await apiClient<CatalogProductDto[]>(
         "/api/catalog/products",
         {
@@ -143,7 +158,8 @@ export async function getProductsByCategorySlug(
       if (joined.length > 0) return joined.map(mapProduct);
     }
 
-    return [];
+    const { getMockCategoryProducts } = await import("@/lib/mocks/category-plp");
+    return getMockCategoryProducts(slugParts);
   } catch {
     const { getMockCategoryProducts } = await import("@/lib/mocks/category-plp");
     return getMockCategoryProducts(slugParts);

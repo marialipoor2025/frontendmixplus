@@ -37,7 +37,7 @@ export function ProductListingToolbar({
 
   return (
     <div
-      className={`mb-4 flex grow flex-row items-center gap-x-4 ${
+      className={`mb-4 hidden grow flex-row items-center gap-x-4 lg:flex ${
         pending ? "opacity-70" : ""
       }`}
     >

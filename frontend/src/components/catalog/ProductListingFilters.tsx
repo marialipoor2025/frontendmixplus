@@ -19,23 +19,27 @@ import type {
   ProductListingQuery,
 } from "@/types/product-listing";
 
+type AccordionId = "price" | "brand" | "condition";
+
 type ProductListingFiltersProps = {
   basePath: string;
   query: ProductListingQuery;
   facets: ProductListingFacets;
+  /** Extra classes on the outer aside. */
+  className?: string;
 };
 
-type AccordionId = "price" | "brand" | "condition";
+export function countActiveFilters(query: ProductListingQuery) {
+  const { filters } = query;
+  let count = filters.brands.length;
+  if (filters.inStockOnly) count += 1;
+  if (filters.condition) count += 1;
+  if (filters.minPrice != null || filters.maxPrice != null) count += 1;
+  return count;
+}
 
 function hasActiveFilters(query: ProductListingQuery) {
-  const { filters } = query;
-  return (
-    filters.brands.length > 0 ||
-    filters.inStockOnly ||
-    Boolean(filters.condition) ||
-    filters.minPrice != null ||
-    filters.maxPrice != null
-  );
+  return countActiveFilters(query) > 0;
 }
 
 function FilterSwitch({
@@ -126,6 +130,7 @@ export function ProductListingFilters({
   basePath,
   query,
   facets,
+  className = "",
 }: ProductListingFiltersProps) {
   const router = useRouter();
   const switchId = useId();
@@ -215,7 +220,7 @@ export function ProductListingFilters({
     <aside
       className={`w-full rounded-lg border border-[var(--color-neutral-200)] bg-[var(--color-neutral-000,#fff)] ${
         pending ? "opacity-70" : ""
-      }`}
+      } ${className}`}
       aria-label="فیلتر محصولات"
     >
       <div className="w-full px-5 py-4 text-base">

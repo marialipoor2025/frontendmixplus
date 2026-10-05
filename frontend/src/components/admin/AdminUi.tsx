@@ -276,12 +276,25 @@ export function priceCell(amount: number) {
   );
 }
 
-export function RowActions({ onEdit }: { onEdit?: () => void }) {
+export function RowActions({
+  onEdit,
+  onDelete,
+}: {
+  onEdit?: () => void;
+  onDelete?: () => void;
+}) {
   return (
     <div className="flex gap-2">
-      <AdminOutlineButton type="button" onClick={onEdit}>
-        ویرایش
-      </AdminOutlineButton>
+      {onEdit ? (
+        <AdminOutlineButton type="button" onClick={onEdit}>
+          ویرایش
+        </AdminOutlineButton>
+      ) : null}
+      {onDelete ? (
+        <AdminOutlineButton type="button" onClick={onDelete}>
+          حذف
+        </AdminOutlineButton>
+      ) : null}
     </div>
   );
 }

@@ -44,6 +44,7 @@ public static class DatabaseInitializer
 
         await SeedHomeAndNavAsync(services, config, logger);
         await CatalogSeeder.SeedAsync(services, config, logger);
+        await VariantSeeder.SeedAsync(services, config, logger);
         await HomeCompositionSeeder.SeedAsync(services, config, logger);
         await NavigationSeeder.SeedAsync(services, config, logger);
     }

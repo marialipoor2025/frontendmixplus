@@ -1,43 +1,57 @@
 import { ProductBreadcrumb } from "@/components/product/ProductBreadcrumb";
-import { ProductBuyBox } from "@/components/product/ProductBuyBox";
 import { ProductComments } from "@/components/product/ProductComments";
 import { ProductExpertReview } from "@/components/product/ProductExpertReview";
-import { ProductFeatures } from "@/components/product/ProductFeatures";
 import { ProductGallery } from "@/components/product/ProductGallery";
-import { ProductInsurance } from "@/components/product/ProductInsurance";
 import { ProductInfoFooter } from "@/components/product/ProductInfoFooter";
 import { ProductIntro } from "@/components/product/ProductIntro";
 import { ProductMiniBuyBox } from "@/components/product/ProductMiniBuyBox";
-import { ProductPricePolicyLink } from "@/components/product/ProductPricePolicyLink";
+import { ProductPurchasePanel } from "@/components/product/ProductPurchasePanel";
 import { ProductQuestions } from "@/components/product/ProductQuestions";
 import { ProductRecommendationRails } from "@/components/product/ProductRecommendationRails";
-import { ProductReturnNotice } from "@/components/product/ProductReturnNotice";
 import { ProductScrollTabs } from "@/components/product/ProductScrollTabs";
 import { ProductSellersList } from "@/components/product/ProductSellersList";
 import { ProductSpecs } from "@/components/product/ProductSpecs";
-import { ProductTitle } from "@/components/product/ProductTitle";
-import { ProductTouchPoints } from "@/components/product/ProductTouchPoints";
-import { ProductVariantInfo } from "@/components/product/ProductVariantInfo";
 import { MainNav } from "@/components/layout/MainNav";
 import { SiteFooter } from "@/components/layout/SiteFooter";
 import { SiteHeader } from "@/components/layout/SiteHeader";
 import { StickyHeaderShell } from "@/components/layout/StickyHeaderShell";
+import { resolveOptionGroups } from "@/lib/product-variants";
 import type { MainNavData } from "@/types/nav";
-import type { ProductDetailPageData } from "@/types/product-detail";
+import type {
+  ProductColorOption,
+  ProductDetailPageData,
+} from "@/types/product-detail";
 
 type ProductPageProps = {
   data: ProductDetailPageData;
   nav: MainNavData;
 };
 
+function defaultColorOption(
+  data: ProductDetailPageData,
+): ProductColorOption | undefined {
+  const colorGroup = resolveOptionGroups(data.variant).find(
+    (g) => g.code === "color",
+  );
+  const selectedId =
+    data.variant.selectedOptionValueIds[colorGroup?.id ?? ""] ??
+    data.variant.selectedColorId;
+  const value =
+    colorGroup?.values.find((v) => v.id === selectedId) ?? colorGroup?.values[0];
+  if (!value) return undefined;
+  return {
+    id: value.id,
+    name: value.label,
+    hex: value.swatchHex ?? "#e5e7eb",
+  };
+}
+
 /**
  * Product detail page shell. Sections (gallery, buy box, …) land one by one.
  */
 export function ProductPage({ data, nav }: ProductPageProps) {
-  const selectedColor =
-    data.variant.colors.find((c) => c.id === data.variant.selectedColorId) ??
-    data.variant.colors[0];
   const primaryImage = data.gallery.images[0];
+  const defaultColor = defaultColorOption(data);
 
   return (
     <>
@@ -57,23 +71,7 @@ export function ProductPage({ data, nav }: ProductPageProps) {
             sale={data.gallery.sale}
           />
 
-          <div className="min-w-0 grow px-5 pt-4 lg:px-0 lg:pt-0">
-            <ProductTitle title={data.title} links={data.titleNav} />
-            <ProductVariantInfo data={data.variant} productSlug={data.slug} />
-            {data.insurance ? <ProductInsurance offer={data.insurance} /> : null}
-            <ProductFeatures items={data.features} />
-            {data.returnNotice ? (
-              <ProductReturnNotice text={data.returnNotice} />
-            ) : null}
-            {data.touchPoints ? (
-              <ProductTouchPoints data={data.touchPoints} />
-            ) : null}
-          </div>
-
-          <div className="flex w-full flex-col gap-2 lg:sticky lg:top-28 lg:w-[300px] lg:shrink-0">
-            <ProductBuyBox data={data.buyBox} />
-            <ProductPricePolicyLink />
-          </div>
+          <ProductPurchasePanel data={data} />
         </section>
 
         <ProductInfoFooter />
@@ -98,7 +96,7 @@ export function ProductPage({ data, nav }: ProductPageProps) {
               <ProductMiniBuyBox
                 title={data.title}
                 imageUrl={primaryImage.url}
-                color={selectedColor}
+                color={defaultColor}
                 buyBox={data.buyBox}
                 sale={data.gallery.sale}
               />

@@ -33,14 +33,58 @@ export type ProductColorOption = {
   hex: string;
 };
 
+/** One selectable value inside an option group (color, capacity, …). */
+export type ProductVariantOptionValue = {
+  id: string;
+  label: string;
+  /** Present for color swatches. */
+  swatchHex?: string;
+  available: boolean;
+};
+
+export type ProductVariantOptionGroup = {
+  id: string;
+  /** Stable code: color | capacity | storage | … */
+  code: string;
+  name: string;
+  ui: "swatch" | "chip";
+  values: ProductVariantOptionValue[];
+};
+
+/** Sellable SKU = combination of option values. */
+export type ProductSkuVariant = {
+  id: string;
+  sku: string;
+  /** Option value ids that form this combination. */
+  optionValueIds: string[];
+  price: number;
+  originalPrice?: number;
+  discountPercent?: number;
+  inStock: boolean;
+};
+
 export type ProductVariantInfoData = {
   rating: number;
   /** Buyers who left a score (shown as «امتیاز N خریدار»). */
   ratingCount: number;
   commentCount: number;
   questionCount: number;
-  colors: ProductColorOption[];
-  selectedColorId: string;
+  /**
+   * Option groups the shopper can pick (color, capacity, …).
+   * Prefer this over legacy `colors`.
+   */
+  optionGroups: ProductVariantOptionGroup[];
+  /** groupId → selected valueId */
+  selectedOptionValueIds: Record<string, string>;
+  /** All sellable combinations for this product. */
+  skus: ProductSkuVariant[];
+  /**
+   * @deprecated Prefer `optionGroups` with `ui: "swatch"`.
+   * Kept for older mocks; UI maps it into a color group when optionGroups is empty.
+   */
+  colors?: ProductColorOption[];
+  /** @deprecated Prefer selectedOptionValueIds. */
+  selectedColorId?: string;
 };
 
 export type ProductInsuranceOffer = {

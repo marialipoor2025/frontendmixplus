@@ -103,6 +103,7 @@ public sealed class CatalogModule : IModule
             .WithName("ListCatalogCategories");
 
         endpoints.MapAdminCatalogEndpoints();
+        endpoints.MapVariantEndpoints();
     }
 
     private static ProductCardDto ToDto(Product product)

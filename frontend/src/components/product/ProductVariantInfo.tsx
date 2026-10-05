@@ -1,18 +1,26 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
 import {
   ChevronLeftIcon,
   DoneCheckIcon,
   RatingStarIcon,
 } from "@/components/layout/icons";
-import type { ProductVariantInfoData } from "@/types/product-detail";
+import {
+  isOptionValueAvailable,
+  resolveOptionGroups,
+} from "@/lib/product-variants";
+import type {
+  ProductSkuVariant,
+  ProductVariantInfoData,
+} from "@/types/product-detail";
 
 type ProductVariantInfoProps = {
   data: ProductVariantInfoData;
-  /** Product slug for in-page review/Q&A anchors. */
   productSlug: string;
+  selectedOptionValueIds: Record<string, string>;
+  activeSku?: ProductSkuVariant;
+  onSelectOption: (groupId: string, valueId: string) => void;
 };
 
 function formatFa(n: number, digits = 1): string {
@@ -23,15 +31,16 @@ function formatFa(n: number, digits = 1): string {
 }
 
 /**
- * PDP variant strip: rating, review/Q chips, and color picker.
+ * PDP variant strip: rating chips + option groups (color swatches, capacity chips, …).
  */
 export function ProductVariantInfo({
   data,
   productSlug,
+  selectedOptionValueIds,
+  activeSku,
+  onSelectOption,
 }: ProductVariantInfoProps) {
-  const [selectedColorId, setSelectedColorId] = useState(data.selectedColorId);
-  const selectedColor =
-    data.colors.find((c) => c.id === selectedColorId) ?? data.colors[0];
+  const groups = resolveOptionGroups(data);
 
   return (
     <div
@@ -84,68 +93,109 @@ export function ProductVariantInfo({
         </div>
       </div>
 
-      {data.colors.length > 0 && selectedColor ? (
-        <div className="flex w-full flex-col gap-5 pt-2">
-          <div className="flex flex-col gap-3">
-            <div className="flex w-full items-start justify-between gap-4">
-              <div className="flex flex-col items-start justify-center gap-0.5">
-                <div className="flex flex-wrap items-center gap-0.5">
-                  <span className="text-sm font-medium leading-[1.8] text-[var(--color-neutral-900)]">
-                    رنگ:{" "}
-                  </span>
-                  <div className="flex items-center gap-1.5 text-sm font-medium leading-[1.8] text-[var(--color-neutral-900)]">
-                    <span>{selectedColor.name}</span>
-                    <span
-                      className="size-4 rounded-full border border-[var(--color-neutral-200)]"
-                      style={{ backgroundColor: selectedColor.hex }}
-                      aria-hidden
-                    />
-                  </div>
-                </div>
-              </div>
+      {groups.map((group) => {
+        const selectedId = selectedOptionValueIds[group.id];
+        const selectedValue =
+          group.values.find((v) => v.id === selectedId) ?? group.values[0];
+
+        return (
+          <div key={group.id} className="flex w-full flex-col gap-3 pt-2">
+            <div className="flex flex-wrap items-center gap-0.5">
+              <span className="text-sm font-medium leading-[1.8] text-[var(--color-neutral-900)]">
+                {group.name}:{" "}
+              </span>
+              <span className="text-sm font-medium leading-[1.8] text-[var(--color-neutral-900)]">
+                {selectedValue?.label}
+              </span>
+              {selectedValue?.swatchHex ? (
+                <span
+                  className="ms-1 size-4 rounded-full border border-[var(--color-neutral-200)]"
+                  style={{ backgroundColor: selectedValue.swatchHex }}
+                  aria-hidden
+                />
+              ) : null}
             </div>
 
             <div className="flex w-full flex-wrap gap-2">
-              {data.colors.map((color) => {
-                const selected = color.id === selectedColorId;
-                return (
-                  <button
-                    key={color.id}
-                    type="button"
-                    className="cursor-pointer py-0.5"
-                    title={color.name}
-                    aria-label={color.name}
-                    aria-pressed={selected}
-                    onClick={() => setSelectedColorId(color.id)}
-                  >
-                    <span
-                      className={[
-                        "relative ml-2 flex items-center justify-center bg-[var(--color-neutral-000)] px-2 lg:px-0",
-                        selected
-                          ? "rounded-full ring-2 ring-[var(--color-neutral-700)] ring-offset-2"
-                          : "",
-                      ].join(" ")}
+              {group.values.map((value) => {
+                const selected = value.id === selectedId;
+                const available =
+                  value.available &&
+                  isOptionValueAvailable(
+                    data.skus,
+                    group.id,
+                    value.id,
+                    selectedOptionValueIds,
+                  );
+
+                if (group.ui === "swatch") {
+                  return (
+                    <button
+                      key={value.id}
+                      type="button"
+                      disabled={!available}
+                      className="cursor-pointer py-0.5 disabled:cursor-not-allowed disabled:opacity-40"
+                      title={value.label}
+                      aria-label={value.label}
+                      aria-pressed={selected}
+                      onClick={() => onSelectOption(group.id, value.id)}
                     >
                       <span
                         className={[
-                          "mx-auto flex size-10 items-center justify-center rounded-full border lg:border-none",
+                          "relative ml-2 flex items-center justify-center bg-[var(--color-neutral-000)] px-2 lg:px-0",
                           selected
-                            ? "border-[var(--color-neutral-300)]"
-                            : "border-[var(--color-neutral-200)]",
+                            ? "rounded-full ring-2 ring-[var(--color-neutral-700)] ring-offset-2"
+                            : "",
                         ].join(" ")}
-                        style={{ backgroundColor: color.hex }}
                       >
-                        {selected ? (
-                          <DoneCheckIcon className="size-6 text-[var(--color-neutral-900)]" />
-                        ) : null}
+                        <span
+                          className={[
+                            "mx-auto flex size-10 items-center justify-center rounded-full border lg:border-none",
+                            selected
+                              ? "border-[var(--color-neutral-300)]"
+                              : "border-[var(--color-neutral-200)]",
+                          ].join(" ")}
+                          style={{
+                            backgroundColor: value.swatchHex ?? "#e5e7eb",
+                          }}
+                        >
+                          {selected ? (
+                            <DoneCheckIcon className="size-6 text-[var(--color-neutral-900)]" />
+                          ) : null}
+                        </span>
                       </span>
-                    </span>
+                    </button>
+                  );
+                }
+
+                return (
+                  <button
+                    key={value.id}
+                    type="button"
+                    disabled={!available}
+                    aria-pressed={selected}
+                    onClick={() => onSelectOption(group.id, value.id)}
+                    className={[
+                      "rounded-lg border px-3 py-2 text-sm font-medium transition disabled:cursor-not-allowed disabled:opacity-40",
+                      selected
+                        ? "border-[var(--color-primary)] bg-[var(--color-primary-soft)] text-[var(--color-primary)]"
+                        : "border-[var(--color-neutral-200)] bg-white text-[var(--color-neutral-700)] hover:border-[var(--color-neutral-400)]",
+                    ].join(" ")}
+                  >
+                    {value.label}
                   </button>
                 );
               })}
             </div>
           </div>
-        </div>
+        );
+      })}
+
+      {activeSku ? (
+        <p className="text-xs text-[var(--color-neutral-500)]" dir="ltr">
+          SKU: {activeSku.sku}
+          {!activeSku.inStock ? " · ناموجود" : ""}
+        </p>
       ) : null}
     </div>
   );

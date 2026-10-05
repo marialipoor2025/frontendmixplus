@@ -205,6 +205,80 @@ export function getMockProductDetail(slug: string): ProductDetailPageData | null
       ratingCount: Math.max(1, Math.round((product.reviewCount ?? 20) * 0.9)),
       commentCount: product.reviewCount ?? 21,
       questionCount: Math.max(5, Math.round((product.reviewCount ?? 20) * 0.13)),
+      optionGroups: [
+        {
+          id: "opt-color",
+          code: "color",
+          name: "رنگ",
+          ui: "swatch",
+          values: [
+            {
+              id: "white-gloss",
+              label: "سفید براق",
+              swatchHex: "rgb(255, 253, 250)",
+              available: true,
+            },
+            {
+              id: "steel",
+              label: "استیل",
+              swatchHex: "rgb(235, 235, 235)",
+              available: true,
+            },
+          ],
+        },
+        {
+          id: "opt-capacity",
+          code: "capacity",
+          name: "ظرفیت",
+          ui: "chip",
+          values: [
+            { id: "cap-28", label: "۲۸ فوت", available: true },
+            { id: "cap-30", label: "۳۰ فوت", available: true },
+            { id: "cap-32", label: "۳۲ فوت", available: false },
+          ],
+        },
+      ],
+      selectedOptionValueIds: {
+        "opt-color": "white-gloss",
+        "opt-capacity": "cap-28",
+      },
+      skus: [
+        {
+          id: "sku-wg-28",
+          sku: `${product.slug}-wg-28`.toUpperCase().slice(0, 28),
+          optionValueIds: ["white-gloss", "cap-28"],
+          price: product.price.amount,
+          originalPrice: product.originalPrice?.amount,
+          discountPercent: product.discountPercent,
+          inStock: true,
+        },
+        {
+          id: "sku-wg-30",
+          sku: `${product.slug}-wg-30`.toUpperCase().slice(0, 28),
+          optionValueIds: ["white-gloss", "cap-30"],
+          price: product.price.amount + 4_500_000,
+          originalPrice: (product.originalPrice?.amount ?? product.price.amount) + 5_000_000,
+          discountPercent: product.discountPercent,
+          inStock: true,
+        },
+        {
+          id: "sku-st-28",
+          sku: `${product.slug}-st-28`.toUpperCase().slice(0, 28),
+          optionValueIds: ["steel", "cap-28"],
+          price: product.price.amount + 1_200_000,
+          originalPrice: product.originalPrice?.amount,
+          discountPercent: product.discountPercent,
+          inStock: true,
+        },
+        {
+          id: "sku-st-30",
+          sku: `${product.slug}-st-30`.toUpperCase().slice(0, 28),
+          optionValueIds: ["steel", "cap-30"],
+          price: product.price.amount + 5_800_000,
+          inStock: false,
+        },
+      ],
+      // Legacy fields kept for transitional readers.
       selectedColorId: "white-gloss",
       colors: [
         { id: "white-gloss", name: "سفید براق", hex: "rgb(255, 253, 250)" },

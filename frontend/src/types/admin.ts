@@ -45,11 +45,17 @@ export type AdminStat = {
 
 export type AdminVariant = {
   id: string;
+  productId: string;
   productTitle: string;
   sku: string;
+  /** Human-readable combination, e.g. «رنگ: استیل · ظرفیت: ۲۸ فوت» */
   attributes: string;
+  /** Structured option pairs for edit forms / future API. */
+  options: { code: string; name: string; value: string }[];
   price: number;
+  originalPrice?: number;
   stock: number;
+  inStock: boolean;
 };
 
 export type AdminSpec = {

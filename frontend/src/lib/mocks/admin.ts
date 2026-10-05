@@ -28,27 +28,46 @@ export const mockAdminStats: AdminStat[] = [
 export const mockAdminVariants: AdminVariant[] = [
   {
     id: "v1",
+    productId: "p-samsung-side",
     productTitle: "یخچال ساید بای ساید سامسونگ",
-    sku: "RF-SAM-001-SLV",
-    attributes: "رنگ: نقره‌ای",
+    sku: "RF-SAM-001-WG-28",
+    attributes: "رنگ: سفید براق · ظرفیت: ۲۸ فوت",
+    options: [
+      { code: "color", name: "رنگ", value: "سفید براق" },
+      { code: "capacity", name: "ظرفیت", value: "۲۸ فوت" },
+    ],
     price: 68500000,
+    originalPrice: 72900000,
     stock: 9,
+    inStock: true,
   },
   {
     id: "v2",
+    productId: "p-samsung-side",
     productTitle: "یخچال ساید بای ساید سامسونگ",
-    sku: "RF-SAM-001-BLK",
-    attributes: "رنگ: مشکی",
-    price: 69900000,
-    stock: 5,
+    sku: "RF-SAM-001-ST-30",
+    attributes: "رنگ: استیل · ظرفیت: ۳۰ فوت",
+    options: [
+      { code: "color", name: "رنگ", value: "استیل" },
+      { code: "capacity", name: "ظرفیت", value: "۳۰ فوت" },
+    ],
+    price: 74300000,
+    stock: 0,
+    inStock: false,
   },
   {
     id: "v3",
+    productId: "p-bosch-washer",
     productTitle: "ماشین لباسشویی بوش ۹ کیلویی",
     sku: "WM-BSH-090-WHT",
-    attributes: "رنگ: سفید",
+    attributes: "رنگ: سفید · ظرفیت: ۹ کیلوگرم",
+    options: [
+      { code: "color", name: "رنگ", value: "سفید" },
+      { code: "capacity", name: "ظرفیت", value: "۹ کیلوگرم" },
+    ],
     price: 42900000,
     stock: 8,
+    inStock: true,
   },
 ];
 

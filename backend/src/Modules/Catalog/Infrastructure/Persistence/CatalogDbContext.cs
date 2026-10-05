@@ -3,6 +3,7 @@ using MixPlus.Modules.Catalog.Application.Abstractions;
 using MixPlus.Modules.Catalog.Domain.Brands;
 using MixPlus.Modules.Catalog.Domain.Categories;
 using MixPlus.Modules.Catalog.Domain.Products;
+using MixPlus.Modules.Catalog.Domain.Reviews;
 using MixPlus.Modules.Catalog.Domain.Specs;
 using MixPlus.Modules.Catalog.Domain.Variants;
 
@@ -27,6 +28,7 @@ public sealed class CatalogDbContext : DbContext, ICatalogDbContext
     public DbSet<ProductSku> Skus => Set<ProductSku>();
     public DbSet<ProductSpecGroup> SpecGroups => Set<ProductSpecGroup>();
     public DbSet<SpecDefinition> SpecDefinitions => Set<SpecDefinition>();
+    public DbSet<ProductReview> Reviews => Set<ProductReview>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -183,6 +185,19 @@ public sealed class CatalogDbContext : DbContext, ICatalogDbContext
             entity.Property(x => x.Group).HasMaxLength(120).IsRequired();
             entity.Property(x => x.Unit).HasMaxLength(40).IsRequired();
             entity.Property(x => x.Category).HasMaxLength(120).IsRequired();
+        });
+
+        modelBuilder.Entity<ProductReview>(entity =>
+        {
+            entity.ToTable("ProductReviews");
+            entity.HasKey(x => x.Id);
+            entity.Ignore(x => x.DomainEvents);
+            entity.Property(x => x.ExternalKey).HasMaxLength(100).IsRequired();
+            entity.HasIndex(x => x.ExternalKey).IsUnique();
+            entity.Property(x => x.ProductTitle).HasMaxLength(300).IsRequired();
+            entity.Property(x => x.CustomerName).HasMaxLength(200).IsRequired();
+            entity.Property(x => x.Excerpt).HasMaxLength(1000).IsRequired();
+            entity.Property(x => x.Status).HasMaxLength(32).IsRequired();
         });
     }
 }

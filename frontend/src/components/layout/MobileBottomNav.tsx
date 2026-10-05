@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect, useMemo, useState, type MouseEvent } from "react";
+import { useEffect, useState, type MouseEvent } from "react";
 import { MobileCategoryBrowser } from "@/components/categories/MobileCategoryBrowser";
 import {
   BottomNavCartIcon,
@@ -13,7 +13,10 @@ import {
   ChevronDownIcon,
   ChevronUpIcon,
 } from "@/components/layout/icons";
-import { useMobileNav } from "@/components/layout/MobileNavContext";
+import {
+  useCategoryImages,
+  useMobileNav,
+} from "@/components/layout/MobileNavContext";
 import { MobileSideDrawer } from "@/components/layout/MobileSideDrawer";
 import { MobileSupportChat } from "@/components/layout/MobileSupportChat";
 import { NavMenuIcon } from "@/components/layout/NavMenuIcon";
@@ -21,7 +24,6 @@ import {
   NAV_ACTION_LINKS,
   NAV_ICON_CLASS,
 } from "@/components/layout/navMenuShared";
-import { mockHomePageData } from "@/lib/mocks/home";
 
 type NavId = "chat" | "categories" | "cart" | "profile" | "home";
 
@@ -44,22 +46,14 @@ function pathToNavId(pathname: string): NavId | null {
   return null;
 }
 
-function buildCategoryImageMap() {
-  const map: Record<string, string> = {};
-  for (const cat of mockHomePageData.categories) {
-    map[cat.href] = cat.imageUrl;
-  }
-  return map;
-}
-
 export function MobileBottomNav() {
   const pathname = usePathname() || "/";
   const nav = useMobileNav();
+  const imageByHref = useCategoryImages();
   const [chatOpen, setChatOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [categoriesExpanded, setCategoriesExpanded] = useState(false);
   const [selectedId, setSelectedId] = useState<NavId | null>(null);
-  const imageByHref = useMemo(() => buildCategoryImageMap(), []);
 
   useEffect(() => {
     setSelectedId(null);

@@ -89,7 +89,14 @@ public sealed class CatalogModule : IModule
                 var rows = await db.Categories.AsNoTracking()
                     .Where(x => x.IsActive)
                     .OrderBy(x => x.SortOrder)
-                    .Select(x => new CategoryDto(x.ExternalKey, x.Title, x.Href, x.ImageUrl))
+                    .Select(x => new CategoryDto(
+                        x.ExternalKey,
+                        x.Title,
+                        x.Href,
+                        x.ImageUrl,
+                        x.ParentId.HasValue ? x.ParentId.Value.ToString("D") : null,
+                        x.Slug,
+                        x.SortOrder))
                     .ToListAsync(ct);
                 return Results.Ok(rows);
             })

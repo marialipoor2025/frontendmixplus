@@ -4,7 +4,9 @@ import { DesktopSupportChat } from "@/components/layout/DesktopSupportChat";
 import { MobileBottomNav } from "@/components/layout/MobileBottomNav";
 import { MobileNavProvider } from "@/components/layout/MobileNavContext";
 import { siteConfig } from "@/config/site";
+import { getHomePageData } from "@/lib/api/home";
 import { getMainNavData } from "@/lib/api/nav";
+import { buildCategoryImageMap } from "@/lib/category-images";
 import "./globals.css";
 
 const vazirmatn = Vazirmatn({
@@ -22,7 +24,11 @@ export const metadata: Metadata = {
 };
 
 export default async function RootLayout({ children }: LayoutProps<"/">) {
-  const nav = await getMainNavData();
+  const [nav, home] = await Promise.all([
+    getMainNavData(),
+    getHomePageData().catch(() => null),
+  ]);
+  const categoryImages = buildCategoryImageMap(home?.categories);
 
   return (
     <html
@@ -31,7 +37,7 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
       className={`${vazirmatn.variable} h-full antialiased`}
     >
       <body className="flex min-h-full flex-col bg-[var(--background)] pb-[calc(3.25rem+env(safe-area-inset-bottom))] text-[var(--foreground)] lg:pb-0">
-        <MobileNavProvider data={nav}>
+        <MobileNavProvider data={nav} categoryImages={categoryImages}>
           {children}
           <MobileBottomNav />
           <DesktopSupportChat />

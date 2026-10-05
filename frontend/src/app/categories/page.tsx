@@ -1,28 +1,24 @@
 import { MobileCategoryBrowser } from "@/components/categories/MobileCategoryBrowser";
 import { SiteHeader } from "@/components/layout/SiteHeader";
 import { StickyHeaderShell } from "@/components/layout/StickyHeaderShell";
+import { getHomePageData } from "@/lib/api/home";
 import { getMainNavData } from "@/lib/api/nav";
-import { mockHomePageData } from "@/lib/mocks/home";
+import { buildCategoryImageMap } from "@/lib/category-images";
 
 export const metadata = {
   title: "دسته‌بندی کالاها",
 };
-
-function buildImageMap() {
-  const map: Record<string, string> = {};
-  for (const cat of mockHomePageData.categories) {
-    map[cat.href] = cat.imageUrl;
-  }
-  return map;
-}
 
 /**
  * Mobile categories screen (Digikala-style two-pane).
  * Scoped to MixPlus household appliances only.
  */
 export default async function CategoriesPage() {
-  const nav = await getMainNavData();
-  const imageByHref = buildImageMap();
+  const [nav, home] = await Promise.all([
+    getMainNavData(),
+    getHomePageData().catch(() => null),
+  ]);
+  const imageByHref = buildCategoryImageMap(home?.categories);
 
   return (
     <>

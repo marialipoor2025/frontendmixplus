@@ -7,6 +7,7 @@ using MixPlus.BuildingBlocks.Application;
 using MixPlus.BuildingBlocks.Infrastructure;
 using MixPlus.Modules.Identity.Application.Abstractions;
 using MixPlus.Modules.Identity.Application.Auth;
+using MixPlus.Modules.Identity.Infrastructure;
 using MixPlus.Modules.Identity.Infrastructure.Messaging;
 using MixPlus.Modules.Identity.Infrastructure.Persistence;
 
@@ -39,6 +40,7 @@ public sealed class IdentityModule : IModule
 
         services.AddScoped<IOtpAuthService, OtpAuthService>();
         services.AddScoped<ISessionAuthService, SessionAuthService>();
+        services.AddScoped<IAccessTokenValidator, SessionAccessTokenValidator>();
     }
 
     public void MapEndpoints(IEndpointRouteBuilder endpoints)

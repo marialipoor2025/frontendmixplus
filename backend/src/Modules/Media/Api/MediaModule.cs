@@ -37,8 +37,17 @@ public sealed class MediaModule : IModule
         group.MapGet("/health", () => Results.Ok(new { module = Name, status = "ready" }))
             .WithName("MediaHealth");
 
-        group.MapPost("/upload", async (HttpRequest request, IMediaUploadService media, CancellationToken ct) =>
+        group.MapPost("/upload", async (
+                HttpRequest request,
+                IMediaUploadService media,
+                IAccessTokenValidator tokens,
+                CancellationToken ct) =>
             {
+                if (!await tokens.IsValidAsync(ReadBearer(request), ct))
+                {
+                    return Results.Unauthorized();
+                }
+
                 if (!request.HasFormContentType)
                 {
                     return Results.BadRequest(new { error = "Expected multipart form upload." });
@@ -76,5 +85,19 @@ public sealed class MediaModule : IModule
                 return Results.File(stream, contentType, fileDownloadName: fileName, enableRangeProcessing: true);
             })
             .WithName("GetMediaVariant");
+    }
+
+    private static string? ReadBearer(HttpRequest request)
+    {
+        var header = request.Headers.Authorization.ToString();
+        if (string.IsNullOrWhiteSpace(header))
+        {
+            return null;
+        }
+
+        const string prefix = "Bearer ";
+        return header.StartsWith(prefix, StringComparison.OrdinalIgnoreCase)
+            ? header[prefix.Length..].Trim()
+            : header.Trim();
     }
 }

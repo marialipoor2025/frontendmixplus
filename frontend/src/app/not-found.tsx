@@ -1,11 +1,21 @@
 import Link from "next/link";
+import { MainNav } from "@/components/layout/MainNav";
+import { SiteFooter } from "@/components/layout/SiteFooter";
 import { SiteHeader } from "@/components/layout/SiteHeader";
+import { StickyHeaderShell } from "@/components/layout/StickyHeaderShell";
 import { siteConfig } from "@/config/site";
+import { getMainNavData } from "@/lib/api/nav";
 
-export default function NotFound() {
+export default async function NotFound() {
+  const nav = await getMainNavData();
+
   return (
     <>
-      <SiteHeader />
+      <StickyHeaderShell>
+        <SiteHeader />
+        <MainNav data={nav} />
+      </StickyHeaderShell>
+
       <main className="flex flex-1 flex-col items-center justify-center px-4 py-16 text-center">
         <p className="bg-gradient-to-l from-[#1672dd] to-[#ed1944] bg-clip-text text-7xl font-black text-transparent md:text-8xl">
           ۴۰۴
@@ -23,6 +33,8 @@ export default function NotFound() {
           بازگشت به صفحه اصلی
         </Link>
       </main>
+
+      <SiteFooter />
     </>
   );
 }

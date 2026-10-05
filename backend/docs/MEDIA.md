@@ -16,4 +16,5 @@
 ## Later
 
 - Swap `ILocalMediaStorage` for S3/MinIO without changing Catalog contracts.
-- Harden upload auth (admin-only) once admin session is enforced.
+- Uploads require a valid customer/admin opaque session (`IAccessTokenValidator`).
+- Later: restrict uploads to admin roles only.

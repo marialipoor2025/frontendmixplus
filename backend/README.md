@@ -35,7 +35,8 @@ Contracts live in `../src/types/*` on the frontend and are mirrored as DTOs unde
 | **Merchandising** | Active skeleton | Home composition, banners, rails | Hero / mid / bottom banners, product rails, home API |
 | **Navigation** | Active skeleton | Mega-menu + quick links | Header / mobile drawer nav API |
 | **Promotions** | Active skeleton | Offer campaigns | Amazing offers rail |
-| **Identity** | Stub | Login, profile, wishlist | Header + bottom-nav stubs |
+| **Identity** | Active | OTP login/register, opaque session tokens, `/me` + logout | Header login + profile gate |
+| **Media** | Active | Local disk binaries + ImageSharp variants | Admin/product media uploads |
 | **Cart** | Stub | Cart & checkout | Cart popover / `/checkout/cart/` |
 | **Search** | Stub | Search & discovery | Search bar / `/search` |
 | **Support** | Stub | Chat, enquiry, FAQ | Support chat FAB / top-bar |

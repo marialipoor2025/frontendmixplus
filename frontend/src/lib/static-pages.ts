@@ -66,4 +66,32 @@ export const STATIC_PAGES: Record<string, StaticPageDef> = {
     title: "بلاگ میکپلاس",
     description: "راهنمای خرید، مقایسه و مقالات لوازم خانگی.",
   },
+  "incredible-offers": {
+    title: "تخفیفات ویژه",
+    description: "پیشنهادهای شگفت‌انگیز و تخفیف‌های ویژه میکپلاس.",
+  },
+  stock: {
+    title: "کالاهای استوک",
+    description: "کالاهای استوک و فرصت‌های خرید اقتصادی.",
+  },
+  "services/install": {
+    title: "نصب و سرویس",
+    description: "درخواست نصب و خدمات پس از فروش لوازم خانگی.",
+  },
+  b2b: {
+    title: "خرید سازمانی",
+    description: "خرید عمده و سازمانی از میکپلاس.",
+  },
+  enquiry: {
+    title: "صدور پیش‌فاکتور",
+    description: "درخواست صدور پیش‌فاکتور برای خریدهای سازمانی و عمده.",
+  },
+  "sellers/join": {
+    title: "فروشنده شو",
+    description: "شرایط همکاری فروشندگان و پیوستن به مارکت‌پلیس میکپلاس.",
+  },
+  "landing/dowry": {
+    title: "جهیزیه",
+    description: "پکیج‌ها و پیشنهادهای ویژه جهیزیه.",
+  },
 };

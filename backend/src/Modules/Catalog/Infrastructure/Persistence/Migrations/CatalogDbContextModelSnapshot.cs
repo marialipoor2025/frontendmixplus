@@ -236,6 +236,14 @@ namespace MixPlus.Modules.Catalog.Infrastructure.Persistence.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("character varying(100)");
 
+                    b.Property<bool>("IsAnonymous")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("ProductSlug")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
                     b.Property<string>("ProductTitle")
                         .IsRequired()
                         .HasMaxLength(300)
@@ -253,6 +261,8 @@ namespace MixPlus.Modules.Catalog.Infrastructure.Persistence.Migrations
 
                     b.HasIndex("ExternalKey")
                         .IsUnique();
+
+                    b.HasIndex("ProductSlug");
 
                     b.ToTable("ProductReviews", "catalog");
                 });

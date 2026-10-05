@@ -163,10 +163,19 @@ export async function submitProductReview(
   );
 
   if (!res.ok) {
-    const payload = (await res.json().catch(() => null)) as {
-      error?: string;
-    } | null;
-    return { ok: false, error: payload?.error ?? "ثبت دیدگاه ناموفق بود." };
+    const text = await res.text();
+    try {
+      const payload = JSON.parse(text) as { error?: string };
+      return { ok: false, error: payload?.error ?? "ثبت دیدگاه ناموفق بود." };
+    } catch {
+      return {
+        ok: false,
+        error:
+          res.status >= 500
+            ? "خطای سرور هنگام ثبت دیدگاه. لطفاً دوباره تلاش کنید."
+            : "ثبت دیدگاه ناموفق بود.",
+      };
+    }
   }
 
   const payload = (await res.json()) as { message?: string };

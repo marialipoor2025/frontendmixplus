@@ -26,7 +26,7 @@ type HeaderUserActionsProps = {
 
 /**
  * Barghchi-style header actions: cart, wishlist shortcut, login/profile.
- * Wishlist heart opens saved favorites; badge mirrors cart when count > 0.
+ * Header heart opens favorites; turns red when the logged-in user has items.
  */
 export function HeaderUserActions({
   loginLabel = "ورود | ثبت نام",
@@ -37,7 +37,7 @@ export function HeaderUserActions({
   emptyCartTitle = "سبد خرید شما خالی است!",
 }: HeaderUserActionsProps) {
   const { ready, isAuthenticated, user } = useAuth();
-  const [wishlistCount, setWishlistCount] = useState(0);
+  const [hasFavorites, setHasFavorites] = useState(false);
   const accountHref = isAuthenticated ? "/profile" : loginHref;
   const accountLabel =
     ready && isAuthenticated && user ? identityLabel(user) : loginLabel;
@@ -47,14 +47,14 @@ export function HeaderUserActions({
 
   useEffect(() => {
     if (!ready || !isAuthenticated) {
-      setWishlistCount(0);
+      setHasFavorites(false);
       return;
     }
 
     let cancelled = false;
     const refresh = () => {
       void getWishlistCount().then((count) => {
-        if (!cancelled) setWishlistCount(count);
+        if (!cancelled) setHasFavorites(count > 0);
       });
     };
 
@@ -119,19 +119,14 @@ export function HeaderUserActions({
 
       <Link
         href={heartHref}
-        aria-label={
-          wishlistCount > 0
-            ? `علاقه‌مندی‌ها، ${wishlistCount} کالا`
-            : "علاقه‌مندی‌ها"
-        }
-        className="relative flex items-center justify-center text-[#2B3674] transition hover:text-[var(--color-primary)]"
+        aria-label="علاقه‌مندی‌ها"
+        className={`flex items-center justify-center transition ${
+          hasFavorites
+            ? "text-[var(--color-hint-object-error)] hover:text-[var(--color-hint-object-error)]"
+            : "text-[#2B3674] hover:text-[var(--color-primary)]"
+        }`}
       >
-        {wishlistCount > 0 ? (
-          <span className="absolute -end-2 -top-1.5 flex size-4 items-center justify-center rounded-full bg-[var(--color-hint-object-error)] text-[9px] font-bold text-white">
-            {wishlistCount > 99 ? "99+" : wishlistCount}
-          </span>
-        ) : null}
-        <WishlistHeartIcon filled={wishlistCount > 0} />
+        <WishlistHeartIcon filled={hasFavorites} />
       </Link>
 
       <Link

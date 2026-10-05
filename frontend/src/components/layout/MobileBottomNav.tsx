@@ -2,7 +2,8 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect, useState, type MouseEvent } from "react";
+import { useEffect, useRef, useState, type MouseEvent } from "react";
+import { createPortal } from "react-dom";
 import { MobileCategoryBrowser } from "@/components/categories/MobileCategoryBrowser";
 import {
   BottomNavCartIcon,
@@ -54,6 +55,12 @@ export function MobileBottomNav() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [categoriesExpanded, setCategoriesExpanded] = useState(false);
   const [selectedId, setSelectedId] = useState<NavId | null>(null);
+  const [mounted, setMounted] = useState(false);
+  const shellRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   useEffect(() => {
     setSelectedId(null);
@@ -61,6 +68,29 @@ export function MobileBottomNav() {
     setMenuOpen(false);
     setCategoriesExpanded(false);
   }, [pathname]);
+
+  useEffect(() => {
+    if (!mounted) return;
+    const el = shellRef.current;
+    if (!el) return;
+
+    const sync = () => {
+      const vv = window.visualViewport;
+      el.style.top = `${vv?.offsetTop ?? 0}px`;
+      el.style.height = `${vv?.height ?? window.innerHeight}px`;
+    };
+
+    sync();
+    const vv = window.visualViewport;
+    vv?.addEventListener("resize", sync);
+    vv?.addEventListener("scroll", sync);
+    window.addEventListener("resize", sync);
+    return () => {
+      vv?.removeEventListener("resize", sync);
+      vv?.removeEventListener("scroll", sync);
+      window.removeEventListener("resize", sync);
+    };
+  }, [mounted]);
 
   if (pathname.startsWith("/users") || pathname.startsWith("/admin")) {
     return null;
@@ -101,13 +131,19 @@ export function MobileBottomNav() {
       ? "h-6 w-6 text-[var(--color-primary)]"
       : "h-6 w-6 text-[#2B3674]";
 
-  return (
+  if (!mounted) return null;
+
+  return createPortal(
     <>
-      <nav
-        className="fixed inset-x-0 bottom-0 z-40 border-t border-[var(--color-border)] bg-white lg:hidden"
-        style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
-        aria-label="منوی پایین موبایل"
+      <div
+        ref={shellRef}
+        className="pointer-events-none fixed inset-x-0 top-0 z-50 h-[100dvh] lg:hidden"
       >
+        <nav
+          className="pointer-events-auto absolute inset-x-0 bottom-0 border-t border-[var(--color-border)] bg-white"
+          style={{ paddingBottom: "env(safe-area-inset-bottom, 0px)" }}
+          aria-label="منوی پایین موبایل"
+        >
         <ul className="mx-auto flex max-w-lg items-center justify-between px-4 py-2">
           <li>
             <button
@@ -195,7 +231,8 @@ export function MobileBottomNav() {
             </Link>
           </li>
         </ul>
-      </nav>
+        </nav>
+      </div>
 
       <MobileSupportChat
         open={chatOpen}
@@ -294,6 +331,7 @@ export function MobileBottomNav() {
           </div>
         )}
       </MobileSideDrawer>
-    </>
+    </>,
+    document.body,
   );
 }

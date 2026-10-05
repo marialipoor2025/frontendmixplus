@@ -7,6 +7,8 @@ namespace MixPlus.Modules.Catalog.Domain.Products;
 /// </summary>
 public sealed class Product : AggregateRoot
 {
+    private readonly List<ProductMediaItem> _mediaItems = [];
+
     private Product()
     {
     }
@@ -22,6 +24,9 @@ public sealed class Product : AggregateRoot
     public Guid SellerId { get; private set; }
     public string SellerExternalKey { get; private set; } = string.Empty;
     public string SellerName { get; private set; } = string.Empty;
+    public Guid? CategoryId { get; private set; }
+    public string? CategoryExternalKey { get; private set; }
+    public string? CategoryName { get; private set; }
     public Money Price { get; private set; } = Money.Create(0);
     public Money? OriginalPrice { get; private set; }
     public int? DiscountPercent { get; private set; }
@@ -31,6 +36,7 @@ public sealed class Product : AggregateRoot
     public ProductCondition Condition { get; private set; } = ProductCondition.New;
     public bool InStock { get; private set; }
     public bool IsPublished { get; private set; }
+    public IReadOnlyCollection<ProductMediaItem> MediaItems => _mediaItems.AsReadOnly();
 
     public static Product Create(
         string externalKey,
@@ -115,6 +121,59 @@ public sealed class Product : AggregateRoot
         SellerExternalKey = sellerExternalKey.Trim();
         SellerName = sellerName;
         Price = price;
+    }
+
+    public void SetCategory(Guid? categoryId, string? categoryExternalKey, string? categoryName)
+    {
+        if (categoryId is null || string.IsNullOrWhiteSpace(categoryExternalKey))
+        {
+            CategoryId = null;
+            CategoryExternalKey = null;
+            CategoryName = null;
+            return;
+        }
+
+        CategoryId = categoryId;
+        CategoryExternalKey = categoryExternalKey.Trim();
+        CategoryName = string.IsNullOrWhiteSpace(categoryName) ? null : categoryName.Trim();
+    }
+
+    /// <summary>
+    /// Replace gallery order. First primary wins; if none marked, first item is primary.
+    /// Optionally syncs <see cref="ImageUrl"/> when <paramref name="primaryImageUrl"/> is provided.
+    /// </summary>
+    public void ReplaceMedia(
+        IEnumerable<(Guid MediaAssetId, bool IsPrimary)> items,
+        string? primaryImageUrl = null)
+    {
+        var list = items.ToList();
+        _mediaItems.Clear();
+
+        if (list.Count == 0)
+        {
+            if (!string.IsNullOrWhiteSpace(primaryImageUrl))
+            {
+                ImageUrl = primaryImageUrl;
+            }
+
+            return;
+        }
+
+        var primaryIndex = list.FindIndex(x => x.IsPrimary);
+        if (primaryIndex < 0) primaryIndex = 0;
+
+        for (var i = 0; i < list.Count; i++)
+        {
+            _mediaItems.Add(ProductMediaItem.Create(
+                list[i].MediaAssetId,
+                i,
+                i == primaryIndex));
+        }
+
+        if (!string.IsNullOrWhiteSpace(primaryImageUrl))
+        {
+            ImageUrl = primaryImageUrl;
+        }
     }
 }
 

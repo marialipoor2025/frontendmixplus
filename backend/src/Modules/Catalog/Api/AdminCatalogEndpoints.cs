@@ -95,11 +95,12 @@ internal static class AdminCatalogEndpoints
         }
 
         var brandLogo = await ResolveBrandLogoAsync(db, body.BrandId, body.BrandLogoUrl, ct);
+        var imageUrl = ResolveImageUrl(body);
         var product = Product.Create(
             externalKey,
             body.Title,
             body.Slug,
-            body.ImageUrl,
+            imageUrl,
             body.BrandId,
             body.BrandName,
             body.SellerId,
@@ -117,6 +118,9 @@ internal static class AdminCatalogEndpoints
             body.Badges,
             ParseCondition(body.Condition),
             body.InStock);
+
+        await ApplyCategoryAsync(product, body.CategoryId, db, ct);
+        ApplyMedia(product, body, imageUrl);
 
         db.Products.Add(product);
         await db.SaveChangesAsync(ct);
@@ -142,10 +146,11 @@ internal static class AdminCatalogEndpoints
         }
 
         var brandLogo = await ResolveBrandLogoAsync(db, body.BrandId, body.BrandLogoUrl, ct);
+        var imageUrl = ResolveImageUrl(body);
         product.UpdateCore(
             body.Title,
             body.Slug,
-            body.ImageUrl,
+            imageUrl,
             body.BrandId,
             body.BrandName,
             body.SellerId,
@@ -162,6 +167,8 @@ internal static class AdminCatalogEndpoints
             ParseCondition(body.Condition),
             body.InStock);
 
+        await ApplyCategoryAsync(product, body.CategoryId, db, ct);
+        ApplyMedia(product, body, imageUrl);
         product.SetPublished(body.IsPublished);
         await db.SaveChangesAsync(ct);
         return Results.Ok(ToAdminDto(product));
@@ -197,7 +204,7 @@ internal static class AdminCatalogEndpoints
             return Results.BadRequest(new { error = "عنوان الزامی است" });
         if (string.IsNullOrWhiteSpace(body.Slug))
             return Results.BadRequest(new { error = "اسلاگ الزامی است" });
-        if (string.IsNullOrWhiteSpace(body.ImageUrl))
+        if (string.IsNullOrWhiteSpace(body.ImageUrl) && (body.MediaIds is null || body.MediaIds.Count == 0))
             return Results.BadRequest(new { error = "تصویر الزامی است" });
         if (string.IsNullOrWhiteSpace(body.BrandId) || string.IsNullOrWhiteSpace(body.BrandName))
             return Results.BadRequest(new { error = "برند الزامی است" });
@@ -205,7 +212,70 @@ internal static class AdminCatalogEndpoints
             return Results.BadRequest(new { error = "فروشنده الزامی است" });
         if (body.Price is null || body.Price.Amount < 0)
             return Results.BadRequest(new { error = "قیمت نامعتبر است" });
+
+        if (body.MediaIds is { Count: > 0 })
+        {
+            foreach (var id in body.MediaIds)
+            {
+                if (!Guid.TryParse(id, out _))
+                {
+                    return Results.BadRequest(new { error = $"شناسه رسانه نامعتبر: {id}" });
+                }
+            }
+        }
+
         return null;
+    }
+
+    private static string ResolveImageUrl(UpsertAdminProductRequest body)
+    {
+        if (!string.IsNullOrWhiteSpace(body.ImageUrl))
+        {
+            return body.ImageUrl.Trim();
+        }
+
+        var first = body.MediaIds?.FirstOrDefault(x => Guid.TryParse(x, out _));
+        return first is null
+            ? "/placeholders/product-appliance.png"
+            : ProductMediaUrls.Gallery(Guid.Parse(first));
+    }
+
+    private static async Task ApplyCategoryAsync(
+        Product product,
+        string? categoryExternalKey,
+        CatalogDbContext db,
+        CancellationToken ct)
+    {
+        if (string.IsNullOrWhiteSpace(categoryExternalKey))
+        {
+            product.SetCategory(null, null, null);
+            return;
+        }
+
+        var category = await db.Categories.AsNoTracking()
+            .FirstOrDefaultAsync(x => x.ExternalKey == categoryExternalKey.Trim(), ct);
+        if (category is null)
+        {
+            product.SetCategory(null, null, null);
+            return;
+        }
+
+        product.SetCategory(category.Id, category.ExternalKey, category.Title);
+    }
+
+    private static void ApplyMedia(Product product, UpsertAdminProductRequest body, string imageUrl)
+    {
+        if (body.MediaIds is null)
+        {
+            return;
+        }
+
+        var items = body.MediaIds
+            .Where(id => Guid.TryParse(id, out _))
+            .Select((id, index) => (Guid.Parse(id), index == 0))
+            .ToList();
+
+        product.ReplaceMedia(items, imageUrl);
     }
 
     private static async Task<string?> ResolveBrandLogoAsync(
@@ -233,6 +303,16 @@ internal static class AdminCatalogEndpoints
             badges = JsonSerializer.Deserialize<List<string>>(product.BadgesJson);
         }
 
+        var gallery = product.MediaItems
+            .OrderBy(x => x.SortOrder)
+            .Select(x => new ProductMediaDto(
+                x.MediaAssetId.ToString("D"),
+                ProductMediaUrls.Gallery(x.MediaAssetId),
+                ProductMediaUrls.Thumb(x.MediaAssetId),
+                product.Title,
+                x.IsPrimary))
+            .ToList();
+
         return new AdminProductDto(
             product.ExternalKey,
             product.Title,
@@ -243,6 +323,8 @@ internal static class AdminCatalogEndpoints
             product.BrandLogoUrl,
             product.SellerExternalKey,
             product.SellerName,
+            product.CategoryExternalKey,
+            product.CategoryName,
             new MoneyDto(product.Price.Amount, product.Price.Currency),
             product.OriginalPrice is null
                 ? null
@@ -253,6 +335,14 @@ internal static class AdminCatalogEndpoints
             badges,
             product.Condition == ProductCondition.Used ? "used" : "new",
             product.InStock,
-            product.IsPublished);
+            product.IsPublished,
+            gallery.Count > 0 ? gallery : null);
     }
+}
+
+internal static class ProductMediaUrls
+{
+    public static string Gallery(Guid mediaAssetId) => $"/api/media/{mediaAssetId:D}/gallery";
+    public static string Thumb(Guid mediaAssetId) => $"/api/media/{mediaAssetId:D}/thumb";
+    public static string Card(Guid mediaAssetId) => $"/api/media/{mediaAssetId:D}/card";
 }

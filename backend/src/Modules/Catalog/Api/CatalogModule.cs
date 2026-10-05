@@ -42,6 +42,7 @@ public sealed class CatalogModule : IModule
         group.MapGet("/products", async (
                 CatalogDbContext db,
                 string? brandSlug,
+                string? categorySlug,
                 CancellationToken ct) =>
             {
                 var query = db.Products.AsNoTracking().Where(x => x.IsPublished);
@@ -60,6 +61,24 @@ public sealed class CatalogModule : IModule
                     }
 
                     query = query.Where(x => x.BrandExternalKey == brandKey);
+                }
+
+                if (!string.IsNullOrWhiteSpace(categorySlug))
+                {
+                    var slug = categorySlug.Trim().ToLowerInvariant();
+                    var category = await db.Categories.AsNoTracking()
+                        .Where(c => c.IsActive && c.Slug == slug)
+                        .Select(c => new { c.Id, c.ExternalKey })
+                        .FirstOrDefaultAsync(ct);
+
+                    if (category is null)
+                    {
+                        return Results.Ok(Array.Empty<ProductCardDto>());
+                    }
+
+                    query = query.Where(x =>
+                        x.CategoryId == category.Id ||
+                        x.CategoryExternalKey == category.ExternalKey);
                 }
 
                 var rows = await query.OrderBy(x => x.Title).ToListAsync(ct);
@@ -103,7 +122,10 @@ public sealed class CatalogModule : IModule
             .WithName("ListCatalogCategories");
 
         endpoints.MapAdminCatalogEndpoints();
+        endpoints.MapAdminCategoryEndpoints();
         endpoints.MapVariantEndpoints();
+        endpoints.MapProductMediaEndpoints();
+        endpoints.MapSpecEndpoints();
     }
 
     private static ProductCardDto ToDto(Product product)

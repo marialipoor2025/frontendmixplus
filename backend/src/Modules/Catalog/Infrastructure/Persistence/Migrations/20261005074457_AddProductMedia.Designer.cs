@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using MixPlus.Modules.Catalog.Infrastructure.Persistence;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace MixPlus.Modules.Catalog.Infrastructure.Persistence.Migrations
 {
     [DbContext(typeof(CatalogDbContext))]
-    partial class CatalogDbContextModelSnapshot : ModelSnapshot
+    [Migration("20261005074457_AddProductMedia")]
+    partial class AddProductMedia
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -136,17 +139,6 @@ namespace MixPlus.Modules.Catalog.Infrastructure.Persistence.Migrations
                         .HasMaxLength(200)
                         .HasColumnType("character varying(200)");
 
-                    b.Property<string>("CategoryExternalKey")
-                        .HasMaxLength(100)
-                        .HasColumnType("character varying(100)");
-
-                    b.Property<Guid?>("CategoryId")
-                        .HasColumnType("uuid");
-
-                    b.Property<string>("CategoryName")
-                        .HasMaxLength(200)
-                        .HasColumnType("character varying(200)");
-
                     b.Property<int>("Condition")
                         .HasColumnType("integer");
 
@@ -199,10 +191,6 @@ namespace MixPlus.Modules.Catalog.Infrastructure.Persistence.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("CategoryExternalKey");
-
-                    b.HasIndex("CategoryId");
-
                     b.HasIndex("ExternalKey")
                         .IsUnique();
 
@@ -210,77 +198,6 @@ namespace MixPlus.Modules.Catalog.Infrastructure.Persistence.Migrations
                         .IsUnique();
 
                     b.ToTable("Products", "catalog");
-                });
-
-            modelBuilder.Entity("MixPlus.Modules.Catalog.Domain.Specs.ProductSpecGroup", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<int?>("PreviewCount")
-                        .HasColumnType("integer");
-
-                    b.Property<string>("ProductExternalKey")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("character varying(100)");
-
-                    b.Property<Guid>("ProductId")
-                        .HasColumnType("uuid");
-
-                    b.Property<int>("SortOrder")
-                        .HasColumnType("integer");
-
-                    b.Property<string>("Title")
-                        .IsRequired()
-                        .HasMaxLength(200)
-                        .HasColumnType("character varying(200)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ProductId");
-
-                    b.ToTable("SpecGroups", "catalog");
-                });
-
-            modelBuilder.Entity("MixPlus.Modules.Catalog.Domain.Specs.SpecDefinition", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<string>("Category")
-                        .IsRequired()
-                        .HasMaxLength(120)
-                        .HasColumnType("character varying(120)");
-
-                    b.Property<string>("ExternalKey")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("character varying(100)");
-
-                    b.Property<string>("Group")
-                        .IsRequired()
-                        .HasMaxLength(120)
-                        .HasColumnType("character varying(120)");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(200)
-                        .HasColumnType("character varying(200)");
-
-                    b.Property<string>("Unit")
-                        .IsRequired()
-                        .HasMaxLength(40)
-                        .HasColumnType("character varying(40)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ExternalKey")
-                        .IsUnique();
-
-                    b.ToTable("SpecDefinitions", "catalog");
                 });
 
             modelBuilder.Entity("MixPlus.Modules.Catalog.Domain.Variants.ProductOptionGroup", b =>
@@ -452,42 +369,6 @@ namespace MixPlus.Modules.Catalog.Infrastructure.Persistence.Migrations
 
                     b.Navigation("Price")
                         .IsRequired();
-                });
-
-            modelBuilder.Entity("MixPlus.Modules.Catalog.Domain.Specs.ProductSpecGroup", b =>
-                {
-                    b.OwnsMany("MixPlus.Modules.Catalog.Domain.Specs.ProductSpecAttribute", "Attributes", b1 =>
-                        {
-                            b1.Property<Guid>("Id")
-                                .ValueGeneratedOnAdd()
-                                .HasColumnType("uuid");
-
-                            b1.Property<string>("Label")
-                                .IsRequired()
-                                .HasMaxLength(200)
-                                .HasColumnType("character varying(200)");
-
-                            b1.Property<int>("SortOrder")
-                                .HasColumnType("integer");
-
-                            b1.Property<Guid>("SpecGroupId")
-                                .HasColumnType("uuid");
-
-                            b1.Property<string>("ValuesJson")
-                                .IsRequired()
-                                .HasColumnType("jsonb");
-
-                            b1.HasKey("Id");
-
-                            b1.HasIndex("SpecGroupId");
-
-                            b1.ToTable("SpecAttributes", "catalog");
-
-                            b1.WithOwner()
-                                .HasForeignKey("SpecGroupId");
-                        });
-
-                    b.Navigation("Attributes");
                 });
 
             modelBuilder.Entity("MixPlus.Modules.Catalog.Domain.Variants.ProductOptionGroup", b =>

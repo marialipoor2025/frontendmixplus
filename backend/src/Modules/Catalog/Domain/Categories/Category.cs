@@ -55,4 +55,8 @@ public sealed class Category : AggregateRoot
         ImageUrl = imageUrl;
         SortOrder = sortOrder;
     }
+
+    public void SetParent(Guid? parentId) => ParentId = parentId;
+
+    public void SetActive(bool isActive) => IsActive = isActive;
 }

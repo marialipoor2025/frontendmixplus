@@ -3,6 +3,7 @@ using MixPlus.Modules.Catalog.Application.Abstractions;
 using MixPlus.Modules.Catalog.Domain.Brands;
 using MixPlus.Modules.Catalog.Domain.Categories;
 using MixPlus.Modules.Catalog.Domain.Products;
+using MixPlus.Modules.Catalog.Domain.Specs;
 using MixPlus.Modules.Catalog.Domain.Variants;
 
 namespace MixPlus.Modules.Catalog.Infrastructure.Persistence;
@@ -24,6 +25,8 @@ public sealed class CatalogDbContext : DbContext, ICatalogDbContext
     public DbSet<Category> Categories => Set<Category>();
     public DbSet<ProductOptionGroup> OptionGroups => Set<ProductOptionGroup>();
     public DbSet<ProductSku> Skus => Set<ProductSku>();
+    public DbSet<ProductSpecGroup> SpecGroups => Set<ProductSpecGroup>();
+    public DbSet<SpecDefinition> SpecDefinitions => Set<SpecDefinition>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -43,6 +46,10 @@ public sealed class CatalogDbContext : DbContext, ICatalogDbContext
             entity.Property(x => x.BrandName).HasMaxLength(200).IsRequired();
             entity.Property(x => x.SellerExternalKey).HasMaxLength(100).IsRequired();
             entity.Property(x => x.SellerName).HasMaxLength(200).IsRequired();
+            entity.Property(x => x.CategoryExternalKey).HasMaxLength(100);
+            entity.Property(x => x.CategoryName).HasMaxLength(200);
+            entity.HasIndex(x => x.CategoryId);
+            entity.HasIndex(x => x.CategoryExternalKey);
             entity.Property(x => x.BadgesJson).HasColumnType("jsonb");
             entity.OwnsOne(x => x.Price, money =>
             {
@@ -54,6 +61,20 @@ public sealed class CatalogDbContext : DbContext, ICatalogDbContext
                 money.Property(m => m.Amount).HasColumnName("OriginalPriceAmount").HasPrecision(18, 2);
                 money.Property(m => m.Currency).HasColumnName("OriginalPriceCurrency").HasMaxLength(8);
             });
+
+            entity.OwnsMany(x => x.MediaItems, media =>
+            {
+                media.ToTable("ProductMedia");
+                media.WithOwner().HasForeignKey("ProductId");
+                media.HasKey(x => x.Id);
+                media.Property(x => x.MediaAssetId).IsRequired();
+                media.HasIndex("ProductId", nameof(ProductMediaItem.MediaAssetId)).IsUnique();
+                media.HasIndex(x => x.MediaAssetId);
+            });
+
+            entity.Navigation(x => x.MediaItems)
+                .HasField("_mediaItems")
+                .UsePropertyAccessMode(PropertyAccessMode.Field);
         });
 
         modelBuilder.Entity<Brand>(entity =>
@@ -126,6 +147,42 @@ public sealed class CatalogDbContext : DbContext, ICatalogDbContext
                 money.Property(m => m.Amount).HasColumnName("OriginalPriceAmount").HasPrecision(18, 2);
                 money.Property(m => m.Currency).HasColumnName("OriginalPriceCurrency").HasMaxLength(8);
             });
+        });
+
+        modelBuilder.Entity<ProductSpecGroup>(entity =>
+        {
+            entity.ToTable("SpecGroups");
+            entity.HasKey(x => x.Id);
+            entity.Ignore(x => x.DomainEvents);
+            entity.Property(x => x.ProductExternalKey).HasMaxLength(100).IsRequired();
+            entity.Property(x => x.Title).HasMaxLength(200).IsRequired();
+            entity.HasIndex(x => x.ProductId);
+
+            entity.OwnsMany(x => x.Attributes, attrs =>
+            {
+                attrs.ToTable("SpecAttributes");
+                attrs.WithOwner().HasForeignKey("SpecGroupId");
+                attrs.HasKey(x => x.Id);
+                attrs.Property(x => x.Label).HasMaxLength(200).IsRequired();
+                attrs.Property(x => x.ValuesJson).HasColumnType("jsonb").IsRequired();
+            });
+
+            entity.Navigation(x => x.Attributes)
+                .HasField("_attributes")
+                .UsePropertyAccessMode(PropertyAccessMode.Field);
+        });
+
+        modelBuilder.Entity<SpecDefinition>(entity =>
+        {
+            entity.ToTable("SpecDefinitions");
+            entity.HasKey(x => x.Id);
+            entity.Ignore(x => x.DomainEvents);
+            entity.Property(x => x.ExternalKey).HasMaxLength(100).IsRequired();
+            entity.HasIndex(x => x.ExternalKey).IsUnique();
+            entity.Property(x => x.Name).HasMaxLength(200).IsRequired();
+            entity.Property(x => x.Group).HasMaxLength(120).IsRequired();
+            entity.Property(x => x.Unit).HasMaxLength(40).IsRequired();
+            entity.Property(x => x.Category).HasMaxLength(120).IsRequired();
         });
     }
 }

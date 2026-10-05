@@ -40,5 +40,7 @@ public sealed class SellersModule : IModule
                 return Results.Ok(rows);
             })
             .WithName("ListSellers");
+
+        endpoints.MapAdminSellerEndpoints();
     }
 }

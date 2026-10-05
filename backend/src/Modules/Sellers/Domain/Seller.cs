@@ -3,7 +3,7 @@ using MixPlus.BuildingBlocks.Domain;
 namespace MixPlus.Modules.Sellers.Domain;
 
 /// <summary>
-/// Seller aggregate — aligns with frontend <c>Seller</c> type.
+/// Seller aggregate — aligns with frontend <c>Seller</c> / admin seller types.
 /// </summary>
 public sealed class Seller : AggregateRoot
 {
@@ -16,8 +16,15 @@ public sealed class Seller : AggregateRoot
     public string Slug { get; private set; } = string.Empty;
     public decimal? Rating { get; private set; }
     public bool IsActive { get; private set; } = true;
+    /// <summary>approved | pending | suspended</summary>
+    public string Status { get; private set; } = "approved";
 
-    public static Seller Create(string externalKey, string name, string? slug = null, decimal? rating = null)
+    public static Seller Create(
+        string externalKey,
+        string name,
+        string? slug = null,
+        decimal? rating = null,
+        string status = "approved")
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(externalKey);
         ArgumentException.ThrowIfNullOrWhiteSpace(name);
@@ -26,23 +33,44 @@ public sealed class Seller : AggregateRoot
             ? externalKey.Trim().ToLowerInvariant()
             : slug.Trim().ToLowerInvariant();
 
-        return new Seller
+        var seller = new Seller
         {
             Id = StableGuid.From(externalKey),
             ExternalKey = externalKey.Trim(),
             Name = name.Trim(),
             Slug = resolvedSlug,
             Rating = rating,
-            IsActive = true,
         };
+        seller.SetStatus(status);
+        return seller;
     }
 
-    public void Update(string name, string? slug = null)
+    public void Update(string name, string? slug = null, decimal? rating = null)
     {
         Name = name.Trim();
         if (!string.IsNullOrWhiteSpace(slug))
         {
             Slug = slug.Trim().ToLowerInvariant();
         }
+
+        if (rating.HasValue)
+        {
+            Rating = rating;
+        }
+    }
+
+    public void SetStatus(string status)
+    {
+        var normalized = string.IsNullOrWhiteSpace(status)
+            ? "approved"
+            : status.Trim().ToLowerInvariant();
+
+        Status = normalized switch
+        {
+            "pending" => "pending",
+            "suspended" => "suspended",
+            _ => "approved",
+        };
+        IsActive = Status == "approved";
     }
 }

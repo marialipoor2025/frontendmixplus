@@ -28,6 +28,7 @@ public sealed class SellersDbContext : DbContext
             entity.Property(x => x.Name).HasMaxLength(200).IsRequired();
             entity.Property(x => x.Slug).HasMaxLength(200).IsRequired();
             entity.HasIndex(x => x.Slug).IsUnique();
+            entity.Property(x => x.Status).HasMaxLength(32).IsRequired();
         });
     }
 }

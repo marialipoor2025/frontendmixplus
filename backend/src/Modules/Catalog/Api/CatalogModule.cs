@@ -43,6 +43,7 @@ public sealed class CatalogModule : IModule
                 CatalogDbContext db,
                 string? brandSlug,
                 string? categorySlug,
+                string? q,
                 CancellationToken ct) =>
             {
                 var query = db.Products.AsNoTracking().Where(x => x.IsPublished);
@@ -81,10 +82,36 @@ public sealed class CatalogModule : IModule
                         x.CategoryExternalKey == category.ExternalKey);
                 }
 
+                if (!string.IsNullOrWhiteSpace(q))
+                {
+                    var term = q.Trim();
+                    var pattern = $"%{term}%";
+                    query = query.Where(x =>
+                        EF.Functions.ILike(x.Title, pattern) ||
+                        EF.Functions.ILike(x.BrandName, pattern) ||
+                        EF.Functions.ILike(x.Slug, pattern));
+                }
+
                 var rows = await query.OrderBy(x => x.Title).ToListAsync(ct);
                 return Results.Ok(rows.Select(ToDto).ToList());
             })
             .WithName("ListCatalogProducts");
+
+        group.MapGet("/products/{productKey}", async (
+                string productKey,
+                CatalogDbContext db,
+                CancellationToken ct) =>
+            {
+                var product = await db.Products.AsNoTracking()
+                    .FirstOrDefaultAsync(
+                        x => x.IsPublished &&
+                             (x.ExternalKey == productKey || x.Slug == productKey),
+                        ct);
+                return product is null
+                    ? Results.NotFound(new { error = "محصول یافت نشد" })
+                    : Results.Ok(ToDto(product));
+            })
+            .WithName("GetCatalogProduct");
 
         group.MapGet("/brands", async (CatalogDbContext db, string? slug, CancellationToken ct) =>
             {
@@ -125,6 +152,7 @@ public sealed class CatalogModule : IModule
         endpoints.MapAdminCategoryEndpoints();
         endpoints.MapAdminBrandEndpoints();
         endpoints.MapVariantEndpoints();
+        endpoints.MapInventoryEndpoints();
         endpoints.MapProductMediaEndpoints();
         endpoints.MapSpecEndpoints();
     }

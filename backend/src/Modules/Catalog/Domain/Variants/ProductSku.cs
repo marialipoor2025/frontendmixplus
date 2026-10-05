@@ -65,6 +65,12 @@ public sealed class ProductSku : AggregateRoot
         InStock = stock > 0;
     }
 
+    public void AdjustStock(int onHand)
+    {
+        Stock = Math.Max(0, onHand);
+        InStock = Stock > 0;
+    }
+
     public IReadOnlyList<Guid> GetOptionValueIds()
     {
         try

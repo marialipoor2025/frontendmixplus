@@ -9,6 +9,7 @@ import type {
   AdminMedia,
   AdminOffer,
   AdminOrder,
+  AdminProductSpecs,
   AdminPromotion,
   AdminReportRow,
   AdminReview,
@@ -77,10 +78,75 @@ export const mockAdminSpecs: AdminSpec[] = [
   { id: "s3", name: "قدرت موتور", group: "فنی", unit: "وات", category: "جاروبرقی" },
 ];
 
+export const mockAdminProductSpecs: AdminProductSpecs[] = [
+  {
+    productKey: "snowa-s1di-s110",
+    productTitle: "یخچال فریزر ساید بای ساید اسنوا S1Di-S110",
+    groups: [
+      {
+        id: "general",
+        title: "مشخصات کلی",
+        previewCount: 5,
+        attributes: [
+          { id: "model", label: "مدل", values: ["S1Di-S110-W"] },
+          { id: "energy", label: "گرید انرژی", values: ["A+"] },
+          { id: "capacity-l", label: "گنجایش کل به لیتر", values: ["۷۸۰"] },
+          { id: "frost", label: "نوع مقاومت در برابر برفک", values: ["نوفراست"] },
+          {
+            id: "display",
+            label: "امکانات صفحه نمایش",
+            values: ["نمایشگر لمسی", "کنترل دمای یخچال و فریزر"],
+          },
+        ],
+      },
+      {
+        id: "dims",
+        title: "ابعاد و وزن",
+        previewCount: 3,
+        attributes: [
+          { id: "w", label: "عرض", values: ["۹۱ سانتی‌متر"] },
+          { id: "h", label: "ارتفاع", values: ["۱۷۹ سانتی‌متر"] },
+          { id: "d", label: "عمق", values: ["۷۱ سانتی‌متر"] },
+        ],
+      },
+    ],
+  },
+];
+
 export const mockAdminCategories: AdminCategory[] = [
-  { id: "c1", name: "لوازم خانگی", parent: "—", slug: "home-appliances", productCount: 420 },
-  { id: "c2", name: "یخچال و فریزر", parent: "لوازم خانگی", slug: "fridge", productCount: 86 },
-  { id: "c3", name: "صوتی و تصویری", parent: "—", slug: "av", productCount: 210 },
+  {
+    id: "c1",
+    name: "لوازم خانگی",
+    parent: "—",
+    parentId: null,
+    slug: "home-appliances",
+    href: "/category/home-appliances",
+    sortOrder: 1,
+    isActive: true,
+    productCount: 420,
+  },
+  {
+    id: "c2",
+    name: "یخچال و فریزر",
+    parent: "لوازم خانگی",
+    parentId: "c1",
+    slug: "fridge",
+    href: "/category/fridge",
+    sortOrder: 2,
+    isActive: true,
+    productCount: 86,
+  },
+  {
+    id: "c3",
+    name: "صوتی و تصویری",
+    parent: "—",
+    parentId: null,
+    slug: "av",
+    href: "/category/av",
+    sortOrder: 3,
+    isActive: true,
+    productCount: 210,
+  },
 ];
 
 export const mockAdminBrands: AdminBrand[] = [
@@ -90,9 +156,38 @@ export const mockAdminBrands: AdminBrand[] = [
 ];
 
 export const mockAdminMedia: AdminMedia[] = [
-  { id: "m1", name: "fridge-hero.webp", type: "image", usedIn: "محصول RF-SAM-001", sizeKb: 240 },
-  { id: "m2", name: "home-banner-1.png", type: "image", usedIn: "بنر صفحه اصلی", sizeKb: 520 },
-  { id: "m3", name: "washer-demo.mp4", type: "video", usedIn: "محصول WM-BSH-090", sizeKb: 4200 },
+  {
+    id: "m1",
+    name: "fridge-hero.webp",
+    type: "image",
+    usedIn: "محصول RF-SAM-001",
+    sizeKb: 240,
+    previewUrl: "/placeholders/product-appliance.png",
+    variants: [
+      { key: "thumb", url: "/placeholders/product-appliance.png", width: 120, height: 120 },
+      { key: "card", url: "/placeholders/product-appliance.png", width: 320, height: 320 },
+      { key: "gallery", url: "/placeholders/product-appliance.png", width: 800, height: 800 },
+    ],
+  },
+  {
+    id: "m2",
+    name: "home-banner-1.png",
+    type: "image",
+    usedIn: "بنر صفحه اصلی",
+    sizeKb: 520,
+    previewUrl: "/placeholders/product-appliance.png",
+    variants: [
+      { key: "thumb", url: "/placeholders/product-appliance.png", width: 120, height: 120 },
+      { key: "card", url: "/placeholders/product-appliance.png", width: 320, height: 320 },
+    ],
+  },
+  {
+    id: "m3",
+    name: "washer-demo.mp4",
+    type: "video",
+    usedIn: "محصول WM-BSH-090",
+    sizeKb: 4200,
+  },
 ];
 
 export const mockAdminInventory: AdminInventoryRow[] = [

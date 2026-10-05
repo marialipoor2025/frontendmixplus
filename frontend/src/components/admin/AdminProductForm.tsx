@@ -11,15 +11,18 @@ import type {
   AdminBrandOption,
   AdminProduct,
   AdminSellerOption,
+  ProductMediaItem,
   UpsertAdminProductInput,
 } from "@/types/admin-product";
 import type { ProductBadge } from "@/types/product";
+import { ProductMediaManager } from "@/components/admin/ProductMediaManager";
 
 type Props = {
   mode: "create" | "edit";
   initial?: AdminProduct;
   brands: AdminBrandOption[];
   sellers: AdminSellerOption[];
+  categories?: { id: string; name: string }[];
   submitting?: boolean;
   error?: string | null;
   onSubmit: (input: UpsertAdminProductInput) => Promise<void> | void;
@@ -45,6 +48,7 @@ export function AdminProductForm({
   initial,
   brands,
   sellers,
+  categories = [],
   submitting,
   error,
   onSubmit,
@@ -56,10 +60,26 @@ export function AdminProductForm({
   const [imageUrl, setImageUrl] = useState(
     initial?.imageUrl ?? "/placeholders/product-appliance.png",
   );
+  const [gallery, setGallery] = useState<ProductMediaItem[]>(
+    initial?.gallery?.length
+      ? initial.gallery
+      : initial?.imageUrl
+        ? [
+            {
+              id: "primary",
+              url: initial.imageUrl,
+              thumbUrl: initial.imageUrl,
+              alt: initial.title,
+              isPrimary: true,
+            },
+          ]
+        : [],
+  );
   const [brandId, setBrandId] = useState(initial?.brandId ?? brands[0]?.id ?? "");
   const [sellerId, setSellerId] = useState(
     initial?.sellerId ?? sellers[0]?.id ?? "",
   );
+  const [categoryId, setCategoryId] = useState(initial?.categoryId ?? "");
   const [priceAmount, setPriceAmount] = useState(String(initial?.price.amount ?? ""));
   const [originalAmount, setOriginalAmount] = useState(
     initial?.originalPrice ? String(initial.originalPrice.amount) : "",
@@ -84,6 +104,12 @@ export function AdminProductForm({
     if (!slugTouched) setSlug(slugify(title));
   }, [title, slugTouched]);
 
+  function handleGalleryChange(next: ProductMediaItem[]) {
+    setGallery(next);
+    const primary = next.find((x) => x.isPrimary) ?? next[0];
+    setImageUrl(primary?.url ?? "/placeholders/product-appliance.png");
+  }
+
   const brand = brands.find((b) => b.id === brandId) ?? brands[0];
   const seller = sellers.find((s) => s.id === sellerId) ?? sellers[0];
 
@@ -93,6 +119,7 @@ export function AdminProductForm({
       title: title || "عنوان محصول",
       slug: slug || "product-slug",
       imageUrl: imageUrl || "/placeholders/product-appliance.png",
+      gallery,
       brandId: brand?.id ?? "",
       brandName: brand?.name ?? "برند",
       brandLogoUrl: brand?.logoUrl || undefined,
@@ -118,6 +145,7 @@ export function AdminProductForm({
       title,
       slug,
       imageUrl,
+      gallery,
       brand,
       seller,
       priceAmount,
@@ -139,12 +167,15 @@ export function AdminProductForm({
       id: initial?.id,
       title: title.trim(),
       slug: slug.trim(),
-      imageUrl: imageUrl.trim(),
+      imageUrl: imageUrl.trim() || "/placeholders/product-appliance.png",
+      mediaIds: gallery.map((g) => g.id),
+      gallery,
       brandId: brand.id,
       brandName: brand.name,
       brandLogoUrl: brand.logoUrl || undefined,
       sellerId: seller.id,
       sellerName: seller.name,
+      categoryId: categoryId || null,
       price: { amount: Number(priceAmount), currency: "IRT" },
       originalPrice: originalAmount
         ? { amount: Number(originalAmount), currency: "IRT" }
@@ -195,14 +226,16 @@ export function AdminProductForm({
               required
             />
           </label>
+          <div className="sm:col-span-2">
+            <ProductMediaManager items={gallery} onChange={handleGalleryChange} />
+          </div>
           <label>
-            <span className={labelClass}>آدرس تصویر</span>
+            <span className={labelClass}>آدرس تصویر اصلی (در صورت نیاز دستی)</span>
             <input
               className={fieldClass}
               dir="ltr"
               value={imageUrl}
               onChange={(e) => setImageUrl(e.target.value)}
-              required
             />
           </label>
           <label>
@@ -231,6 +264,21 @@ export function AdminProductForm({
               {sellers.map((s) => (
                 <option key={s.id} value={s.id}>
                   {s.name}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label>
+            <span className={labelClass}>دسته‌بندی</span>
+            <select
+              className={fieldClass}
+              value={categoryId}
+              onChange={(e) => setCategoryId(e.target.value)}
+            >
+              <option value="">— بدون دسته —</option>
+              {categories.map((c) => (
+                <option key={c.id} value={c.id}>
+                  {c.name}
                 </option>
               ))}
             </select>

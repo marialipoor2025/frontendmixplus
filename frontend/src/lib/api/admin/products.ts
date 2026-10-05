@@ -22,6 +22,8 @@ type ApiAdminProduct = {
   brandLogoUrl?: string | null;
   sellerId: string;
   sellerName: string;
+  categoryId?: string | null;
+  categoryName?: string | null;
   price: ApiMoney;
   originalPrice?: ApiMoney | null;
   discountPercent?: number | null;
@@ -31,12 +33,26 @@ type ApiAdminProduct = {
   condition?: string | null;
   inStock: boolean;
   isPublished: boolean;
+  gallery?: {
+    id: string;
+    url: string;
+    thumbUrl: string;
+    alt: string;
+    isPrimary: boolean;
+  }[] | null;
 };
 
 function mapProduct(row: ApiAdminProduct): AdminProduct {
   const badges = (row.badges ?? []).filter(
     (b): b is ProductBadge => b === "mixplus-choice" || b === "opportunity",
   );
+  const gallery = (row.gallery ?? []).map((g) => ({
+    id: g.id,
+    url: g.url,
+    thumbUrl: g.thumbUrl,
+    alt: g.alt,
+    isPrimary: g.isPrimary,
+  }));
   return {
     id: row.id,
     title: row.title,
@@ -47,6 +63,8 @@ function mapProduct(row: ApiAdminProduct): AdminProduct {
     brandLogoUrl: row.brandLogoUrl ?? undefined,
     sellerId: row.sellerId,
     sellerName: row.sellerName,
+    categoryId: row.categoryId ?? null,
+    categoryName: row.categoryName ?? null,
     price: { amount: Number(row.price.amount), currency: row.price.currency },
     originalPrice: row.originalPrice
       ? {
@@ -61,6 +79,7 @@ function mapProduct(row: ApiAdminProduct): AdminProduct {
     condition: row.condition === "used" ? "used" : "new",
     inStock: row.inStock,
     isPublished: row.isPublished,
+    gallery: gallery.length ? gallery : undefined,
   };
 }
 
@@ -130,6 +149,16 @@ export async function getAdminProduct(id: string): Promise<AdminProduct> {
   return mapProduct(await apiClient<ApiAdminProduct>(`/api/admin/catalog/products/${id}`));
 }
 
+function toApiBody(input: UpsertAdminProductInput) {
+  const mediaIds = (input.mediaIds ?? []).filter((id) =>
+    /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(
+      id,
+    ),
+  );
+  const { gallery: _gallery, ...rest } = input;
+  return { ...rest, mediaIds };
+}
+
 export async function createAdminProduct(
   input: UpsertAdminProductInput,
 ): Promise<AdminProduct> {
@@ -138,7 +167,7 @@ export async function createAdminProduct(
   }
   const row = await apiClient<ApiAdminProduct>("/api/admin/catalog/products", {
     method: "POST",
-    body: JSON.stringify(input),
+    body: JSON.stringify(toApiBody(input)),
   });
   return mapProduct(row);
 }
@@ -152,7 +181,7 @@ export async function updateAdminProduct(
   }
   const row = await apiClient<ApiAdminProduct>(`/api/admin/catalog/products/${id}`, {
     method: "PUT",
-    body: JSON.stringify(input),
+    body: JSON.stringify(toApiBody(input)),
   });
   return mapProduct(row);
 }

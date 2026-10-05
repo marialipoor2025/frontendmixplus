@@ -66,11 +66,38 @@ export type AdminSpec = {
   category: string;
 };
 
+/** One attribute row inside a product specs group (PDP contract). */
+export type AdminProductSpecAttribute = {
+  id: string;
+  label: string;
+  /** Comma/newline separated in forms; stored as string[]. */
+  values: string[];
+};
+
+export type AdminProductSpecGroup = {
+  id: string;
+  title: string;
+  previewCount?: number;
+  attributes: AdminProductSpecAttribute[];
+};
+
+/** Product-scoped specs document edited in admin. */
+export type AdminProductSpecs = {
+  productKey: string;
+  productTitle: string;
+  groups: AdminProductSpecGroup[];
+};
+
 export type AdminCategory = {
   id: string;
   name: string;
   parent: string;
+  parentId?: string | null;
   slug: string;
+  href: string;
+  imageUrl?: string;
+  sortOrder: number;
+  isActive: boolean;
   productCount: number;
 };
 
@@ -88,6 +115,10 @@ export type AdminMedia = {
   type: "image" | "video";
   usedIn: string;
   sizeKb: number;
+  /** Absolute or API-relative preview URL (thumb/card). */
+  previewUrl?: string;
+  contentType?: string;
+  variants?: { key: string; url: string; width: number; height: number }[];
 };
 
 export type AdminInventoryRow = {

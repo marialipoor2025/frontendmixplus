@@ -10,21 +10,30 @@ import {
   listAdminBrands,
   listAdminSellers,
 } from "@/lib/api/admin/products";
+import { listAdminCategories } from "@/lib/api/categories";
 import type { AdminBrandOption, AdminSellerOption } from "@/types/admin-product";
 
 export default function AdminNewProductPage() {
   const router = useRouter();
   const [brands, setBrands] = useState<AdminBrandOption[]>([]);
   const [sellers, setSellers] = useState<AdminSellerOption[]>([]);
+  const [categories, setCategories] = useState<{ id: string; name: string }[]>(
+    [],
+  );
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    Promise.all([listAdminBrands(), listAdminSellers()])
-      .then(([b, s]) => {
+    Promise.all([
+      listAdminBrands(),
+      listAdminSellers(),
+      listAdminCategories(),
+    ])
+      .then(([b, s, c]) => {
         setBrands(b);
         setSellers(s);
+        setCategories((c ?? []).map((x) => ({ id: x.id, name: x.name })));
       })
       .catch((err) =>
         setError(err instanceof Error ? err.message : "بارگذاری فرم ناموفق بود"),
@@ -49,6 +58,7 @@ export default function AdminNewProductPage() {
           mode="create"
           brands={brands}
           sellers={sellers}
+          categories={categories}
           submitting={submitting}
           error={error}
           onCancel={() => router.push("/admin/products")}

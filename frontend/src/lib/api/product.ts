@@ -1,9 +1,11 @@
 import { siteConfig } from "@/config/site";
+import { getProductMedia } from "@/lib/api/product-media";
+import { getProductSpecs } from "@/lib/api/specs";
 import { getProductVariants } from "@/lib/api/variants";
 import { getMockProductDetail } from "@/lib/mocks/product-detail";
 import type { ProductDetailPageData } from "@/types/product-detail";
 
-/** Frontend-first PDP fetch — merges live Catalog variants when available. */
+/** Frontend-first PDP fetch — merges live Catalog variants, media, specs when available. */
 export async function getProductDetail(
   slug: string,
 ): Promise<ProductDetailPageData | null> {
@@ -14,19 +16,49 @@ export async function getProductDetail(
     return data;
   }
 
-  const liveVariants = await getProductVariants(slug).catch(() => null);
+  const [liveVariants, liveMedia, liveSpecs] = await Promise.all([
+    getProductVariants(slug).catch(() => null),
+    getProductMedia(slug).catch(() => null),
+    getProductSpecs(slug).catch(() => null),
+  ]);
 
-  if (!liveVariants || liveVariants.optionGroups.length === 0) {
-    return data;
+  let next = data;
+
+  if (liveVariants && liveVariants.optionGroups.length > 0) {
+    next = {
+      ...next,
+      variant: {
+        ...next.variant,
+        optionGroups: liveVariants.optionGroups,
+        selectedOptionValueIds: liveVariants.selectedOptionValueIds,
+        skus: liveVariants.skus,
+      },
+    };
   }
 
-  return {
-    ...data,
-    variant: {
-      ...data.variant,
-      optionGroups: liveVariants.optionGroups,
-      selectedOptionValueIds: liveVariants.selectedOptionValueIds,
-      skus: liveVariants.skus,
-    },
-  };
+  if (liveMedia && liveMedia.length > 0) {
+    next = {
+      ...next,
+      gallery: {
+        ...next.gallery,
+        images: liveMedia.map((m) => ({
+          id: m.id,
+          url: m.url,
+          alt: m.alt || next.title,
+        })),
+      },
+    };
+  }
+
+  if (liveSpecs && liveSpecs.length > 0) {
+    next = {
+      ...next,
+      content: {
+        ...next.content,
+        specs: liveSpecs,
+      },
+    };
+  }
+
+  return next;
 }

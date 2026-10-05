@@ -1,7 +1,7 @@
 import { CategoryPlpPage } from "@/components/categories/CategoryPlpPage";
+import { getProductsByCategorySlug } from "@/lib/api/catalog";
 import { getMainNavData } from "@/lib/api/nav";
 import { resolveCategoryPath } from "@/lib/category-path";
-import { getMockCategoryProducts } from "@/lib/mocks/category-plp";
 
 type PageProps = {
   params: Promise<{ slug: string[] }>;
@@ -23,7 +23,7 @@ export default async function CategorySlugPage({
   const sp = await searchParams;
   const nav = await getMainNavData();
   const category = resolveCategoryPath(slug, nav);
-  const products = getMockCategoryProducts(slug);
+  const products = await getProductsByCategorySlug(slug);
 
   return (
     <CategoryPlpPage

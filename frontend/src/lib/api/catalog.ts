@@ -97,3 +97,36 @@ export async function getProductsByBrandSlug(slug: string): Promise<Product[]> {
   });
   return rows.map(mapProduct);
 }
+
+/** Category PLP products — live Catalog filter by categorySlug, mock fallback. */
+export async function getProductsByCategorySlug(
+  slugParts: string[],
+): Promise<Product[]> {
+  const leaf = slugParts[slugParts.length - 1] ?? slugParts.join("-");
+
+  if (siteConfig.useMocks || !siteConfig.apiBaseUrl) {
+    const { getMockCategoryProducts } = await import("@/lib/mocks/category-plp");
+    return getMockCategoryProducts(slugParts);
+  }
+
+  try {
+    const rows = await apiClient<CatalogProductDto[]>("/api/catalog/products", {
+      query: { categorySlug: leaf },
+    });
+    if (rows.length > 0) return rows.map(mapProduct);
+
+    // Fallback: try full path joined if leaf empty.
+    if (slugParts.length > 1) {
+      const joined = await apiClient<CatalogProductDto[]>(
+        "/api/catalog/products",
+        { query: { categorySlug: slugParts.join("-") } },
+      );
+      if (joined.length > 0) return joined.map(mapProduct);
+    }
+
+    return [];
+  } catch {
+    const { getMockCategoryProducts } = await import("@/lib/mocks/category-plp");
+    return getMockCategoryProducts(slugParts);
+  }
+}

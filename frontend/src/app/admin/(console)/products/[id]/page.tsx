@@ -11,6 +11,7 @@ import {
   listAdminSellers,
   updateAdminProduct,
 } from "@/lib/api/admin/products";
+import { listAdminCategories } from "@/lib/api/categories";
 import type {
   AdminBrandOption,
   AdminProduct,
@@ -24,6 +25,9 @@ export default function AdminEditProductPage() {
   const [product, setProduct] = useState<AdminProduct | null>(null);
   const [brands, setBrands] = useState<AdminBrandOption[]>([]);
   const [sellers, setSellers] = useState<AdminSellerOption[]>([]);
+  const [categories, setCategories] = useState<{ id: string; name: string }[]>(
+    [],
+  );
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -31,11 +35,17 @@ export default function AdminEditProductPage() {
 
   useEffect(() => {
     if (!id) return;
-    Promise.all([getAdminProduct(id), listAdminBrands(), listAdminSellers()])
-      .then(([p, b, s]) => {
+    Promise.all([
+      getAdminProduct(id),
+      listAdminBrands(),
+      listAdminSellers(),
+      listAdminCategories(),
+    ])
+      .then(([p, b, s, c]) => {
         setProduct(p);
         setBrands(b);
         setSellers(s);
+        setCategories((c ?? []).map((x) => ({ id: x.id, name: x.name })));
       })
       .catch((err) =>
         setError(err instanceof Error ? err.message : "بارگذاری ناموفق بود"),
@@ -65,6 +75,7 @@ export default function AdminEditProductPage() {
             initial={product}
             brands={brands}
             sellers={sellers}
+            categories={categories}
             submitting={submitting}
             error={error}
             onCancel={() => router.push("/admin/products")}

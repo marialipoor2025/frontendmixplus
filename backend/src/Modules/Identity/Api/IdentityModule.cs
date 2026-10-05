@@ -94,6 +94,8 @@ public sealed class IdentityModule : IModule
             .WithName("AuthLogout");
 
         endpoints.MapAdminCustomerEndpoints();
+        endpoints.MapAdminAuditEndpoints();
+        endpoints.MapAdminRoleEndpoints();
     }
 
     private static string? ReadBearer(HttpRequest request)

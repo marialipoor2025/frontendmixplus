@@ -15,6 +15,7 @@ public sealed class IdentityDbContext : DbContext
     public DbSet<User> Users => Set<User>();
     public DbSet<OtpChallenge> OtpChallenges => Set<OtpChallenge>();
     public DbSet<UserSession> Sessions => Set<UserSession>();
+    public DbSet<AuditLogEntry> AuditLogs => Set<AuditLogEntry>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -51,6 +52,18 @@ public sealed class IdentityDbContext : DbContext
             entity.Property(x => x.Token).HasMaxLength(128).IsRequired();
             entity.HasIndex(x => x.Token).IsUnique();
             entity.HasIndex(x => x.UserId);
+        });
+
+        modelBuilder.Entity<AuditLogEntry>(entity =>
+        {
+            entity.ToTable("AuditLogs");
+            entity.HasKey(x => x.Id);
+            entity.Ignore(x => x.DomainEvents);
+            entity.Property(x => x.ExternalKey).HasMaxLength(100).IsRequired();
+            entity.HasIndex(x => x.ExternalKey).IsUnique();
+            entity.Property(x => x.Actor).HasMaxLength(200).IsRequired();
+            entity.Property(x => x.Action).HasMaxLength(200).IsRequired();
+            entity.Property(x => x.Entity).HasMaxLength(300).IsRequired();
         });
     }
 }

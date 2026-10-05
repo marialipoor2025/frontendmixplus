@@ -5,6 +5,7 @@ import { getMainNavData } from "@/lib/api/nav";
 
 type PageProps = {
   params: Promise<{ slug: string }>;
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
 };
 
 export async function generateMetadata({ params }: PageProps) {
@@ -13,8 +14,9 @@ export async function generateMetadata({ params }: PageProps) {
   return { title: brand ? `برند ${brand.name}` : "برند" };
 }
 
-export default async function BrandSlugPage({ params }: PageProps) {
+export default async function BrandSlugPage({ params, searchParams }: PageProps) {
   const { slug } = await params;
+  const sp = await searchParams;
   const brand = await getBrandBySlug(slug);
   if (!brand) notFound();
 
@@ -23,5 +25,12 @@ export default async function BrandSlugPage({ params }: PageProps) {
     getProductsByBrandSlug(slug),
   ]);
 
-  return <BrandPlpPage brand={brand} nav={nav} products={products} />;
+  return (
+    <BrandPlpPage
+      brand={brand}
+      nav={nav}
+      products={products}
+      searchParams={sp}
+    />
+  );
 }

@@ -19,7 +19,7 @@ type ProductCardProps = {
 /**
  * Flip to `true` later to restore merchandising / stock / used labels on cards.
  */
-const SHOW_PRODUCT_LABELS = false;
+const SHOW_PRODUCT_LABELS = true;
 
 /** Two-line labels (Coolblue Choice style). */
 const BADGE_LINES: Record<ProductBadge, [string, string?]> = {

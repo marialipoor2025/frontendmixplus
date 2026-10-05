@@ -73,14 +73,43 @@ public sealed class CatalogModule : IModule
                         .Select(c => new { c.Id, c.ExternalKey })
                         .FirstOrDefaultAsync(ct);
 
-                    if (category is null)
+                    var categoryMatched = false;
+                    if (category is not null)
                     {
-                        return Results.Ok(Array.Empty<ProductCardDto>());
+                        var byCategory = query.Where(x =>
+                            x.CategoryId == category.Id ||
+                            x.CategoryExternalKey == category.ExternalKey);
+                        if (await byCategory.AnyAsync(ct))
+                        {
+                            query = byCategory;
+                            categoryMatched = true;
+                        }
                     }
 
-                    query = query.Where(x =>
-                        x.CategoryId == category.Id ||
-                        x.CategoryExternalKey == category.ExternalKey);
+                    if (!categoryMatched)
+                    {
+                        var terms = CategorySearchTerms(slug);
+                        if (terms.Count == 0)
+                        {
+                            return Results.Ok(Array.Empty<ProductCardDto>());
+                        }
+
+                        // Filter in memory: Npgsql cannot translate terms.Any + ILike cleanly.
+                        var candidates = await query.ToListAsync(ct);
+                        var matchedIds = candidates
+                            .Where(x => terms.Any(term =>
+                                x.Title.Contains(term, StringComparison.OrdinalIgnoreCase) ||
+                                x.Slug.Contains(term, StringComparison.OrdinalIgnoreCase)))
+                            .Select(x => x.Id)
+                            .ToList();
+
+                        if (matchedIds.Count == 0)
+                        {
+                            return Results.Ok(Array.Empty<ProductCardDto>());
+                        }
+
+                        query = query.Where(x => matchedIds.Contains(x.Id));
+                    }
                 }
 
                 if (!string.IsNullOrWhiteSpace(q))
@@ -97,9 +126,10 @@ public sealed class CatalogModule : IModule
                 {
                     "price-asc" => query.OrderBy(x => x.Price.Amount),
                     "price-desc" => query.OrderByDescending(x => x.Price.Amount),
-                    "newest" => query.OrderByDescending(x => x.ExternalKey),
-                    "popular" or "rating" => query.OrderByDescending(x => x.Rating ?? 0),
-                    "discount" => query.OrderByDescending(x => x.DiscountPercent ?? 0),
+                    "newest" or "shipping" => query.OrderByDescending(x => x.ExternalKey),
+                    "popular" or "rating" or "bestseller" or "buyers" =>
+                        query.OrderByDescending(x => x.Rating ?? 0),
+                    "discount" or "selected" => query.OrderByDescending(x => x.DiscountPercent ?? 0),
                     _ => query.OrderBy(x => x.Title),
                 };
 
@@ -198,5 +228,86 @@ public sealed class CatalogModule : IModule
             badges,
             product.Condition == ProductCondition.Used ? "used" : "new",
             product.InStock);
+    }
+
+    /// <summary>
+    /// Build search tokens for nested PLP slugs when products aren't category-linked yet.
+    /// </summary>
+    private static List<string> CategorySearchTerms(string slug)
+    {
+        var terms = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
+        foreach (var part in slug.Split('-', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
+        {
+            if (part.Length < 3)
+            {
+                continue;
+            }
+
+            // Skip low-signal English glue words.
+            if (part is "the" or "and" or "for" or "with")
+            {
+                continue;
+            }
+
+            terms.Add(part);
+        }
+
+        if (slug.Contains("refrigerator", StringComparison.OrdinalIgnoreCase) ||
+            slug.Contains("fridge", StringComparison.OrdinalIgnoreCase) ||
+            slug.Contains("freezer", StringComparison.OrdinalIgnoreCase))
+        {
+            terms.Add("یخچال");
+            terms.Add("فریزر");
+            terms.Add("fridge");
+            terms.Add("freezer");
+            terms.Add("refrigerator");
+        }
+
+        if (slug.Contains("side", StringComparison.OrdinalIgnoreCase))
+        {
+            terms.Add("side");
+            terms.Add("ساید");
+        }
+
+        if (slug.Contains("twin", StringComparison.OrdinalIgnoreCase))
+        {
+            terms.Add("twin");
+            terms.Add("دوقلو");
+        }
+
+        if (slug.Contains("combi", StringComparison.OrdinalIgnoreCase))
+        {
+            terms.Add("combi");
+            terms.Add("کمبی");
+        }
+
+        if (slug.Contains("washing", StringComparison.OrdinalIgnoreCase) ||
+            slug.Contains("washer", StringComparison.OrdinalIgnoreCase))
+        {
+            terms.Add("لباسشویی");
+            terms.Add("washer");
+        }
+
+        if (slug.Contains("dishwasher", StringComparison.OrdinalIgnoreCase))
+        {
+            terms.Add("ظرفشویی");
+            terms.Add("dishwasher");
+        }
+
+        if (slug.Contains("vacuum", StringComparison.OrdinalIgnoreCase) ||
+            slug.Contains("vaccum", StringComparison.OrdinalIgnoreCase))
+        {
+            terms.Add("جاروبرقی");
+            terms.Add("vacuum");
+        }
+
+        if (slug is "tv" || slug.Contains("television", StringComparison.OrdinalIgnoreCase))
+        {
+            terms.Add("تلویزیون");
+            terms.Add("tv");
+        }
+
+        return terms.ToList();
     }
 }

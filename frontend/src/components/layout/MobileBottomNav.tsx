@@ -69,8 +69,24 @@ export function MobileBottomNav() {
     setCategoriesExpanded(false);
   }, [pathname]);
 
+  /** Digikala PDP has no bottom nav — free the viewport for the sticky buy bar. */
+  const hideBottomNav =
+    pathname.startsWith("/users") ||
+    pathname.startsWith("/admin") ||
+    pathname.startsWith("/product");
+
   useEffect(() => {
-    if (!mounted) return;
+    const cls = "no-mobile-bottom-nav";
+    if (hideBottomNav) {
+      document.body.classList.add(cls);
+    } else {
+      document.body.classList.remove(cls);
+    }
+    return () => document.body.classList.remove(cls);
+  }, [hideBottomNav]);
+
+  useEffect(() => {
+    if (!mounted || hideBottomNav) return;
     const el = shellRef.current;
     if (!el) return;
 
@@ -90,9 +106,9 @@ export function MobileBottomNav() {
       vv?.removeEventListener("scroll", sync);
       window.removeEventListener("resize", sync);
     };
-  }, [mounted]);
+  }, [mounted, hideBottomNav]);
 
-  if (pathname.startsWith("/users") || pathname.startsWith("/admin")) {
+  if (hideBottomNav) {
     return null;
   }
 

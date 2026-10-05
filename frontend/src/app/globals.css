@@ -160,3 +160,8 @@ body {
 .animate-mobile-drawer-in {
   animation: mobileDrawerIn 280ms ease-out;
 }
+
+/* Routes without MobileBottomNav (PDP, auth, admin) — drop reserved bottom pad */
+body.no-mobile-bottom-nav {
+  padding-bottom: 0;
+}

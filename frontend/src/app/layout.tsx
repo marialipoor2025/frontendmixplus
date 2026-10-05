@@ -40,9 +40,9 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
     <html
       lang={siteConfig.locale}
       dir={siteConfig.direction}
-      className={`${vazirmatn.variable} h-full antialiased`}
+      className={`${vazirmatn.variable} h-full overflow-x-clip antialiased`}
     >
-      <body className="flex min-h-full flex-col bg-[var(--background)] pb-[calc(3.25rem+env(safe-area-inset-bottom))] text-[var(--foreground)] lg:pb-0">
+      <body className="flex min-h-full flex-col overflow-x-clip bg-[var(--background)] pb-[calc(3.25rem+env(safe-area-inset-bottom))] text-[var(--foreground)] lg:pb-0">
         <MobileNavProvider data={nav} categoryImages={categoryImages}>
           {children}
           <MobileBottomNav />

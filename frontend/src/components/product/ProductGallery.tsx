@@ -2,8 +2,9 @@
 
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { useEffect, useState, type ReactNode } from "react";
+import { useEffect, useMemo, useState, type ReactNode } from "react";
 import {
+  ChevronLeftIcon,
   CompareIcon,
   InfoOutlineIcon,
   ListIcon,
@@ -29,6 +30,8 @@ const VISIBLE_THUMBS = 5;
 const ZOOM_MIN = 1;
 const ZOOM_MAX = 3;
 const ZOOM_STEP = 0.5;
+const MOBILE_LARGE = 300;
+const MOBILE_SMALL = 144;
 
 type ProductGalleryProps = {
   title: string;
@@ -47,14 +50,57 @@ type GalleryAction = {
   active?: boolean;
 };
 
+type MosaicGroup = {
+  large: ProductGalleryImage;
+  smallTop?: ProductGalleryImage;
+  smallBottom?: ProductGalleryImage;
+  largeIndex: number;
+  smallTopIndex?: number;
+  smallBottomIndex?: number;
+};
+
 function formatSoldPercent(percent: number): string {
   return new Intl.NumberFormat("fa-IR").format(percent);
 }
 
+function formatFaCount(n: number): string {
+  return new Intl.NumberFormat("fa-IR").format(n);
+}
+
+function GalleryImageIcon({ className = "" }: { className?: string }) {
+  return (
+    <svg
+      className={className}
+      xmlns="http://www.w3.org/2000/svg"
+      width={28}
+      height={28}
+      viewBox="0 0 24 24"
+      fill="currentColor"
+      aria-hidden
+    >
+      <path d="M19 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2Zm0 16H5v-2.17l2.59-2.58a1 1 0 0 1 1.41 0L11 16l3.59-3.58a1 1 0 0 1 1.41 0L19 15.17V19Zm0-6.83-2.29-2.3a3 3 0 0 0-4.24 0L11 11.34 8.71 9.05a3 3 0 0 0-4.24 0L5 8.52V5h14v7.17ZM8.5 10a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3Z" />
+    </svg>
+  );
+}
+
+function chunkMosaic(images: ProductGalleryImage[]): MosaicGroup[] {
+  const groups: MosaicGroup[] = [];
+  for (let i = 0; i < images.length; i += 3) {
+    groups.push({
+      large: images[i]!,
+      largeIndex: i,
+      smallTop: images[i + 1],
+      smallTopIndex: images[i + 1] ? i + 1 : undefined,
+      smallBottom: images[i + 2],
+      smallBottomIndex: images[i + 2] ? i + 2 : undefined,
+    });
+  }
+  return groups;
+}
+
 /**
- * PDP image column: special-sale strip, action icons, main image, thumbs, SKU.
- * Clicking the main image opens a zoom lightbox (#30).
- * Heart = wishlist (#54), share sheet (#56).
+ * PDP image column: Digikala-style mobile mosaic + desktop action column.
+ * Heart = wishlist (#54), share sheet (#56), zoom lightbox (#30).
  */
 export function ProductGallery({
   title,
@@ -75,6 +121,7 @@ export function ProductGallery({
           alt: title,
         },
       ];
+  const mosaicGroups = useMemo(() => chunkMosaic(safeImages), [safeImages]);
   const [activeIndex, setActiveIndex] = useState(0);
   const [zoomOpen, setZoomOpen] = useState(false);
   const [zoomScale, setZoomScale] = useState(ZOOM_MIN);
@@ -130,8 +177,10 @@ export function ProductGallery({
     return () => window.clearTimeout(t);
   }, [toast]);
 
-  const openZoom = () => {
-    if (active.kind === "video") return;
+  const openZoomAt = (index: number) => {
+    const image = safeImages[index];
+    if (!image || image.kind === "video") return;
+    setActiveIndex(index);
     setZoomScale(ZOOM_MIN);
     setZoomOpen(true);
   };
@@ -140,9 +189,7 @@ export function ProductGallery({
     if (!ready) return;
     if (!isAuthenticated) {
       const returnUrl = `/product/${slug}`;
-      router.push(
-        `/users/login?returnUrl=${encodeURIComponent(returnUrl)}`,
-      );
+      router.push(`/users/login?returnUrl=${encodeURIComponent(returnUrl)}`);
       return;
     }
     if (wishBusy) return;
@@ -210,162 +257,327 @@ export function ProductGallery({
     },
   ];
 
-  return (
-    <div className="flex w-full shrink-0 flex-col-reverse lg:ml-4 lg:w-[36%] lg:max-w-[580px] lg:flex-col">
-      {sale ? (
+  const mobileQuickActions = actions.filter(
+    (a) => a.id === "favorite" || a.id === "share",
+  );
+
+  function renderMosaicTile(
+    image: ProductGalleryImage,
+    index: number,
+    size: number,
+    overlayCount?: number,
+  ) {
+    return (
+      <button
+        type="button"
+        className="relative flex h-fit w-fit cursor-pointer items-center justify-center rounded bg-[var(--color-neutral-100)]"
+        aria-label={image.alt || title}
+        onClick={() => openZoomAt(index)}
+      >
         <div
-          className="mb-0 flex items-center justify-between gap-3 px-5 py-2 text-sm lg:mb-5"
-          style={{ backgroundColor: "rgb(230 18 61 / 0.08)" }}
+          className="relative shrink-0 overflow-hidden rounded"
+          style={{
+            width: size,
+            height: size,
+            mixBlendMode: "multiply",
+            lineHeight: 0,
+          }}
         >
-          <div className="flex items-center justify-center">
-            <div className="font-semibold" style={{ color: "rgb(230, 18, 61)" }}>
-              {sale.label}
-            </div>
-          </div>
-          <div className="flex grow items-center justify-end">
-            <div className="flex grow flex-col gap-1 2xl:flex-row 2xl:items-center 2xl:gap-2">
-              <div className="flex items-center justify-start gap-0.5 text-[11px] leading-4 text-[var(--color-neutral-500)]">
-                <span
-                  className="ml-0.5 text-xs font-semibold leading-4"
-                  style={{ color: "rgb(230, 18, 61)" }}
-                >
-                  {formatSoldPercent(sale.soldPercent)}%
-                </span>
-                فروش رفته
-              </div>
-              <div
-                className="block h-1 grow rounded"
-                style={{ backgroundColor: "rgb(230 18 61 / 0.08)" }}
-              >
-                <span
-                  className="relative block h-1 rounded"
-                  style={{
-                    backgroundColor: "rgb(230, 18, 61)",
-                    width: `${Math.min(100, Math.max(0, sale.soldPercent))}%`,
-                  }}
-                />
-              </div>
-            </div>
-          </div>
+          <Image
+            src={image.url}
+            alt={image.alt || title}
+            width={size}
+            height={size}
+            className="h-full w-full rounded object-cover"
+            sizes={`${size}px`}
+            priority={index === 0}
+          />
+          {overlayCount != null && overlayCount > 0 ? (
+            <span className="absolute inset-x-2 bottom-2 mx-auto flex w-fit items-center gap-1 rounded-full bg-[rgb(66_71_80_/_0.72)] px-2.5 py-1 text-xs font-medium text-white">
+              <GalleryImageIcon className="size-3.5 text-white" />
+              {formatFaCount(overlayCount)}
+            </span>
+          ) : null}
         </div>
-      ) : null}
+      </button>
+    );
+  }
 
-      <div className="flex flex-col items-center lg:block lg:max-w-[368px] xl:max-w-[580px]">
-        <div className="relative flex w-full">
-          <div className="flex self-end text-[var(--color-neutral-700)] lg:flex-col lg:gap-y-4 lg:self-start lg:text-[var(--color-neutral-900)]">
-            {actions.map((action) => (
-              <div key={action.id} className="z-[1] whitespace-nowrap lg:ml-4">
-                <button
-                  type="button"
-                  className="flex cursor-pointer text-[var(--color-icon-high-emphasis)] transition hover:text-[var(--color-neutral-900)] disabled:opacity-60"
-                  aria-label={action.label}
-                  title={action.label}
-                  aria-pressed={action.active}
-                  disabled={action.id === "favorite" && wishBusy}
-                  onClick={action.onClick}
-                >
-                  {action.icon}
-                </button>
-              </div>
-            ))}
-          </div>
-
-          <div className="relative flex flex-1 items-center">
-            {active.kind === "video" ? (
-              <video
-                src={active.url}
-                className="aspect-square w-full overflow-hidden rounded-[var(--large-radius)] bg-[var(--color-neutral-50)] object-contain"
-                controls
-                playsInline
-                preload="metadata"
-              />
-            ) : (
-              <button
-                type="button"
-                className="w-full cursor-zoom-in leading-none"
-                aria-label={`بزرگ‌نمایی تصویر ${active.alt || title}`}
-                onClick={openZoom}
-              >
-                <Image
-                  src={active.url}
-                  alt={active.alt || title}
-                  title={title}
-                  width={800}
-                  height={800}
-                  className="aspect-square w-full overflow-hidden rounded-[var(--large-radius)] object-contain"
-                  sizes="(min-width: 1280px) 580px, (min-width: 1024px) 368px, 100vw"
-                  priority
-                />
-              </button>
-            )}
-          </div>
-        </div>
-
-        <div className="mt-5 mb-3 flex w-full items-center overflow-x-auto px-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-          {visibleThumbs.map((image, index) => {
-            const selected = index === activeIndex;
+  return (
+    <div className="flex w-full shrink-0 flex-col lg:ml-4 lg:w-[36%] lg:max-w-[580px]">
+      {/* —— Mobile Digikala mosaic —— */}
+      <div className="lg:hidden">
+        <div className="hide-scrollbar flex items-center overflow-x-scroll px-1">
+          {mosaicGroups.map((group, groupIndex) => {
+            const showCountOverlay =
+              groupIndex === 0 &&
+              group.smallBottom &&
+              safeImages.length > 3;
             return (
-              <button
-                key={image.id}
-                type="button"
-                className={[
-                  "ml-2 cursor-pointer rounded border p-1 transition",
-                  selected
-                    ? "border-[var(--color-neutral-400)]"
-                    : "border-[var(--color-neutral-200)] hover:border-[var(--color-neutral-300)]",
-                ].join(" ")}
-                aria-label={image.alt || title}
-                aria-current={selected ? "true" : undefined}
-                onClick={() => setActiveIndex(index)}
+              <div
+                key={`mosaic-${group.large.id}-${groupIndex}`}
+                className="mr-3 flex gap-3 self-center"
               >
-                <Image
-                  src={image.url}
-                  alt={image.alt || title}
-                  width={72}
-                  height={72}
-                  className="size-[72px] object-contain"
-                />
-              </button>
+                {renderMosaicTile(
+                  group.large,
+                  group.largeIndex,
+                  MOBILE_LARGE,
+                )}
+                {(group.smallTop || group.smallBottom) && (
+                  <div className="flex flex-col items-center gap-3">
+                    {group.smallTop && group.smallTopIndex != null
+                      ? renderMosaicTile(
+                          group.smallTop,
+                          group.smallTopIndex,
+                          MOBILE_SMALL,
+                        )
+                      : (
+                        <div
+                          className="rounded bg-[var(--color-neutral-100)]"
+                          style={{
+                            width: MOBILE_SMALL,
+                            height: MOBILE_SMALL,
+                          }}
+                        />
+                      )}
+                    {group.smallBottom && group.smallBottomIndex != null
+                      ? renderMosaicTile(
+                          group.smallBottom,
+                          group.smallBottomIndex,
+                          MOBILE_SMALL,
+                          showCountOverlay ? safeImages.length : undefined,
+                        )
+                      : group.smallTop ? (
+                        <div
+                          className="rounded bg-[var(--color-neutral-100)]"
+                          style={{
+                            width: MOBILE_SMALL,
+                            height: MOBILE_SMALL,
+                          }}
+                        />
+                      ) : null}
+                  </div>
+                )}
+              </div>
             );
           })}
 
-          {hasMore ? (
-            <button
-              type="button"
-              className="relative flex cursor-pointer items-center justify-center rounded border border-[var(--color-neutral-200)] p-1"
-              aria-label="مشاهده تصاویر بیشتر"
-              onClick={() => setActiveIndex(VISIBLE_THUMBS)}
-            >
-              <Image
-                src={moreThumb.url}
-                alt=""
-                width={72}
-                height={72}
-                className="size-[72px] object-contain blur-[1.5px] brightness-90"
-              />
-              <span className="absolute flex text-[var(--color-icon-high-emphasis)]">
-                <MoreHorizIcon className="size-6" />
-              </span>
-            </button>
-          ) : null}
-        </div>
-
-        <div className="mt-1 hidden items-center lg:flex">
           <button
             type="button"
-            className="ml-9 cursor-pointer rounded"
-            aria-label="گزارش مشخصات کالا یا موارد قانونی"
+            className="mr-1 flex h-[320px] w-[min(367px,78vw)] shrink-0 cursor-pointer flex-col items-center justify-center gap-3 self-center bg-white"
+            onClick={() => openZoomAt(0)}
+            aria-label="همه تصویرها"
           >
-            <span className="flex items-center">
-              <InfoOutlineIcon className="mt-0.5 size-[18px] text-[var(--color-neutral-500)]" />
-              <span className="mr-2 text-[13px] text-[var(--color-neutral-500)]">
-                گزارش مشخصات کالا یا موارد قانونی
-              </span>
+            <GalleryImageIcon className="size-7 text-[var(--color-icon-high-emphasis)]" />
+            <span className="inline-flex h-8 items-center gap-2 rounded-lg bg-[var(--color-primary-tonal,#ffe6eb)] px-2 text-sm font-medium text-[var(--color-primary-700,#ef394e)]">
+              <GalleryImageIcon className="size-4" />
+              همه تصویرها
+              <ChevronLeftIcon className="size-4" />
             </span>
           </button>
-          <span className="text-[11px] text-[var(--color-neutral-400)]">
-            {sku}
-          </span>
+        </div>
+
+        {sale ? (
+          <div
+            className="mt-2 flex items-center justify-between gap-3 px-5 py-2 text-sm"
+            style={{ backgroundColor: "rgb(230 18 61 / 0.08)" }}
+          >
+            <div
+              className="font-semibold"
+              style={{ color: "rgb(230, 18, 61)" }}
+            >
+              {sale.label}
+            </div>
+            <div className="flex items-center gap-0.5 text-[11px] text-[var(--color-neutral-500)]">
+              <span
+                className="text-xs font-semibold"
+                style={{ color: "rgb(230, 18, 61)" }}
+              >
+                {formatSoldPercent(sale.soldPercent)}%
+              </span>
+              فروش رفته
+            </div>
+          </div>
+        ) : null}
+
+        <div className="mt-3 flex items-center gap-4 px-4 text-[var(--color-icon-high-emphasis)]">
+          {mobileQuickActions.map((action) => (
+            <button
+              key={action.id}
+              type="button"
+              className="flex cursor-pointer disabled:opacity-60"
+              aria-label={action.label}
+              title={action.label}
+              aria-pressed={action.active}
+              disabled={action.id === "favorite" && wishBusy}
+              onClick={action.onClick}
+            >
+              {action.icon}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* —— Desktop column —— */}
+      <div className="hidden lg:flex lg:flex-col">
+        {sale ? (
+          <div
+            className="mb-5 flex items-center justify-between gap-3 px-5 py-2 text-sm"
+            style={{ backgroundColor: "rgb(230 18 61 / 0.08)" }}
+          >
+            <div className="flex items-center justify-center">
+              <div
+                className="font-semibold"
+                style={{ color: "rgb(230, 18, 61)" }}
+              >
+                {sale.label}
+              </div>
+            </div>
+            <div className="flex grow items-center justify-end">
+              <div className="flex grow flex-col gap-1 2xl:flex-row 2xl:items-center 2xl:gap-2">
+                <div className="flex items-center justify-start gap-0.5 text-[11px] leading-4 text-[var(--color-neutral-500)]">
+                  <span
+                    className="ml-0.5 text-xs font-semibold leading-4"
+                    style={{ color: "rgb(230, 18, 61)" }}
+                  >
+                    {formatSoldPercent(sale.soldPercent)}%
+                  </span>
+                  فروش رفته
+                </div>
+                <div
+                  className="block h-1 grow rounded"
+                  style={{ backgroundColor: "rgb(230 18 61 / 0.08)" }}
+                >
+                  <span
+                    className="relative block h-1 rounded"
+                    style={{
+                      backgroundColor: "rgb(230, 18, 61)",
+                      width: `${Math.min(100, Math.max(0, sale.soldPercent))}%`,
+                    }}
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+        ) : null}
+
+        <div className="block max-w-[368px] xl:max-w-[580px]">
+          <div className="relative flex w-full">
+            <div className="flex flex-col gap-y-4 self-start text-[var(--color-neutral-900)]">
+              {actions.map((action) => (
+                <div key={action.id} className="z-[1] ml-4 whitespace-nowrap">
+                  <button
+                    type="button"
+                    className="flex cursor-pointer text-[var(--color-icon-high-emphasis)] transition hover:text-[var(--color-neutral-900)] disabled:opacity-60"
+                    aria-label={action.label}
+                    title={action.label}
+                    aria-pressed={action.active}
+                    disabled={action.id === "favorite" && wishBusy}
+                    onClick={action.onClick}
+                  >
+                    {action.icon}
+                  </button>
+                </div>
+              ))}
+            </div>
+
+            <div className="relative flex flex-1 items-center">
+              {active.kind === "video" ? (
+                <video
+                  src={active.url}
+                  className="aspect-square w-full overflow-hidden rounded-[var(--large-radius)] bg-[var(--color-neutral-50)] object-contain"
+                  controls
+                  playsInline
+                  preload="metadata"
+                />
+              ) : (
+                <button
+                  type="button"
+                  className="w-full cursor-zoom-in leading-none"
+                  aria-label={`بزرگ‌نمایی تصویر ${active.alt || title}`}
+                  onClick={() => openZoomAt(activeIndex)}
+                >
+                  <Image
+                    src={active.url}
+                    alt={active.alt || title}
+                    title={title}
+                    width={800}
+                    height={800}
+                    className="aspect-square w-full overflow-hidden rounded-[var(--large-radius)] object-contain"
+                    sizes="(min-width: 1280px) 580px, 368px"
+                    priority
+                  />
+                </button>
+              )}
+            </div>
+          </div>
+
+          <div className="mt-5 mb-3 flex w-full items-center overflow-x-auto px-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+            {visibleThumbs.map((image, index) => {
+              const selected = index === activeIndex;
+              return (
+                <button
+                  key={image.id}
+                  type="button"
+                  className={[
+                    "ml-2 cursor-pointer rounded border p-1 transition",
+                    selected
+                      ? "border-[var(--color-neutral-400)]"
+                      : "border-[var(--color-neutral-200)] hover:border-[var(--color-neutral-300)]",
+                  ].join(" ")}
+                  aria-label={image.alt || title}
+                  aria-current={selected ? "true" : undefined}
+                  onClick={() => setActiveIndex(index)}
+                >
+                  <Image
+                    src={image.url}
+                    alt={image.alt || title}
+                    width={72}
+                    height={72}
+                    className="size-[72px] object-contain"
+                  />
+                </button>
+              );
+            })}
+
+            {hasMore ? (
+              <button
+                type="button"
+                className="relative flex cursor-pointer items-center justify-center rounded border border-[var(--color-neutral-200)] p-1"
+                aria-label="مشاهده تصاویر بیشتر"
+                onClick={() => setActiveIndex(VISIBLE_THUMBS)}
+              >
+                <Image
+                  src={moreThumb.url}
+                  alt=""
+                  width={72}
+                  height={72}
+                  className="size-[72px] object-contain blur-[1.5px] brightness-90"
+                />
+                <span className="absolute flex text-[var(--color-icon-high-emphasis)]">
+                  <MoreHorizIcon className="size-6" />
+                </span>
+              </button>
+            ) : null}
+          </div>
+
+          <div className="mt-1 flex items-center">
+            <button
+              type="button"
+              className="ml-9 cursor-pointer rounded"
+              aria-label="گزارش مشخصات کالا یا موارد قانونی"
+            >
+              <span className="flex items-center">
+                <InfoOutlineIcon className="mt-0.5 size-[18px] text-[var(--color-neutral-500)]" />
+                <span className="mr-2 text-[13px] text-[var(--color-neutral-500)]">
+                  گزارش مشخصات کالا یا موارد قانونی
+                </span>
+              </span>
+            </button>
+            <span className="text-[11px] text-[var(--color-neutral-400)]">
+              {sku}
+            </span>
+          </div>
         </div>
       </div>
 
@@ -436,7 +648,6 @@ export function ProductGallery({
               onClick={() => setZoomOpen(false)}
             />
             <div className="pointer-events-none relative z-[1] flex min-h-full items-center justify-center p-4">
-              {/* Native img so scale() works without next/image layout constraints */}
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src={active.url}

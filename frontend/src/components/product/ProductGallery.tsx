@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 import { useEffect, useState, type ReactNode } from "react";
 import {
   CompareIcon,
@@ -12,6 +13,13 @@ import {
   ShareIcon,
   WishlistHeartIcon,
 } from "@/components/layout/icons";
+import { ProductShareSheet } from "@/components/product/ProductShareSheet";
+import {
+  addToWishlist,
+  isInWishlist,
+  removeFromWishlist,
+} from "@/lib/api/wishlist";
+import { useAuth } from "@/lib/auth/useAuth";
 import type {
   ProductGalleryImage,
   ProductGallerySale,
@@ -24,15 +32,19 @@ const ZOOM_STEP = 0.5;
 
 type ProductGalleryProps = {
   title: string;
+  slug: string;
   sku: string;
   images: ProductGalleryImage[];
   sale?: ProductGallerySale;
+  priceAmount?: number;
 };
 
 type GalleryAction = {
   id: string;
   label: string;
   icon: ReactNode;
+  onClick?: () => void;
+  active?: boolean;
 };
 
 function formatSoldPercent(percent: number): string {
@@ -42,13 +54,18 @@ function formatSoldPercent(percent: number): string {
 /**
  * PDP image column: special-sale strip, action icons, main image, thumbs, SKU.
  * Clicking the main image opens a zoom lightbox (#30).
+ * Heart = wishlist (#54), share sheet (#56).
  */
 export function ProductGallery({
   title,
+  slug,
   sku,
   images,
   sale,
+  priceAmount = 0,
 }: ProductGalleryProps) {
+  const router = useRouter();
+  const { ready, isAuthenticated } = useAuth();
   const safeImages = images.length
     ? images
     : [
@@ -61,10 +78,29 @@ export function ProductGallery({
   const [activeIndex, setActiveIndex] = useState(0);
   const [zoomOpen, setZoomOpen] = useState(false);
   const [zoomScale, setZoomScale] = useState(ZOOM_MIN);
+  const [shareOpen, setShareOpen] = useState(false);
+  const [wished, setWished] = useState(false);
+  const [wishBusy, setWishBusy] = useState(false);
+  const [toast, setToast] = useState<string | null>(null);
   const active = safeImages[Math.min(activeIndex, safeImages.length - 1)]!;
   const visibleThumbs = safeImages.slice(0, VISIBLE_THUMBS);
   const hasMore = safeImages.length > VISIBLE_THUMBS;
   const moreThumb = safeImages[VISIBLE_THUMBS] ?? safeImages[0]!;
+  const shareUrl =
+    typeof window !== "undefined"
+      ? `${window.location.origin}/product/${slug}`
+      : `/product/${slug}`;
+
+  useEffect(() => {
+    if (!ready || !isAuthenticated || !slug) return;
+    let cancelled = false;
+    void isInWishlist(slug).then((value) => {
+      if (!cancelled) setWished(value);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [ready, isAuthenticated, slug]);
 
   useEffect(() => {
     if (!zoomOpen) return;
@@ -88,22 +124,69 @@ export function ProductGallery({
     };
   }, [zoomOpen, safeImages.length]);
 
+  useEffect(() => {
+    if (!toast) return;
+    const t = window.setTimeout(() => setToast(null), 2200);
+    return () => window.clearTimeout(t);
+  }, [toast]);
+
   const openZoom = () => {
     if (active.kind === "video") return;
     setZoomScale(ZOOM_MIN);
     setZoomOpen(true);
   };
 
+  async function toggleWishlist() {
+    if (!ready) return;
+    if (!isAuthenticated) {
+      const returnUrl = `/product/${slug}`;
+      router.push(
+        `/users/login?returnUrl=${encodeURIComponent(returnUrl)}`,
+      );
+      return;
+    }
+    if (wishBusy) return;
+    setWishBusy(true);
+    try {
+      if (wished) {
+        await removeFromWishlist(slug);
+        setWished(false);
+        setToast("از علاقه‌مندی‌ها حذف شد");
+      } else {
+        await addToWishlist({
+          productSlug: slug,
+          title,
+          imageUrl: safeImages[0]?.url ?? "",
+          priceAmount,
+        });
+        setWished(true);
+        setToast("به علاقه‌مندی‌ها اضافه شد");
+      }
+    } catch {
+      setToast("خطا در به‌روزرسانی علاقه‌مندی‌ها");
+    } finally {
+      setWishBusy(false);
+    }
+  }
+
   const actions: GalleryAction[] = [
     {
       id: "favorite",
-      label: "اضافه به علاقه‌مندی",
-      icon: <WishlistHeartIcon className="size-6" />,
+      label: wished ? "حذف از علاقه‌مندی" : "اضافه به علاقه‌مندی",
+      icon: (
+        <WishlistHeartIcon
+          className={`size-6 ${wished ? "text-[var(--color-hint-object-error)]" : ""}`}
+          filled={wished}
+        />
+      ),
+      onClick: () => void toggleWishlist(),
+      active: wished,
     },
     {
       id: "share",
       label: "به اشتراک‌گذاری کالا",
       icon: <ShareIcon className="size-6" />,
+      onClick: () => setShareOpen(true),
     },
     {
       id: "amazing-notif",
@@ -174,9 +257,12 @@ export function ProductGallery({
               <div key={action.id} className="z-[1] whitespace-nowrap lg:ml-4">
                 <button
                   type="button"
-                  className="flex cursor-pointer text-[var(--color-icon-high-emphasis)] transition hover:text-[var(--color-neutral-900)]"
+                  className="flex cursor-pointer text-[var(--color-icon-high-emphasis)] transition hover:text-[var(--color-neutral-900)] disabled:opacity-60"
                   aria-label={action.label}
                   title={action.label}
+                  aria-pressed={action.active}
+                  disabled={action.id === "favorite" && wishBusy}
+                  onClick={action.onClick}
                 >
                   {action.icon}
                 </button>
@@ -283,6 +369,19 @@ export function ProductGallery({
         </div>
       </div>
 
+      {toast ? (
+        <div className="fixed bottom-24 left-1/2 z-[90] -translate-x-1/2 rounded-full bg-[var(--color-neutral-900)] px-4 py-2 text-sm text-white shadow-lg lg:bottom-8">
+          {toast}
+        </div>
+      ) : null}
+
+      <ProductShareSheet
+        open={shareOpen}
+        onClose={() => setShareOpen(false)}
+        title={title}
+        url={shareUrl}
+      />
+
       {zoomOpen ? (
         <div
           className="fixed inset-0 z-[70] flex flex-col bg-black/90"
@@ -295,7 +394,7 @@ export function ProductGallery({
             <div className="flex items-center gap-2">
               <button
                 type="button"
-                className="rounded-lg border border-white/30 px-3 py-1.5 text-sm disabled:opacity-40"
+                className="cursor-pointer rounded-lg border border-white/30 px-3 py-1.5 text-sm disabled:opacity-40"
                 disabled={zoomScale <= ZOOM_MIN}
                 onClick={() =>
                   setZoomScale((z) => Math.max(ZOOM_MIN, z - ZOOM_STEP))
@@ -309,7 +408,7 @@ export function ProductGallery({
               </span>
               <button
                 type="button"
-                className="rounded-lg border border-white/30 px-3 py-1.5 text-sm disabled:opacity-40"
+                className="cursor-pointer rounded-lg border border-white/30 px-3 py-1.5 text-sm disabled:opacity-40"
                 disabled={zoomScale >= ZOOM_MAX}
                 onClick={() =>
                   setZoomScale((z) => Math.min(ZOOM_MAX, z + ZOOM_STEP))
@@ -320,7 +419,7 @@ export function ProductGallery({
               </button>
               <button
                 type="button"
-                className="ms-2 rounded-lg bg-white/15 px-3 py-1.5 text-sm"
+                className="ms-2 cursor-pointer rounded-lg bg-white/15 px-3 py-1.5 text-sm"
                 onClick={() => setZoomOpen(false)}
                 aria-label="بستن"
               >
@@ -361,7 +460,7 @@ export function ProductGallery({
                   <button
                     key={image.id}
                     type="button"
-                    className={`shrink-0 rounded border p-0.5 ${
+                    className={`shrink-0 cursor-pointer rounded border p-0.5 ${
                       index === activeIndex
                         ? "border-white"
                         : "border-white/30"

@@ -67,9 +67,11 @@ export function ProductPage({ data, nav }: ProductPageProps) {
         <section className="flex flex-col pb-4 lg:flex-row lg:items-start lg:gap-4 lg:pb-0">
           <ProductGallery
             title={data.title}
+            slug={data.slug}
             sku={data.sku}
             images={data.gallery.images}
             sale={data.gallery.sale}
+            priceAmount={data.buyBox.price}
           />
 
           <ProductPurchasePanel data={data} />

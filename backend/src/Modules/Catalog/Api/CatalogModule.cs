@@ -195,6 +195,7 @@ public sealed class CatalogModule : IModule
         endpoints.MapVariantEndpoints();
         endpoints.MapInventoryEndpoints();
         endpoints.MapOfferEndpoints();
+        endpoints.MapProductOfferEndpoints();
         endpoints.MapReviewEndpoints();
         endpoints.MapProductMediaEndpoints();
         endpoints.MapSpecEndpoints();

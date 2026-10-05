@@ -1,5 +1,6 @@
 import { siteConfig } from "@/config/site";
 import { getCatalogProductBySlug } from "@/lib/api/catalog";
+import { getProductOffers } from "@/lib/api/offers";
 import { getProductMedia } from "@/lib/api/product-media";
 import { getProductSpecs } from "@/lib/api/specs";
 import { getProductReviews } from "@/lib/api/reviews";
@@ -18,13 +19,14 @@ export async function getProductDetail(
     return data;
   }
 
-  const [liveCard, liveVariants, liveMedia, liveSpecs, liveReviews] =
+  const [liveCard, liveVariants, liveMedia, liveSpecs, liveReviews, liveOffers] =
     await Promise.all([
       getCatalogProductBySlug(slug).catch(() => null),
       getProductVariants(slug).catch(() => null),
       getProductMedia(slug).catch(() => null),
       getProductSpecs(slug).catch(() => null),
       getProductReviews(slug).catch(() => [] as ProductComment[]),
+      getProductOffers(slug).catch(() => []),
     ]);
 
   if (!data && !liveCard) return null;
@@ -202,6 +204,33 @@ export async function getProductDetail(
       content: {
         ...next.content,
         specs: liveSpecs,
+      },
+    };
+  }
+
+  if (liveOffers.length > 0) {
+    const primary = liveOffers[0]!;
+    next = {
+      ...next,
+      sellers: liveOffers,
+      buyBox: {
+        ...next.buyBox,
+        seller: {
+          ...next.buyBox.seller,
+          id: primary.id,
+          name: primary.name,
+          href: primary.href,
+          performanceLabel: primary.performanceLabel,
+        },
+        otherSellerCount: Math.max(0, liveOffers.length - 1),
+        price: primary.price,
+        originalPrice: primary.originalPrice,
+        discountPercent: primary.discountPercent,
+        warranty: primary.warranty || next.buyBox.warranty,
+        delivery: {
+          ...next.buyBox.delivery,
+          methodLabel: primary.deliveryLabel || next.buyBox.delivery.methodLabel,
+        },
       },
     };
   }

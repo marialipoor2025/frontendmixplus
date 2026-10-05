@@ -257,7 +257,11 @@ export function CartIcon({ className = "", title }: IconProps) {
 }
 
 /** outline wishlist heart. */
-export function WishlistHeartIcon({ className = "", title }: IconProps) {
+export function WishlistHeartIcon({
+  className = "",
+  title,
+  filled = false,
+}: IconProps & { filled?: boolean }) {
   return (
     <svg
       className={`${base} ${className}`}
@@ -271,6 +275,7 @@ export function WishlistHeartIcon({ className = "", title }: IconProps) {
     >
       {title ? <title>{title}</title> : null}
       <path
+        fill={filled ? "currentColor" : "none"}
         stroke="currentColor"
         strokeLinecap="round"
         strokeWidth="1.5"

@@ -93,6 +93,7 @@ public sealed class IdentityModule : IModule
             })
             .WithName("AuthLogout");
 
+        endpoints.MapWishlistEndpoints();
         endpoints.MapAdminCustomerEndpoints();
         endpoints.MapAdminAuditEndpoints();
         endpoints.MapAdminRoleEndpoints();

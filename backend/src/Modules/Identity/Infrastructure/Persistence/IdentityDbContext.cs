@@ -16,6 +16,7 @@ public sealed class IdentityDbContext : DbContext
     public DbSet<OtpChallenge> OtpChallenges => Set<OtpChallenge>();
     public DbSet<UserSession> Sessions => Set<UserSession>();
     public DbSet<AuditLogEntry> AuditLogs => Set<AuditLogEntry>();
+    public DbSet<WishlistItem> WishlistItems => Set<WishlistItem>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -64,6 +65,20 @@ public sealed class IdentityDbContext : DbContext
             entity.Property(x => x.Actor).HasMaxLength(200).IsRequired();
             entity.Property(x => x.Action).HasMaxLength(200).IsRequired();
             entity.Property(x => x.Entity).HasMaxLength(300).IsRequired();
+        });
+
+        modelBuilder.Entity<WishlistItem>(entity =>
+        {
+            entity.ToTable("WishlistItems");
+            entity.HasKey(x => x.Id);
+            entity.Ignore(x => x.DomainEvents);
+            entity.Property(x => x.ProductSlug).HasMaxLength(300).IsRequired();
+            entity.Property(x => x.ProductTitle).HasMaxLength(500).IsRequired();
+            entity.Property(x => x.ImageUrl).HasMaxLength(1000).IsRequired();
+            entity.Property(x => x.PriceAmount).HasPrecision(18, 2);
+            entity.Property(x => x.PriceCurrency).HasMaxLength(8).IsRequired();
+            entity.HasIndex(x => new { x.UserId, x.ProductSlug }).IsUnique();
+            entity.HasIndex(x => x.UserId);
         });
     }
 }

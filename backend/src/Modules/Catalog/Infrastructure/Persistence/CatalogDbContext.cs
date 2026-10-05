@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using MixPlus.Modules.Catalog.Application.Abstractions;
 using MixPlus.Modules.Catalog.Domain.Brands;
 using MixPlus.Modules.Catalog.Domain.Categories;
+using MixPlus.Modules.Catalog.Domain.Offers;
 using MixPlus.Modules.Catalog.Domain.Products;
 using MixPlus.Modules.Catalog.Domain.Reviews;
 using MixPlus.Modules.Catalog.Domain.Specs;
@@ -29,6 +30,7 @@ public sealed class CatalogDbContext : DbContext, ICatalogDbContext
     public DbSet<ProductSpecGroup> SpecGroups => Set<ProductSpecGroup>();
     public DbSet<SpecDefinition> SpecDefinitions => Set<SpecDefinition>();
     public DbSet<ProductReview> Reviews => Set<ProductReview>();
+    public DbSet<ProductOffer> Offers => Set<ProductOffer>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -201,6 +203,34 @@ public sealed class CatalogDbContext : DbContext, ICatalogDbContext
             entity.Property(x => x.CustomerName).HasMaxLength(200).IsRequired();
             entity.Property(x => x.Excerpt).HasMaxLength(1000).IsRequired();
             entity.Property(x => x.Status).HasMaxLength(32).IsRequired();
+        });
+
+        modelBuilder.Entity<ProductOffer>(entity =>
+        {
+            entity.ToTable("ProductOffers");
+            entity.HasKey(x => x.Id);
+            entity.Ignore(x => x.DomainEvents);
+            entity.Property(x => x.ExternalKey).HasMaxLength(100).IsRequired();
+            entity.HasIndex(x => x.ExternalKey).IsUnique();
+            entity.Property(x => x.ProductSlug).HasMaxLength(300).IsRequired();
+            entity.HasIndex(x => x.ProductSlug);
+            entity.HasIndex(x => x.ProductId);
+            entity.Property(x => x.SellerExternalKey).HasMaxLength(100).IsRequired();
+            entity.Property(x => x.SellerName).HasMaxLength(200).IsRequired();
+            entity.Property(x => x.PerformanceLabel).HasMaxLength(80).IsRequired();
+            entity.Property(x => x.DeliveryLabel).HasMaxLength(300).IsRequired();
+            entity.Property(x => x.Warranty).HasMaxLength(300).IsRequired();
+            entity.Property(x => x.MemberSinceLabel).HasMaxLength(120);
+            entity.OwnsOne(x => x.Price, money =>
+            {
+                money.Property(m => m.Amount).HasColumnName("PriceAmount").HasPrecision(18, 2);
+                money.Property(m => m.Currency).HasColumnName("PriceCurrency").HasMaxLength(8);
+            });
+            entity.OwnsOne(x => x.OriginalPrice, money =>
+            {
+                money.Property(m => m.Amount).HasColumnName("OriginalPriceAmount").HasPrecision(18, 2);
+                money.Property(m => m.Currency).HasColumnName("OriginalPriceCurrency").HasMaxLength(8);
+            });
         });
     }
 }

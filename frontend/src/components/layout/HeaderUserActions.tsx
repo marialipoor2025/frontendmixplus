@@ -1,12 +1,18 @@
 "use client";
 
 import Link from "next/link";
+import { useEffect, useState } from "react";
 import {
   BottomNavCartIcon,
   LoginUserIcon,
   WishlistHeartIcon,
 } from "@/components/layout/icons";
 import { identityLabel } from "@/components/profile/profileNav";
+import {
+  getWishlistCount,
+  WISHLIST_CHANGED_EVENT,
+} from "@/lib/api/wishlist";
+import { AUTH_CHANGED_EVENT } from "@/lib/auth/session";
 import { useAuth } from "@/lib/auth/useAuth";
 
 type HeaderUserActionsProps = {
@@ -19,7 +25,8 @@ type HeaderUserActionsProps = {
 };
 
 /**
- * Barghchi-style header actions: cart, wishlist, login/profile.
+ * Barghchi-style header actions: cart, wishlist shortcut, login/profile.
+ * Wishlist heart opens saved favorites; badge mirrors cart when count > 0.
  */
 export function HeaderUserActions({
   loginLabel = "ورود | ثبت نام",
@@ -30,9 +37,36 @@ export function HeaderUserActions({
   emptyCartTitle = "سبد خرید شما خالی است!",
 }: HeaderUserActionsProps) {
   const { ready, isAuthenticated, user } = useAuth();
+  const [wishlistCount, setWishlistCount] = useState(0);
   const accountHref = isAuthenticated ? "/profile" : loginHref;
   const accountLabel =
     ready && isAuthenticated && user ? identityLabel(user) : loginLabel;
+  const heartHref = isAuthenticated
+    ? wishlistHref
+    : `${loginHref}?returnUrl=${encodeURIComponent(wishlistHref)}`;
+
+  useEffect(() => {
+    if (!ready || !isAuthenticated) {
+      setWishlistCount(0);
+      return;
+    }
+
+    let cancelled = false;
+    const refresh = () => {
+      void getWishlistCount().then((count) => {
+        if (!cancelled) setWishlistCount(count);
+      });
+    };
+
+    refresh();
+    window.addEventListener(WISHLIST_CHANGED_EVENT, refresh);
+    window.addEventListener(AUTH_CHANGED_EVENT, refresh);
+    return () => {
+      cancelled = true;
+      window.removeEventListener(WISHLIST_CHANGED_EVENT, refresh);
+      window.removeEventListener(AUTH_CHANGED_EVENT, refresh);
+    };
+  }, [ready, isAuthenticated]);
 
   return (
     <div className="flex shrink-0 items-center gap-3 xl:gap-4">
@@ -84,11 +118,20 @@ export function HeaderUserActions({
       </div>
 
       <Link
-        href={wishlistHref}
-        aria-label="علاقه‌مندی‌ها"
-        className="flex items-center justify-center text-[#2B3674] transition hover:text-[var(--color-primary)]"
+        href={heartHref}
+        aria-label={
+          wishlistCount > 0
+            ? `علاقه‌مندی‌ها، ${wishlistCount} کالا`
+            : "علاقه‌مندی‌ها"
+        }
+        className="relative flex items-center justify-center text-[#2B3674] transition hover:text-[var(--color-primary)]"
       >
-        <WishlistHeartIcon />
+        {wishlistCount > 0 ? (
+          <span className="absolute -end-2 -top-1.5 flex size-4 items-center justify-center rounded-full bg-[var(--color-hint-object-error)] text-[9px] font-bold text-white">
+            {wishlistCount > 99 ? "99+" : wishlistCount}
+          </span>
+        ) : null}
+        <WishlistHeartIcon filled={wishlistCount > 0} />
       </Link>
 
       <Link

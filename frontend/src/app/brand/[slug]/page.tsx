@@ -22,10 +22,12 @@ export default async function BrandSlugPage({ params, searchParams }: PageProps)
 
   const qRaw = sp.q;
   const q = Array.isArray(qRaw) ? qRaw[0] : qRaw;
+  const sortRaw = sp.sort;
+  const sort = Array.isArray(sortRaw) ? sortRaw[0] : sortRaw;
 
   const [nav, products] = await Promise.all([
     getMainNavData(),
-    getProductsByBrandSlug(slug, q),
+    getProductsByBrandSlug(slug, q, sort),
   ]);
 
   return (

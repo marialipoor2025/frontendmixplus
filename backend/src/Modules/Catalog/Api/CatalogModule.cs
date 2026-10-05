@@ -44,6 +44,7 @@ public sealed class CatalogModule : IModule
                 string? brandSlug,
                 string? categorySlug,
                 string? q,
+                string? sort,
                 CancellationToken ct) =>
             {
                 var query = db.Products.AsNoTracking().Where(x => x.IsPublished);
@@ -92,7 +93,17 @@ public sealed class CatalogModule : IModule
                         EF.Functions.ILike(x.Slug, pattern));
                 }
 
-                var rows = await query.OrderBy(x => x.Title).ToListAsync(ct);
+                query = (sort?.Trim().ToLowerInvariant()) switch
+                {
+                    "price-asc" => query.OrderBy(x => x.Price.Amount),
+                    "price-desc" => query.OrderByDescending(x => x.Price.Amount),
+                    "newest" => query.OrderByDescending(x => x.ExternalKey),
+                    "popular" or "rating" => query.OrderByDescending(x => x.Rating ?? 0),
+                    "discount" => query.OrderByDescending(x => x.DiscountPercent ?? 0),
+                    _ => query.OrderBy(x => x.Title),
+                };
+
+                var rows = await query.ToListAsync(ct);
                 return Results.Ok(rows.Select(ToDto).ToList());
             })
             .WithName("ListCatalogProducts");

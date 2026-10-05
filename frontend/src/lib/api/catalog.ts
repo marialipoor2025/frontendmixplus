@@ -89,6 +89,7 @@ export async function getBrandBySlug(slug: string): Promise<Brand | null> {
 export async function getProductsByBrandSlug(
   slug: string,
   q?: string,
+  sort?: string,
 ): Promise<Product[]> {
   if (siteConfig.useMocks || !siteConfig.apiBaseUrl) {
     const brand = resolveMockBrand(slug);
@@ -96,7 +97,11 @@ export async function getProductsByBrandSlug(
   }
 
   const rows = await apiClient<CatalogProductDto[]>("/api/catalog/products", {
-    query: { brandSlug: slug, q: q?.trim() || undefined },
+    query: {
+      brandSlug: slug,
+      q: q?.trim() || undefined,
+      sort: sort || undefined,
+    },
   });
   return rows.map(mapProduct);
 }
@@ -105,6 +110,7 @@ export async function getProductsByBrandSlug(
 export async function getProductsByCategorySlug(
   slugParts: string[],
   q?: string,
+  sort?: string,
 ): Promise<Product[]> {
   const leaf = slugParts[slugParts.length - 1] ?? slugParts.join("-");
 
@@ -115,7 +121,11 @@ export async function getProductsByCategorySlug(
 
   try {
     const rows = await apiClient<CatalogProductDto[]>("/api/catalog/products", {
-      query: { categorySlug: leaf, q: q?.trim() || undefined },
+      query: {
+        categorySlug: leaf,
+        q: q?.trim() || undefined,
+        sort: sort || undefined,
+      },
     });
     if (rows.length > 0) return rows.map(mapProduct);
 
@@ -126,6 +136,7 @@ export async function getProductsByCategorySlug(
           query: {
             categorySlug: slugParts.join("-"),
             q: q?.trim() || undefined,
+            sort: sort || undefined,
           },
         },
       );

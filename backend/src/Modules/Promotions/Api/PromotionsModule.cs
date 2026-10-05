@@ -35,5 +35,6 @@ public sealed class PromotionsModule : IModule
             .WithName("PromotionsHealth");
 
         endpoints.MapAdminPromotionEndpoints();
+        endpoints.MapAdminCouponEndpoints();
     }
 }

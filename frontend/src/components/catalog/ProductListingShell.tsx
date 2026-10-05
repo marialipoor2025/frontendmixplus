@@ -1,4 +1,6 @@
+import { HorizontalProductCard } from "@/components/catalog/HorizontalProductCard";
 import { ProductListingFilters } from "@/components/catalog/ProductListingFilters";
+import { ProductListingMobileChips } from "@/components/catalog/ProductListingMobileChips";
 import { ProductListingPagination } from "@/components/catalog/ProductListingPagination";
 import { ProductListingToolbar } from "@/components/catalog/ProductListingToolbar";
 import { ProductCard } from "@/components/home/ProductCard";
@@ -39,6 +41,14 @@ export function ProductListingShell({
           <ProductBreadcrumb items={context.breadcrumb} />
         ) : null}
 
+        {/* Mobile: in-flow under breadcrumb; pins to top while scrolling products. */}
+        <ProductListingMobileChips
+          basePath={context.basePath}
+          query={listing.query}
+          facets={listing.facets}
+          total={listing.total}
+        />
+
         <section className="pb-10">
           <h1 className="mb-1 text-base font-bold text-[var(--color-neutral-900)] lg:text-lg">
             {context.title}
@@ -51,12 +61,14 @@ export function ProductListingShell({
             <div className="mb-4" />
           )}
 
-          <div className="grid gap-6 lg:grid-cols-[280px_minmax(0,1fr)]">
-            <ProductListingFilters
-              basePath={context.basePath}
-              query={listing.query}
-              facets={listing.facets}
-            />
+          <div className="mt-3 grid gap-6 lg:mt-0 lg:grid-cols-[280px_minmax(0,1fr)]">
+            <div className="hidden lg:block">
+              <ProductListingFilters
+                basePath={context.basePath}
+                query={listing.query}
+                facets={listing.facets}
+              />
+            </div>
 
             <div>
               <ProductListingToolbar
@@ -70,15 +82,25 @@ export function ProductListingShell({
                   {emptyMessage}
                 </p>
               ) : (
-                <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 xl:grid-cols-4">
-                  {listing.items.map((product) => (
-                    <ProductCard
-                      key={product.id}
-                      product={product}
-                      className="!w-full !min-w-0"
-                    />
-                  ))}
-                </div>
+                <>
+                  <div className="divide-y divide-[var(--color-neutral-200)] lg:hidden">
+                    {listing.items.map((product) => (
+                      <HorizontalProductCard
+                        key={product.id}
+                        product={product}
+                      />
+                    ))}
+                  </div>
+                  <div className="hidden grid-cols-2 gap-3 sm:grid-cols-3 lg:grid xl:grid-cols-4">
+                    {listing.items.map((product) => (
+                      <ProductCard
+                        key={product.id}
+                        product={product}
+                        className="!w-full !min-w-0"
+                      />
+                    ))}
+                  </div>
+                </>
               )}
 
               <ProductListingPagination

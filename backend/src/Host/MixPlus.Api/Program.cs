@@ -85,6 +85,7 @@ foreach (var module in modules)
 }
 
 app.MapAdminDashboardEndpoints();
+app.MapAdminReportEndpoints();
 
 app.Run();
 

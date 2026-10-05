@@ -153,16 +153,26 @@ export function ProductGallery({
                 setActiveIndex((i) => (i + 1) % safeImages.length)
               }
             >
-              <Image
-                src={active.url}
-                alt={active.alt || title}
-                title={title}
-                width={800}
-                height={800}
-                className="aspect-square w-full overflow-hidden rounded-[var(--large-radius)] object-contain"
-                sizes="(min-width: 1280px) 580px, (min-width: 1024px) 368px, 100vw"
-                priority
-              />
+              {active.kind === "video" ? (
+                <video
+                  src={active.url}
+                  className="aspect-square w-full overflow-hidden rounded-[var(--large-radius)] object-contain bg-[var(--color-neutral-50)]"
+                  controls
+                  playsInline
+                  preload="metadata"
+                />
+              ) : (
+                <Image
+                  src={active.url}
+                  alt={active.alt || title}
+                  title={title}
+                  width={800}
+                  height={800}
+                  className="aspect-square w-full overflow-hidden rounded-[var(--large-radius)] object-contain"
+                  sizes="(min-width: 1280px) 580px, (min-width: 1024px) 368px, 100vw"
+                  priority
+                />
+              )}
             </button>
           </div>
         </div>

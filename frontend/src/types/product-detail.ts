@@ -10,6 +10,8 @@ export type ProductGalleryImage = {
   id: string;
   url: string;
   alt: string;
+  /** Defaults to image when omitted. */
+  kind?: "image" | "video";
 };
 
 /** Optional special-sale strip above the gallery. */

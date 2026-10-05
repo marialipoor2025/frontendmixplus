@@ -202,7 +202,10 @@ export function ProductSellersList({ sellers }: ProductSellersListProps) {
   if (sellers.length === 0) return null;
 
   return (
-    <section className="mt-4 hidden border-b-4 border-[var(--color-neutral-100)] px-5 pb-5 lg:block lg:px-0">
+    <section
+      id="pdp-sellers"
+      className="mt-4 border-b-4 border-[var(--color-neutral-100)] px-5 pb-5 lg:px-0"
+    >
       <div className="break-words py-3">
         <div className="flex grow items-center">
           <p className="grow text-base font-bold text-[var(--color-neutral-900)]">

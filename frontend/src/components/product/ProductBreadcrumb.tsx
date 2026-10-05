@@ -21,10 +21,10 @@ export function ProductBreadcrumb({
   if (!items.length) return null;
 
   return (
-    <div className="flex flex-wrap items-center lg:mb-5">
+    <div className="mb-1 flex flex-wrap items-center lg:mb-5">
       <nav
         aria-label="مسیر صفحه"
-        className="min-w-0 grow px-5 py-2 lg:px-0"
+        className="min-w-0 grow py-2 lg:px-0"
       >
         <ol className="flex min-w-0 items-center overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
           {items.map((item, index) => {

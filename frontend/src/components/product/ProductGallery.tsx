@@ -2,7 +2,13 @@
 
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { useEffect, useMemo, useState, type ReactNode } from "react";
+import {
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type ReactNode,
+} from "react";
 import {
   ChevronLeftIcon,
   CompareIcon,
@@ -14,6 +20,7 @@ import {
   ShareIcon,
   WishlistHeartIcon,
 } from "@/components/layout/icons";
+import { ProductBreadcrumb } from "@/components/product/ProductBreadcrumb";
 import { ProductShareSheet } from "@/components/product/ProductShareSheet";
 import {
   addToWishlist,
@@ -22,6 +29,7 @@ import {
 } from "@/lib/api/wishlist";
 import { useAuth } from "@/lib/auth/useAuth";
 import type {
+  BreadcrumbItem,
   ProductGalleryImage,
   ProductGallerySale,
 } from "@/types/product-detail";
@@ -32,6 +40,8 @@ const ZOOM_MAX = 3;
 const ZOOM_STEP = 0.5;
 const MOBILE_LARGE = 300;
 const MOBILE_SMALL = 144;
+/** Sticky PDP chrome height (search / cart / more). */
+const MOBILE_CHROME_H = 48;
 
 type ProductGalleryProps = {
   title: string;
@@ -40,6 +50,8 @@ type ProductGalleryProps = {
   images: ProductGalleryImage[];
   sale?: ProductGallerySale;
   priceAmount?: number;
+  /** Mobile: rendered under sticky chrome, above the mosaic. */
+  breadcrumb?: BreadcrumbItem[];
 };
 
 type GalleryAction = {
@@ -109,6 +121,7 @@ export function ProductGallery({
   images,
   sale,
   priceAmount = 0,
+  breadcrumb = [],
 }: ProductGalleryProps) {
   const router = useRouter();
   const { ready, isAuthenticated } = useAuth();
@@ -122,6 +135,8 @@ export function ProductGallery({
         },
       ];
   const mosaicGroups = useMemo(() => chunkMosaic(safeImages), [safeImages]);
+  const mosaicRef = useRef<HTMLDivElement>(null);
+  const [mosaicHeight, setMosaicHeight] = useState(360);
   const [activeIndex, setActiveIndex] = useState(0);
   const [zoomOpen, setZoomOpen] = useState(false);
   const [zoomScale, setZoomScale] = useState(ZOOM_MIN);
@@ -148,6 +163,17 @@ export function ProductGallery({
       cancelled = true;
     };
   }, [ready, isAuthenticated, slug]);
+
+  /** Keep in-flow spacer matched to the fixed mosaic so the card can slide over it. */
+  useEffect(() => {
+    const el = mosaicRef.current;
+    if (!el) return;
+    const sync = () => setMosaicHeight(el.offsetHeight);
+    sync();
+    const ro = new ResizeObserver(sync);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, [mosaicGroups.length]);
 
   useEffect(() => {
     if (!zoomOpen) return;
@@ -257,10 +283,6 @@ export function ProductGallery({
     },
   ];
 
-  const mobileQuickActions = actions.filter(
-    (a) => a.id === "favorite" || a.id === "share",
-  );
-
   function renderMosaicTile(
     image: ProductGalleryImage,
     index: number,
@@ -304,10 +326,16 @@ export function ProductGallery({
   }
 
   return (
-    <div className="flex w-full shrink-0 flex-col lg:ml-4 lg:w-[36%] lg:max-w-[580px]">
-      {/* —— Mobile Digikala mosaic —— */}
-      <div className="lg:hidden">
-        <div className="hide-scrollbar flex items-center overflow-x-scroll px-1">
+    <>
+      {/*
+        Digikala mobile: mosaic fixed under sticky chrome; one in-flow block
+        reserves chrome + mosaic height. Breadcrumb sits under chrome (scrolls away).
+      */}
+      <div
+        ref={mosaicRef}
+        className="fixed inset-x-0 top-12 z-[1] w-full min-w-0 bg-white lg:hidden"
+      >
+        <div className="hide-scrollbar flex w-full touch-pan-x items-center overflow-x-auto overscroll-x-contain px-1">
           {mosaicGroups.map((group, groupIndex) => {
             const showCountOverlay =
               groupIndex === 0 &&
@@ -376,50 +404,23 @@ export function ProductGallery({
             </span>
           </button>
         </div>
+      </div>
 
-        {sale ? (
-          <div
-            className="mt-2 flex items-center justify-between gap-3 px-5 py-2 text-sm"
-            style={{ backgroundColor: "rgb(230 18 61 / 0.08)" }}
-          >
-            <div
-              className="font-semibold"
-              style={{ color: "rgb(230, 18, 61)" }}
-            >
-              {sale.label}
-            </div>
-            <div className="flex items-center gap-0.5 text-[11px] text-[var(--color-neutral-500)]">
-              <span
-                className="text-xs font-semibold"
-                style={{ color: "rgb(230, 18, 61)" }}
-              >
-                {formatSoldPercent(sale.soldPercent)}%
-              </span>
-              فروش رفته
-            </div>
+      {/* In-flow: chrome clearance + mosaic height; breadcrumb under chrome */}
+      <div
+        className="relative z-[2] w-full shrink-0 lg:hidden"
+        style={{ height: MOBILE_CHROME_H + mosaicHeight }}
+      >
+        <div className="h-12 bg-transparent" aria-hidden />
+        {breadcrumb.length ? (
+          <div className="relative z-[2] bg-white px-4">
+            <ProductBreadcrumb items={breadcrumb} />
           </div>
         ) : null}
-
-        <div className="mt-3 flex items-center gap-4 px-4 text-[var(--color-icon-high-emphasis)]">
-          {mobileQuickActions.map((action) => (
-            <button
-              key={action.id}
-              type="button"
-              className="flex cursor-pointer disabled:opacity-60"
-              aria-label={action.label}
-              title={action.label}
-              aria-pressed={action.active}
-              disabled={action.id === "favorite" && wishBusy}
-              onClick={action.onClick}
-            >
-              {action.icon}
-            </button>
-          ))}
-        </div>
       </div>
 
       {/* —— Desktop column —— */}
-      <div className="hidden lg:flex lg:flex-col">
+      <div className="hidden w-full min-w-0 shrink-0 flex-col lg:ml-4 lg:flex lg:w-[36%] lg:max-w-[580px]">
         {sale ? (
           <div
             className="mb-5 flex items-center justify-between gap-3 px-5 py-2 text-sm"
@@ -695,6 +696,6 @@ export function ProductGallery({
           ) : null}
         </div>
       ) : null}
-    </div>
+    </>
   );
 }

@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useId, useState, type FormEvent } from "react";
 import { siteConfig } from "@/config/site";
 import { resendOtp, startOtp, verifyOtp } from "@/lib/api/auth";
@@ -19,13 +19,28 @@ function isLikelyUsername(value: string) {
   return mobile || email;
 }
 
+/** Only allow same-origin relative paths (blocks open redirects). */
+function safeReturnUrl(raw: string | null): string | null {
+  if (!raw) return null;
+  let decoded = raw;
+  try {
+    decoded = decodeURIComponent(raw);
+  } catch {
+    return null;
+  }
+  if (!decoded.startsWith("/") || decoded.startsWith("//")) return null;
+  return decoded;
+}
+
 /**
  * Digikala-inspired auth card: identifier → OTP (Identity API + mock SMS).
  */
 export function LoginFormCard() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const usernameId = useId();
   const codeId = useId();
+  const returnUrl = safeReturnUrl(searchParams.get("returnUrl"));
 
   const [step, setStep] = useState<Step>("username");
   const [username, setUsername] = useState("");
@@ -88,8 +103,7 @@ export function LoginFormCard() {
     try {
       const result = await verifyOtp(challengeId, trimmed);
       saveSession(result.accessToken, result.user);
-      router.replace("/profile");
-      router.refresh();
+      router.replace(returnUrl ?? "/profile");
     } catch (err) {
       setError(err instanceof Error ? err.message : "مشکلی پیش آمد. لطفاً دوباره تلاش کنید.");
     } finally {

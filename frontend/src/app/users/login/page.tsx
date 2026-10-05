@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import { LoginFormCard } from "@/components/auth/LoginFormCard";
 import { siteConfig } from "@/config/site";
 
@@ -17,7 +18,9 @@ export default function LoginPage() {
       data-auth-page
       className="flex min-h-dvh flex-col items-center justify-center bg-white px-4 py-8 font-sans"
     >
-      <LoginFormCard />
+      <Suspense fallback={null}>
+        <LoginFormCard />
+      </Suspense>
     </main>
   );
 }

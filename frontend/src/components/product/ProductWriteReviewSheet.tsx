@@ -5,13 +5,14 @@ import { useEffect, useState } from "react";
 import { RatingStarIcon } from "@/components/layout/icons";
 import { useAuth } from "@/lib/auth/useAuth";
 import { submitProductReview } from "@/lib/api/reviews";
+import type { ProductComment } from "@/types/product-detail";
 
 type ProductWriteReviewSheetProps = {
   open: boolean;
   onClose: () => void;
   productSlug: string;
   productTitle: string;
-  onSubmitted: () => void;
+  onSubmitted: (pending: ProductComment) => void;
 };
 
 /**
@@ -50,6 +51,9 @@ export function ProductWriteReviewSheet({
 
   const displayName =
     user?.displayName || user?.phone || user?.email || "کاربر میکس پلاس";
+  const loginHref = `/users/login?returnUrl=${encodeURIComponent(
+    `/product/${productSlug}?writeReview=1#pdp-comments`,
+  )}`;
 
   const handleSubmit = async () => {
     if (!isAuthenticated) return;
@@ -64,9 +68,10 @@ export function ProductWriteReviewSheet({
 
     setPending(true);
     setError(null);
+    const trimmedBody = body.trim();
     const result = await submitProductReview(productSlug, {
       rating,
-      body: body.trim(),
+      body: trimmedBody,
       isAnonymous,
       customerName: displayName,
     });
@@ -77,9 +82,17 @@ export function ProductWriteReviewSheet({
       return;
     }
 
+    onSubmitted({
+      id: `pending-${Date.now()}`,
+      authorName: isAnonymous ? "کاربر ناشناس" : displayName,
+      dateLabel: "همین الان",
+      rating,
+      body: trimmedBody,
+      likes: 0,
+      dislikes: 0,
+      expertLabel: "در انتظار تایید",
+    });
     setSuccess(result.message);
-    onSubmitted();
-    window.setTimeout(() => onClose(), 1400);
   };
 
   return (
@@ -92,7 +105,7 @@ export function ProductWriteReviewSheet({
       <button
         type="button"
         aria-label="بستن"
-        className="absolute inset-0 bg-black/40"
+        className="absolute inset-0 cursor-pointer bg-black/40"
         onClick={onClose}
       />
       <div className="absolute inset-x-0 bottom-0 flex max-h-[90dvh] flex-col rounded-t-2xl bg-white shadow-xl lg:inset-auto lg:left-1/2 lg:top-1/2 lg:max-h-[85vh] lg:w-full lg:max-w-md lg:-translate-x-1/2 lg:-translate-y-1/2 lg:rounded-2xl">
@@ -106,7 +119,7 @@ export function ProductWriteReviewSheet({
           <button
             type="button"
             onClick={onClose}
-            className="text-sm text-[var(--color-neutral-500)]"
+            className="cursor-pointer text-sm text-[var(--color-neutral-500)]"
           >
             بستن
           </button>
@@ -125,17 +138,25 @@ export function ProductWriteReviewSheet({
                 برای ثبت دیدگاه ابتدا وارد حساب کاربری شوید.
               </p>
               <Link
-                href={`/users/login?returnUrl=${encodeURIComponent(`/product/${productSlug}#pdp-comments`)}`}
-                className="inline-flex rounded-lg bg-[var(--color-primary)] px-4 py-2.5 text-sm font-bold text-white"
-                onClick={onClose}
+                href={loginHref}
+                className="inline-flex cursor-pointer rounded-lg bg-[var(--color-primary)] px-4 py-2.5 text-sm font-bold text-white"
               >
                 ورود | ثبت‌نام
               </Link>
             </div>
           ) : success ? (
-            <p className="rounded-lg bg-[rgb(76_175_80_/_0.12)] px-4 py-3 text-sm text-[var(--color-success,#00a049)]">
-              {success}
-            </p>
+            <div className="space-y-4">
+              <p className="rounded-lg bg-[rgb(76_175_80_/_0.12)] px-4 py-3 text-sm text-[var(--color-success,#00a049)]">
+                {success}
+              </p>
+              <button
+                type="button"
+                onClick={onClose}
+                className="flex h-11 w-full cursor-pointer items-center justify-center rounded-lg border border-[var(--color-neutral-200)] text-sm font-bold text-[var(--color-neutral-700)]"
+              >
+                بازگشت به دیدگاه‌ها
+              </button>
+            </div>
           ) : (
             <>
               <div className="mb-4">
@@ -149,7 +170,7 @@ export function ProductWriteReviewSheet({
                       type="button"
                       aria-label={`${value} از ۵`}
                       onClick={() => setRating(value)}
-                      className="p-0.5"
+                      className="cursor-pointer p-0.5"
                     >
                       <RatingStarIcon
                         className={`size-8 ${
@@ -196,7 +217,7 @@ export function ProductWriteReviewSheet({
                 type="button"
                 disabled={pending}
                 onClick={handleSubmit}
-                className="flex h-11 w-full items-center justify-center rounded-lg bg-[var(--color-primary-500)] text-sm font-bold text-white disabled:opacity-60"
+                className="flex h-11 w-full cursor-pointer items-center justify-center rounded-lg bg-[var(--color-primary-500)] text-sm font-bold text-white disabled:cursor-not-allowed disabled:opacity-60"
               >
                 {pending ? "در حال ارسال…" : "ثبت دیدگاه"}
               </button>

@@ -2,7 +2,8 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { useSearchParams } from "next/navigation";
+import { useEffect, useMemo, useState } from "react";
 import { ProductWriteReviewSheet } from "@/components/product/ProductWriteReviewSheet";
 import {
   ChevronDownIcon,
@@ -195,7 +196,7 @@ function WriteReviewButton({
     <button
       type="button"
       onClick={onClick}
-      className={`flex h-10 items-center justify-center rounded-[var(--medium-radius)] border border-[var(--color-primary-500)] text-xs font-medium text-[var(--color-primary-500)] ${className}`}
+      className={`flex h-10 cursor-pointer items-center justify-center rounded-[var(--medium-radius)] border border-[var(--color-primary-500)] text-xs font-medium text-[var(--color-primary-500)] ${className}`}
     >
       ثبت دیدگاه
     </button>
@@ -207,17 +208,28 @@ export function ProductComments({
   productSlug,
   productTitle,
 }: ProductCommentsProps) {
+  const searchParams = useSearchParams();
   const [sortId, setSortId] = useState<(typeof SORT_OPTIONS)[number]["id"]>(
     "helpful",
   );
   const [showAll, setShowAll] = useState(false);
   const [sheetOpen, setSheetOpen] = useState(false);
-  const [refreshKey, setRefreshKey] = useState(0);
+  const [localPending, setLocalPending] = useState<ProductComment[]>([]);
+
+  useEffect(() => {
+    if (searchParams.get("writeReview") === "1") {
+      setSheetOpen(true);
+    }
+  }, [searchParams]);
 
   const merged = useMemo(() => {
-    void refreshKey;
-    return data;
-  }, [data, refreshKey]);
+    const comments = [...localPending, ...data.comments];
+    return {
+      ...data,
+      comments,
+      totalCount: Math.max(data.totalCount, comments.length),
+    };
+  }, [data, localPending]);
 
   const previewCount = 4;
   const sortedComments = [...merged.comments].sort((a, b) => {
@@ -376,7 +388,9 @@ export function ProductComments({
         onClose={() => setSheetOpen(false)}
         productSlug={productSlug}
         productTitle={productTitle}
-        onSubmitted={() => setRefreshKey((k) => k + 1)}
+        onSubmitted={(pendingComment) => {
+          setLocalPending((list) => [pendingComment, ...list]);
+        }}
       />
     </section>
   );

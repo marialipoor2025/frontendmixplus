@@ -150,9 +150,9 @@ export const mockAdminCategories: AdminCategory[] = [
 ];
 
 export const mockAdminBrands: AdminBrand[] = [
-  { id: "b1", name: "سامسونگ", slug: "samsung", productCount: 120, status: "active" },
-  { id: "b2", name: "بوش", slug: "bosch", productCount: 64, status: "active" },
-  { id: "b3", name: "شیائومی", slug: "xiaomi", productCount: 98, status: "hidden" },
+  { id: "b1", name: "سامسونگ", slug: "samsung", logoUrl: "/placeholders/product-appliance.png", productCount: 120, status: "active" },
+  { id: "b2", name: "بوش", slug: "bosch", logoUrl: "/placeholders/product-appliance.png", productCount: 64, status: "active" },
+  { id: "b3", name: "شیائومی", slug: "xiaomi", logoUrl: "/placeholders/product-appliance.png", productCount: 98, status: "hidden" },
 ];
 
 export const mockAdminMedia: AdminMedia[] = [

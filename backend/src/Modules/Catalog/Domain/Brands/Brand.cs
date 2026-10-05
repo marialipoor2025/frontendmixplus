@@ -37,4 +37,6 @@ public sealed class Brand : AggregateRoot
         Slug = slug.Trim().ToLowerInvariant();
         LogoUrl = logoUrl;
     }
+
+    public void SetActive(bool isActive) => IsActive = isActive;
 }

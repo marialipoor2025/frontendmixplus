@@ -105,6 +105,7 @@ export type AdminBrand = {
   id: string;
   name: string;
   slug: string;
+  logoUrl?: string;
   productCount: number;
   status: "active" | "hidden";
 };

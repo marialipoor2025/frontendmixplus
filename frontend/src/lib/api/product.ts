@@ -1,28 +1,128 @@
 import { siteConfig } from "@/config/site";
+import { getCatalogProductBySlug } from "@/lib/api/catalog";
 import { getProductMedia } from "@/lib/api/product-media";
 import { getProductSpecs } from "@/lib/api/specs";
 import { getProductVariants } from "@/lib/api/variants";
 import { getMockProductDetail } from "@/lib/mocks/product-detail";
 import type { ProductDetailPageData } from "@/types/product-detail";
 
-/** Frontend-first PDP fetch — merges live Catalog variants, media, specs when available. */
+/** Frontend-first PDP fetch — merges live Catalog card, variants, media, specs. */
 export async function getProductDetail(
   slug: string,
 ): Promise<ProductDetailPageData | null> {
   const data = getMockProductDetail(slug);
-  if (!data) return null;
 
   if (siteConfig.useMocks || !siteConfig.apiBaseUrl) {
     return data;
   }
 
-  const [liveVariants, liveMedia, liveSpecs] = await Promise.all([
+  const [liveCard, liveVariants, liveMedia, liveSpecs] = await Promise.all([
+    getCatalogProductBySlug(slug).catch(() => null),
     getProductVariants(slug).catch(() => null),
     getProductMedia(slug).catch(() => null),
     getProductSpecs(slug).catch(() => null),
   ]);
 
-  let next = data;
+  if (!data && !liveCard) return null;
+
+  let next: ProductDetailPageData =
+    data ??
+    ({
+      slug,
+      title: liveCard!.title,
+      sku: liveCard!.id,
+      brand: {
+        id: liveCard!.brandId,
+        name: liveCard!.brandName,
+        slug: liveCard!.brandId,
+      },
+      titleNav: [],
+      variant: {
+        rating: liveCard!.rating ?? 0,
+        ratingCount: liveCard!.reviewCount ?? 0,
+        questionCount: 0,
+        commentCount: 0,
+        optionGroups: [],
+        selectedOptionValueIds: {},
+        skus: [],
+      },
+      features: [],
+      buyBox: {
+        seller: {
+          id: liveCard!.sellerId,
+          name: liveCard!.sellerName,
+          href: "#",
+          performanceLabel: "",
+        },
+        otherSellerCount: 0,
+        price: liveCard!.price.amount,
+        originalPrice: liveCard!.originalPrice?.amount,
+        discountPercent: liveCard!.discountPercent,
+        warranty: "",
+        delivery: { title: "", methodLabel: "", costLabel: "" },
+      },
+      content: {
+        intro: { preview: "", full: "" },
+        expertReview: { title: "", preview: "", full: "" },
+        specs: [],
+        comments: {
+          averageRating: 0,
+          ratingCount: 0,
+          totalCount: 0,
+          photos: [],
+          topicFilters: [],
+          comments: [],
+        },
+        questions: { totalCount: 0, questions: [] },
+      },
+      breadcrumb: [],
+      gallery: {
+        images: [
+          {
+            id: "main",
+            url: liveCard!.imageUrl,
+            alt: liveCard!.title,
+          },
+        ],
+      },
+    } satisfies ProductDetailPageData);
+
+  if (liveCard) {
+    next = {
+      ...next,
+      title: liveCard.title,
+      slug: liveCard.slug,
+      brand: {
+        ...next.brand,
+        id: liveCard.brandId,
+        name: liveCard.brandName,
+      },
+      buyBox: {
+        ...next.buyBox,
+        seller: {
+          ...next.buyBox.seller,
+          id: liveCard.sellerId,
+          name: liveCard.sellerName,
+        },
+        price: liveCard.price.amount,
+        originalPrice: liveCard.originalPrice?.amount,
+        discountPercent: liveCard.discountPercent,
+      },
+      gallery: {
+        ...next.gallery,
+        images:
+          next.gallery.images.length > 0
+            ? next.gallery.images
+            : [
+                {
+                  id: "main",
+                  url: liveCard.imageUrl,
+                  alt: liveCard.title,
+                },
+              ],
+      },
+    };
+  }
 
   if (liveVariants && liveVariants.optionGroups.length > 0) {
     next = {

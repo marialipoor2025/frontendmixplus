@@ -86,14 +86,17 @@ export async function getBrandBySlug(slug: string): Promise<Brand | null> {
   return rows[0] ? mapBrand(rows[0]) : null;
 }
 
-export async function getProductsByBrandSlug(slug: string): Promise<Product[]> {
+export async function getProductsByBrandSlug(
+  slug: string,
+  q?: string,
+): Promise<Product[]> {
   if (siteConfig.useMocks || !siteConfig.apiBaseUrl) {
     const brand = resolveMockBrand(slug);
     return brand ? getMockBrandProducts(brand) : [];
   }
 
   const rows = await apiClient<CatalogProductDto[]>("/api/catalog/products", {
-    query: { brandSlug: slug },
+    query: { brandSlug: slug, q: q?.trim() || undefined },
   });
   return rows.map(mapProduct);
 }
@@ -101,6 +104,7 @@ export async function getProductsByBrandSlug(slug: string): Promise<Product[]> {
 /** Category PLP products — live Catalog filter by categorySlug, mock fallback. */
 export async function getProductsByCategorySlug(
   slugParts: string[],
+  q?: string,
 ): Promise<Product[]> {
   const leaf = slugParts[slugParts.length - 1] ?? slugParts.join("-");
 
@@ -111,15 +115,19 @@ export async function getProductsByCategorySlug(
 
   try {
     const rows = await apiClient<CatalogProductDto[]>("/api/catalog/products", {
-      query: { categorySlug: leaf },
+      query: { categorySlug: leaf, q: q?.trim() || undefined },
     });
     if (rows.length > 0) return rows.map(mapProduct);
 
-    // Fallback: try full path joined if leaf empty.
     if (slugParts.length > 1) {
       const joined = await apiClient<CatalogProductDto[]>(
         "/api/catalog/products",
-        { query: { categorySlug: slugParts.join("-") } },
+        {
+          query: {
+            categorySlug: slugParts.join("-"),
+            q: q?.trim() || undefined,
+          },
+        },
       );
       if (joined.length > 0) return joined.map(mapProduct);
     }
@@ -128,5 +136,20 @@ export async function getProductsByCategorySlug(
   } catch {
     const { getMockCategoryProducts } = await import("@/lib/mocks/category-plp");
     return getMockCategoryProducts(slugParts);
+  }
+}
+
+/** Single published product card by slug/key for PDP shell fields. */
+export async function getCatalogProductBySlug(
+  slug: string,
+): Promise<Product | null> {
+  if (siteConfig.useMocks || !siteConfig.apiBaseUrl) return null;
+  try {
+    const row = await apiClient<CatalogProductDto>(
+      `/api/catalog/products/${encodeURIComponent(slug)}`,
+    );
+    return mapProduct(row);
+  } catch {
+    return null;
   }
 }

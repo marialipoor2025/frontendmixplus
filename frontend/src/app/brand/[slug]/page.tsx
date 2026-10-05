@@ -20,9 +20,12 @@ export default async function BrandSlugPage({ params, searchParams }: PageProps)
   const brand = await getBrandBySlug(slug);
   if (!brand) notFound();
 
+  const qRaw = sp.q;
+  const q = Array.isArray(qRaw) ? qRaw[0] : qRaw;
+
   const [nav, products] = await Promise.all([
     getMainNavData(),
-    getProductsByBrandSlug(slug),
+    getProductsByBrandSlug(slug, q),
   ]);
 
   return (

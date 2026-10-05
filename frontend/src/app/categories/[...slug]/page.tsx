@@ -23,7 +23,9 @@ export default async function CategorySlugPage({
   const sp = await searchParams;
   const nav = await getMainNavData();
   const category = resolveCategoryPath(slug, nav);
-  const products = await getProductsByCategorySlug(slug);
+  const qRaw = sp.q;
+  const q = Array.isArray(qRaw) ? qRaw[0] : qRaw;
+  const products = await getProductsByCategorySlug(slug, q);
 
   return (
     <CategoryPlpPage

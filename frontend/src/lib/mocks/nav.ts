@@ -13,6 +13,8 @@ export const mockMainNavData: MainNavData = {
   quickLinks: [
     { id: "q-stock", title: "کالاهای استوک", href: "/stock", icon: "stock", badge: "جدید" },
     { id: "q-install", title: "نصب و سرویس", href: "/services/install", icon: "service" },
+    { id: "q-brands", title: "برندها", href: "/brand", icon: "brands" },
+    { id: "q-blog", title: "بلاگ", href: "/blog", icon: "blog" },
   ],
   categories: [
     {

@@ -1,4 +1,4 @@
-import type { StartOtpResponse, VerifyOtpResponse } from "@/types/auth";
+import type { AuthUser, StartOtpResponse, VerifyOtpResponse } from "@/types/auth";
 import { apiClient } from "./client";
 
 export async function startOtp(username: string): Promise<StartOtpResponse> {
@@ -22,5 +22,16 @@ export async function verifyOtp(
   return apiClient<VerifyOtpResponse>("/api/auth/otp/verify", {
     method: "POST",
     body: JSON.stringify({ challengeId, code }),
+  });
+}
+
+export async function getMe(): Promise<AuthUser> {
+  return apiClient<AuthUser>("/api/auth/me", { auth: true });
+}
+
+export async function logoutSession(): Promise<void> {
+  await apiClient<void>("/api/auth/logout", {
+    method: "POST",
+    auth: true,
   });
 }

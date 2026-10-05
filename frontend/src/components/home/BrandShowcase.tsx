@@ -11,8 +11,6 @@ function BrandCard({ brand }: { brand: Brand }) {
   return (
     <Link
       href={`/brand/${brand.slug}`}
-      target="_blank"
-      rel="noopener noreferrer"
       className="flex h-[124px] w-[90px] shrink-0 flex-col items-center gap-1.5 overflow-hidden rounded-md border border-[var(--color-neutral-200)] bg-white lg:border-[var(--color-neutral-100)]"
     >
       <div className="bg-[var(--color-neutral-100)] p-1.5 lg:bg-white">

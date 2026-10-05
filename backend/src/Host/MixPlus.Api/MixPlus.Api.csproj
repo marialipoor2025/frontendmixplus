@@ -22,6 +22,7 @@
     <ProjectReference Include="..\..\Modules\Cart\MixPlus.Modules.Cart.csproj" />
     <ProjectReference Include="..\..\Modules\Search\MixPlus.Modules.Search.csproj" />
     <ProjectReference Include="..\..\Modules\Support\MixPlus.Modules.Support.csproj" />
+    <ProjectReference Include="..\..\Modules\Media\MixPlus.Modules.Media.csproj" />
   </ItemGroup>
   <ItemGroup>
     <None Update="Seed\data\**\*">

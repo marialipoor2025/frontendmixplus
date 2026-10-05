@@ -310,8 +310,45 @@ export function LoginUserIcon({ className = "", title }: IconProps) {
   );
 }
 
-/** dual chat bubbles (bottom-nav support). */
-/** Dual speech-bubble chat mark (filled) shared by desktop FAB and mobile nav. */
+/** Blog / magazine mark for mobile bottom nav. */
+export function BottomNavBlogIcon({ className = "", title }: IconProps) {
+  return (
+    <svg
+      className={`${base} ${className}`}
+      xmlns="http://www.w3.org/2000/svg"
+      width={22}
+      height={22}
+      fill="none"
+      viewBox="0 0 24 24"
+      aria-hidden={title ? undefined : true}
+      role={title ? "img" : undefined}
+    >
+      {title ? <title>{title}</title> : null}
+      <path
+        stroke="currentColor"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth="1.5"
+        d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"
+      />
+      <path
+        stroke="currentColor"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth="1.5"
+        d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2Z"
+      />
+      <path
+        stroke="currentColor"
+        strokeLinecap="round"
+        strokeWidth="1.5"
+        d="M9 7h7M9 11h7M9 15h4"
+      />
+    </svg>
+  );
+}
+
+/** Dual speech-bubble chat mark (filled) shared by desktop FAB. */
 export function BottomNavChatIcon({ className = "", title }: IconProps) {
   return (
     <svg

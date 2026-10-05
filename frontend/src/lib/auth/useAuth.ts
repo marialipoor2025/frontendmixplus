@@ -1,12 +1,14 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import { getMe, logoutSession } from "@/lib/api/auth";
 import type { AuthUser } from "@/types/auth";
 import {
   AUTH_CHANGED_EVENT,
   clearSession,
   getAccessToken,
   getSessionUser,
+  saveSession,
 } from "./session";
 
 export function useAuth() {
@@ -35,7 +37,34 @@ export function useAuth() {
     };
   }, [refresh]);
 
+  // Validate opaque session token against API when present.
+  useEffect(() => {
+    const accessToken = getAccessToken();
+    if (!accessToken) return;
+
+    let cancelled = false;
+    void (async () => {
+      try {
+        const me = await getMe();
+        if (cancelled) return;
+        saveSession(accessToken, me);
+        setUser(me);
+        setToken(accessToken);
+      } catch {
+        if (cancelled) return;
+        clearSession();
+        setUser(null);
+        setToken(null);
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
   const logout = useCallback(() => {
+    void logoutSession().catch(() => undefined);
     clearSession();
     setUser(null);
     setToken(null);

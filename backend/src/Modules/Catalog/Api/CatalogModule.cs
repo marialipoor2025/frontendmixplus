@@ -39,20 +39,44 @@ public sealed class CatalogModule : IModule
         group.MapGet("/health", () => Results.Ok(new { module = Name, status = "ready" }))
             .WithName("CatalogHealth");
 
-        group.MapGet("/products", async (CatalogDbContext db, CancellationToken ct) =>
+        group.MapGet("/products", async (
+                CatalogDbContext db,
+                string? brandSlug,
+                CancellationToken ct) =>
             {
-                var rows = await db.Products.AsNoTracking()
-                    .Where(x => x.IsPublished)
-                    .OrderBy(x => x.Title)
-                    .ToListAsync(ct);
+                var query = db.Products.AsNoTracking().Where(x => x.IsPublished);
+
+                if (!string.IsNullOrWhiteSpace(brandSlug))
+                {
+                    var slug = brandSlug.Trim().ToLowerInvariant();
+                    var brandKey = await db.Brands.AsNoTracking()
+                        .Where(b => b.IsActive && b.Slug == slug)
+                        .Select(b => b.ExternalKey)
+                        .FirstOrDefaultAsync(ct);
+
+                    if (brandKey is null)
+                    {
+                        return Results.Ok(Array.Empty<ProductCardDto>());
+                    }
+
+                    query = query.Where(x => x.BrandExternalKey == brandKey);
+                }
+
+                var rows = await query.OrderBy(x => x.Title).ToListAsync(ct);
                 return Results.Ok(rows.Select(ToDto).ToList());
             })
             .WithName("ListCatalogProducts");
 
-        group.MapGet("/brands", async (CatalogDbContext db, CancellationToken ct) =>
+        group.MapGet("/brands", async (CatalogDbContext db, string? slug, CancellationToken ct) =>
             {
-                var rows = await db.Brands.AsNoTracking()
-                    .Where(x => x.IsActive)
+                var query = db.Brands.AsNoTracking().Where(x => x.IsActive);
+                if (!string.IsNullOrWhiteSpace(slug))
+                {
+                    var normalized = slug.Trim().ToLowerInvariant();
+                    query = query.Where(x => x.Slug == normalized);
+                }
+
+                var rows = await query
                     .OrderBy(x => x.Name)
                     .Select(x => new BrandDto(x.ExternalKey, x.Name, x.Slug, x.LogoUrl))
                     .ToListAsync(ct);

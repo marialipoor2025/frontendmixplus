@@ -24,23 +24,26 @@ public static class NavigationSeeder
         var db = services.GetRequiredService<NavigationDbContext>();
         var overwrite = config.GetValue("Seed:Overwrite", false);
 
-        var hasSettings = await db.NavSettings.AnyAsync(cancellationToken);
-        var hasCategories = await db.MegaCategories.AnyAsync(cancellationToken);
-        if (hasSettings && hasCategories && !overwrite)
-        {
-            logger.LogInformation(
-                "Navigation composition already present — skip (Seed:Overwrite=true to refresh)");
-            return;
-        }
-
         var navJson = await File.ReadAllTextAsync(
             Path.Combine(AppContext.BaseDirectory, "Seed", "data", "nav.json"),
             cancellationToken);
         var nav = JsonSerializer.Deserialize<NavSeedDocument>(navJson, JsonOptions)
             ?? throw new InvalidOperationException("Failed to deserialize nav.json for navigation seed.");
 
-        await SeedSettingsAsync(db, nav, overwrite, cancellationToken);
+        var hasSettings = await db.NavSettings.AnyAsync(cancellationToken);
+        var hasCategories = await db.MegaCategories.AnyAsync(cancellationToken);
+
+        // Always upsert missing quick links (e.g. new Blog entry) without full overwrite.
         await SeedQuickLinksAsync(db, nav, overwrite, cancellationToken);
+
+        if (hasSettings && hasCategories && !overwrite)
+        {
+            logger.LogInformation(
+                "Navigation mega-menu already present — skip categories (Seed:Overwrite=true to refresh)");
+            return;
+        }
+
+        await SeedSettingsAsync(db, nav, overwrite, cancellationToken);
         await SeedMegaMenuAsync(db, nav, overwrite, cancellationToken);
 
         logger.LogInformation(
@@ -104,8 +107,9 @@ public static class NavigationSeeder
                     link.External ?? false,
                     link.Badge));
             }
-            else if (overwrite)
+            else
             {
+                // Always refresh order/title so navbar order stays aligned with nav.json.
                 existing.Update(
                     link.Title,
                     link.Href,

@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { useState, type FormEvent } from "react";
 import { CameraIcon, SearchIcon } from "@/components/layout/icons";
 import { siteConfig } from "@/config/site";
 
@@ -14,18 +15,25 @@ type HeaderSearchProps = {
 
 /**
  * Search field — same «جستجو در میکس پلاس» hint on mobile + desktop.
- * Desktop uses Barghchi rounded pill + stroke search icon.
+ * Submits to `/search?q=...`.
  */
 export function HeaderSearch({
   prefix = "جستجو در",
   brandName = siteConfig.nameFa,
   variant = "default",
 }: HeaderSearchProps) {
+  const router = useRouter();
   const [value, setValue] = useState("");
   const [focused, setFocused] = useState(false);
   const showHint = !value && !focused;
   const isBarghchi = variant === "barghchi";
   const inputId = isBarghchi ? "site-search-desktop" : "site-search";
+
+  const onSubmit = (event: FormEvent) => {
+    event.preventDefault();
+    const q = value.trim();
+    router.push(q ? `/search?q=${encodeURIComponent(q)}` : "/search");
+  };
 
   const hint = showHint ? (
     <span
@@ -52,7 +60,7 @@ export function HeaderSearch({
         </label>
         <form
           className="relative flex w-full items-center"
-          onSubmit={(event) => event.preventDefault()}
+          onSubmit={onSubmit}
         >
           <div className="relative flex w-full items-center rounded-2xl bg-[var(--color-neutral-100)] py-3 pe-5 ps-14">
             <span className="pointer-events-none absolute start-5 flex items-center border-e border-[var(--color-neutral-300)] pe-2.5 text-[#707EAE]">
@@ -62,7 +70,7 @@ export function HeaderSearch({
               {hint}
               <input
                 id={inputId}
-                name="s"
+                name="q"
                 type="text"
                 autoComplete="off"
                 value={value}
@@ -83,7 +91,10 @@ export function HeaderSearch({
       <label className="sr-only" htmlFor={inputId}>
         {prefix} {brandName}
       </label>
-      <div className="flex h-11 min-w-0 w-full max-w-[600px] flex-1 items-center rounded-full border border-[var(--color-neutral-200)] bg-[var(--color-neutral-100)] px-3 md:w-[500px] md:px-4">
+      <form
+        className="flex h-11 min-w-0 w-full max-w-[600px] flex-1 items-center rounded-full border border-[var(--color-neutral-200)] bg-[var(--color-neutral-100)] px-3 md:w-[500px] md:px-4"
+        onSubmit={onSubmit}
+      >
         <div className="relative flex min-w-0 grow items-center gap-2">
           <SearchIcon className="shrink-0 text-[#707EAE]" />
 
@@ -91,7 +102,7 @@ export function HeaderSearch({
             {hint}
             <input
               id={inputId}
-              name="search-input"
+              name="q"
               type="search"
               autoComplete="off"
               value={value}
@@ -110,7 +121,7 @@ export function HeaderSearch({
             <CameraIcon />
           </button>
         </div>
-      </div>
+      </form>
     </div>
   );
 }

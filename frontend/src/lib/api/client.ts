@@ -2,6 +2,8 @@ import { siteConfig } from "@/config/site";
 
 type RequestOptions = RequestInit & {
   query?: Record<string, string | number | boolean | undefined>;
+  /** When true, attach Bearer token from localStorage (browser only). */
+  auth?: boolean;
 };
 
 function buildUrl(path: string, query?: RequestOptions["query"]) {
@@ -17,6 +19,15 @@ function buildUrl(path: string, query?: RequestOptions["query"]) {
   return url.toString();
 }
 
+function readBrowserToken(): string | null {
+  if (typeof window === "undefined") return null;
+  try {
+    return window.localStorage.getItem("mixplus.accessToken");
+  } catch {
+    return null;
+  }
+}
+
 /**
  * Thin HTTP client. Frontend talks only through this layer so we can
  * switch from mocks → ASP.NET Core without touching UI components.
@@ -25,12 +36,15 @@ export async function apiClient<T>(
   path: string,
   options: RequestOptions = {},
 ): Promise<T> {
-  const { query, headers, ...init } = options;
+  const { query, headers, auth, ...init } = options;
+  const token = auth ? readBrowserToken() : null;
+
   const response = await fetch(buildUrl(path, query), {
     ...init,
     headers: {
       Accept: "application/json",
       "Content-Type": "application/json",
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
       ...headers,
     },
     cache: "no-store",
@@ -45,6 +59,10 @@ export async function apiClient<T>(
       // keep default message
     }
     throw new Error(message);
+  }
+
+  if (response.status === 204) {
+    return undefined as T;
   }
 
   return response.json() as Promise<T>;

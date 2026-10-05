@@ -4,6 +4,7 @@ using MixPlus.BuildingBlocks.Application;
 using MixPlus.Modules.Cart.Api;
 using MixPlus.Modules.Catalog.Api;
 using MixPlus.Modules.Identity.Api;
+using MixPlus.Modules.Media.Api;
 using MixPlus.Modules.Merchandising.Api;
 using MixPlus.Modules.Navigation.Api;
 using MixPlus.Modules.Promotions.Api;
@@ -46,6 +47,7 @@ IModule[] modules =
     new NavigationModule(),
     new PromotionsModule(),
     new IdentityModule(),
+    new MediaModule(),
     new CartModule(),
     new SearchModule(),
     new SupportModule(),

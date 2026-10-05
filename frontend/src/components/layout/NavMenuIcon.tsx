@@ -1,5 +1,6 @@
 import {
   AmazingIcon,
+  BottomNavBlogIcon,
   BrandsIcon,
   GiftIcon,
   InstallmentIcon,
@@ -22,6 +23,8 @@ export function NavMenuIcon({
   switch (name) {
     case "amazing":
       return <AmazingIcon className={className} />;
+    case "blog":
+      return <BottomNavBlogIcon className={className} />;
     case "brands":
       return <BrandsIcon className={className} />;
     case "trend":

@@ -38,6 +38,7 @@ public sealed class IdentityModule : IModule
         }
 
         services.AddScoped<IOtpAuthService, OtpAuthService>();
+        services.AddScoped<ISessionAuthService, SessionAuthService>();
     }
 
     public void MapEndpoints(IEndpointRouteBuilder endpoints)
@@ -73,5 +74,35 @@ public sealed class IdentityModule : IModule
                     : Results.BadRequest(new { error = result.Error });
             })
             .WithName("VerifyOtp");
+
+        group.MapGet("/me", async (HttpRequest request, ISessionAuthService sessions, CancellationToken ct) =>
+            {
+                var result = await sessions.GetMeAsync(ReadBearer(request), ct);
+                return result.IsSuccess
+                    ? Results.Ok(result.Value)
+                    : Results.Unauthorized();
+            })
+            .WithName("AuthMe");
+
+        group.MapPost("/logout", async (HttpRequest request, ISessionAuthService sessions, CancellationToken ct) =>
+            {
+                await sessions.LogoutAsync(ReadBearer(request), ct);
+                return Results.NoContent();
+            })
+            .WithName("AuthLogout");
+    }
+
+    private static string? ReadBearer(HttpRequest request)
+    {
+        var header = request.Headers.Authorization.ToString();
+        if (string.IsNullOrWhiteSpace(header))
+        {
+            return null;
+        }
+
+        const string prefix = "Bearer ";
+        return header.StartsWith(prefix, StringComparison.OrdinalIgnoreCase)
+            ? header[prefix.Length..].Trim()
+            : header.Trim();
     }
 }

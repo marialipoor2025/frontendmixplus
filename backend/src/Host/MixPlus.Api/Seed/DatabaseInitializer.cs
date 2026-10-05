@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using MixPlus.Modules.Catalog.Infrastructure.Persistence;
 using MixPlus.Modules.Identity.Infrastructure.Persistence;
+using MixPlus.Modules.Media.Infrastructure.Persistence;
 using MixPlus.Modules.Merchandising.Domain;
 using MixPlus.Modules.Merchandising.Infrastructure.Persistence;
 using MixPlus.Modules.Navigation.Domain;
@@ -23,6 +24,7 @@ public static class DatabaseInitializer
         NavigationDbContext.Schema,
         PromotionsDbContext.Schema,
         IdentityDbContext.Schema,
+        MediaDbContext.Schema,
     ];
 
     public static async Task InitializeAsync(WebApplication app)
@@ -59,6 +61,7 @@ public static class DatabaseInitializer
             services.GetRequiredService<NavigationDbContext>(),
             services.GetRequiredService<PromotionsDbContext>(),
             services.GetRequiredService<IdentityDbContext>(),
+            services.GetRequiredService<MediaDbContext>(),
         ];
 
         // Schema-only reset (app role cannot recreate the database).

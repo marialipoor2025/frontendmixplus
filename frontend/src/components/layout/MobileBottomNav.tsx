@@ -29,6 +29,7 @@ type NavId = "chat" | "categories" | "cart" | "profile" | "home";
 const REAL_PAGES: Partial<Record<NavId, string>> = {
   home: "/",
   categories: "/categories",
+  cart: "/checkout/cart",
   profile: "/profile",
 };
 
@@ -38,6 +39,7 @@ const MENU_ROW =
 function pathToNavId(pathname: string): NavId | null {
   if (pathname === "/") return "home";
   if (pathname.startsWith("/categories")) return "categories";
+  if (pathname.startsWith("/checkout/cart")) return "cart";
   if (pathname.startsWith("/profile")) return "profile";
   return null;
 }
@@ -56,11 +58,9 @@ export function MobileBottomNav() {
   const [chatOpen, setChatOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [categoriesExpanded, setCategoriesExpanded] = useState(false);
-  /** Explicit selection for stub items (cart/profile) or overrides — never stacks with path. */
   const [selectedId, setSelectedId] = useState<NavId | null>(null);
   const imageByHref = useMemo(() => buildCategoryImageMap(), []);
 
-  // Real route changes reset stub selection so only the current page tab is active.
   useEffect(() => {
     setSelectedId(null);
     setChatOpen(false);
@@ -68,14 +68,11 @@ export function MobileBottomNav() {
     setCategoriesExpanded(false);
   }, [pathname]);
 
-  // Auth screens are full-bleed Digikala-style cards — hide marketplace chrome.
   if (pathname.startsWith("/users") || pathname.startsWith("/admin")) {
     return null;
   }
 
   const pathId = pathToNavId(pathname);
-
-  // Exactly one active id — overlays beat stubs, stubs beat path, path defaults to home on `/`.
   const activeId: NavId =
     chatOpen
       ? "chat"
@@ -93,15 +90,16 @@ export function MobileBottomNav() {
     closeMenu();
   };
 
-  const selectTab = (id: NavId) => {
-    closeAllOverlays();
-    setSelectedId(id);
-  };
-
   const onStubClick =
     (id: NavId) => (event: MouseEvent<HTMLAnchorElement>) => {
+      if (id === "cart") {
+        closeAllOverlays();
+        setSelectedId(null);
+        return;
+      }
       event.preventDefault();
-      selectTab(id);
+      closeAllOverlays();
+      setSelectedId(id);
     };
 
   const iconClass = (id: NavId) =>
@@ -163,7 +161,7 @@ export function MobileBottomNav() {
 
           <li>
             <Link
-              href="/checkout/cart/"
+              href="/checkout/cart"
               onClick={onStubClick("cart")}
               className="relative flex h-11 w-11 items-center justify-center"
               aria-label="سبد خرید"

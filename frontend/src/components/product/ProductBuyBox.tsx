@@ -97,7 +97,10 @@ export function ProductBuyBox({ data }: ProductBuyBoxProps) {
 
           <div className="mb-1 flex items-center">
             <div className="relative mr-auto flex flex-col items-end justify-start">
-              {data.originalPrice != null && data.discountPercent != null ? (
+              {data.originalPrice != null &&
+              data.originalPrice > data.price &&
+              data.discountPercent != null &&
+              data.discountPercent > 0 ? (
                 <div className="flex w-full items-center justify-end gap-1">
                   <span className="ml-1 text-[13px] text-[var(--color-neutral-300)] line-through">
                     {formatPrice(data.originalPrice)}
@@ -130,52 +133,57 @@ export function ProductBuyBox({ data }: ProductBuyBoxProps) {
         </div>
       </div>
 
-      <div className="flex w-full items-center px-4">
-        <div className="flex grow items-center py-3">
-          <div className="ml-4">
-            <GuaranteeIcon className="size-6 text-[var(--color-icon-high-emphasis)]" />
-          </div>
-          <p className="text-xs font-medium text-[var(--color-neutral-700)] lg:text-[13px]">
-            {data.warranty}
-          </p>
-        </div>
-      </div>
-
-      <div className="relative w-full cursor-pointer px-4">
-        <div className="border-t border-[var(--color-neutral-200)] py-3">
-          <div className="mb-2 flex flex-row items-center justify-start">
-            <ProductAvailableIcon className="ml-3 mr-px size-6 text-[var(--color-icon-secondary)]" />
+      {data.showWarranty !== false && data.warranty ? (
+        <div className="flex w-full items-center px-4">
+          <div className="flex grow items-center py-3">
+            <div className="ml-4">
+              <GuaranteeIcon className="size-6 text-[var(--color-icon-high-emphasis)]" />
+            </div>
             <p className="text-xs font-medium text-[var(--color-neutral-700)] lg:text-[13px]">
-              {data.delivery.title}
+              {data.warranty}
             </p>
-            <ChevronLeftIcon
-              size={24}
-              className="mr-auto text-[var(--color-icon-low-emphasis)]"
-            />
           </div>
-          <ul className="flex flex-col">
-            <li className="ml-3 flex items-center">
-              <div
-                className="relative ml-3 flex min-w-6 items-center justify-center self-stretch"
-                style={{ width: 24 }}
-              >
-                <span className="size-[5px] rounded-full bg-[var(--color-icon-secondary)]" />
-              </div>
-              <div className="mr-1 flex items-center truncate">
-                <span className="text-[13px] text-[var(--color-neutral-500)]">
-                  {data.delivery.methodLabel}
-                </span>
-                <span className="text-[13px] font-semibold text-[var(--color-neutral-650)]">
-                  <span className="text-[var(--color-neutral-500)]"> • </span>
-                  <span className="inline-flex items-center truncate whitespace-nowrap">
-                    {data.delivery.costLabel}
-                  </span>
-                </span>
-              </div>
-            </li>
-          </ul>
         </div>
-      </div>
+      ) : null}
+
+      {data.showDelivery !== false &&
+      (data.delivery.methodLabel || data.delivery.title) ? (
+        <div className="relative w-full cursor-pointer px-4">
+          <div className="border-t border-[var(--color-neutral-200)] py-3">
+            <div className="mb-2 flex flex-row items-center justify-start">
+              <ProductAvailableIcon className="ml-3 mr-px size-6 text-[var(--color-icon-secondary)]" />
+              <p className="text-xs font-medium text-[var(--color-neutral-700)] lg:text-[13px]">
+                {data.delivery.title || "روش و هزینه تحویل"}
+              </p>
+              <ChevronLeftIcon
+                size={24}
+                className="mr-auto text-[var(--color-icon-low-emphasis)]"
+              />
+            </div>
+            <ul className="flex flex-col">
+              <li className="ml-3 flex items-center">
+                <div
+                  className="relative ml-3 flex min-w-6 items-center justify-center self-stretch"
+                  style={{ width: 24 }}
+                >
+                  <span className="size-[5px] rounded-full bg-[var(--color-icon-secondary)]" />
+                </div>
+                <div className="mr-1 flex items-center truncate">
+                  <span className="text-[13px] text-[var(--color-neutral-500)]">
+                    {data.delivery.methodLabel}
+                  </span>
+                  <span className="text-[13px] font-semibold text-[var(--color-neutral-650)]">
+                    <span className="text-[var(--color-neutral-500)]"> • </span>
+                    <span className="inline-flex items-center truncate whitespace-nowrap">
+                      {data.delivery.costLabel}
+                    </span>
+                  </span>
+                </div>
+              </li>
+            </ul>
+          </div>
+        </div>
+      ) : null}
     </aside>
   );
 }

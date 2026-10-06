@@ -25,7 +25,7 @@ type ProductPurchasePanelProps = {
 /**
  * Client panel that keeps option selection in sync with buy-box price/stock.
  * Mobile: Digikala overlapping content card + sticky buy bar.
- * Desktop: title/variants column + sticky buy box.
+ * Desktop: middle info column + sticky buy box (siblings in Digikala 3-col row).
  */
 export function ProductPurchasePanel({ data }: ProductPurchasePanelProps) {
   const groups = useMemo(() => resolveOptionGroups(data.variant), [data.variant]);
@@ -38,15 +38,13 @@ export function ProductPurchasePanel({ data }: ProductPurchasePanelProps) {
     [data.variant.skus, selected],
   );
 
+  // Seller buy-box (product card) is authoritative; SKU rows can lag after price edits.
   const buyBox = {
     ...data.buyBox,
-    price: activeSku?.price ?? data.buyBox.price,
-    originalPrice:
-      activeSku?.originalPrice ??
-      data.buyBox.originalPrice ??
-      Math.round((activeSku?.price ?? data.buyBox.price) * 1.19),
+    price: data.buyBox.price || activeSku?.price || 0,
+    originalPrice: data.buyBox.originalPrice ?? activeSku?.originalPrice,
     discountPercent:
-      activeSku?.discountPercent ?? data.buyBox.discountPercent ?? 19,
+      data.buyBox.discountPercent ?? activeSku?.discountPercent,
   };
 
   const onSelectOption = (groupId: string, valueId: string) =>
@@ -61,11 +59,6 @@ export function ProductPurchasePanel({ data }: ProductPurchasePanelProps) {
         id="content"
         className="relative z-[2] -mt-8 w-full min-w-0 lg:hidden"
       >
-        {/*
-          Soft shadow/gradient on the mosaic ABOVE the sheet edge + in the
-          rounded-corner notches (Digikala). pointer-events-none so mosaic
-          horizontal swipe still works under the overlap.
-        */}
         <div
           aria-hidden
           className="pointer-events-none absolute inset-x-0 -top-10 h-10 bg-[linear-gradient(180deg,rgba(0,0,0,0)_0%,rgba(0,0,0,0.18)_100%)]"
@@ -102,8 +95,8 @@ export function ProductPurchasePanel({ data }: ProductPurchasePanelProps) {
       </div>
       <ProductMobileBuyBar buyBox={buyBox} inStock={inStock} />
 
-      {/* —— Desktop info column —— */}
-      <div className="hidden min-w-0 grow px-5 pt-4 lg:block lg:px-0 lg:pt-0">
+      {/* —— Digikala desktop: info column (center) —— */}
+      <div className="hidden min-w-0 grow basis-0 px-0 pt-0 lg:block">
         <ProductTitle title={data.title} links={data.titleNav} />
         <ProductVariantInfo
           data={data.variant}
@@ -122,15 +115,17 @@ export function ProductPurchasePanel({ data }: ProductPurchasePanelProps) {
         ) : null}
       </div>
 
-      {/* —— Desktop buy box —— */}
-      <div className="hidden w-full flex-col gap-2 lg:sticky lg:top-28 lg:flex lg:w-[300px] lg:shrink-0">
+      {/* —— Digikala desktop: sticky buy box (start / left in RTL) —— */}
+      <div className="hidden w-[300px] shrink-0 flex-col gap-2 lg:sticky lg:top-28 lg:flex">
         <ProductBuyBox data={buyBox} />
         {!inStock ? (
           <p className="rounded-lg border border-[var(--color-hint-object-error)]/30 bg-red-50 px-3 py-2 text-center text-xs font-medium text-[var(--color-hint-object-error)]">
             این ترکیب در حال حاضر موجود نیست
           </p>
         ) : null}
-        <ProductPricePolicyLink />
+        {data.showPricePolicy !== false ? (
+          <ProductPricePolicyLink label={data.pricePolicyLabel} />
+        ) : null}
       </div>
     </>
   );

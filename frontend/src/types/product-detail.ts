@@ -113,7 +113,11 @@ export type ProductBuyBoxData = {
   discountPercent?: number;
   /** Absolute savings tip shown above the price (تومان). */
   cheaperByAmount?: number;
+  /** When false, warranty row is hidden. */
+  showWarranty?: boolean;
   warranty: string;
+  /** When false, delivery block is hidden. */
+  showDelivery?: boolean;
   delivery: {
     title: string;
     methodLabel: string;
@@ -187,6 +191,8 @@ export type ProductSpecAttribute = {
   label: string;
   /** One or more values (bullets when length > 1). */
   values: string[];
+  /** Optional unit shown after the value (e.g. سانتی‌متر). */
+  unit?: string;
 };
 
 export type ProductSpecGroup = {
@@ -284,6 +290,9 @@ export type ProductDetailPageData = {
   returnNotice?: string;
   touchPoints?: ProductTouchPointsData;
   buyBox: ProductBuyBoxData;
+  /** Pricing-process link under the buy box (Digikala). Default true when omitted. */
+  showPricePolicy?: boolean;
+  pricePolicyLabel?: string;
   /** Desktop-only multi-seller offers under the main PDP block. */
   sellers?: ProductSellerOffer[];
   /** Tabbed content below sticky scroll menu. */

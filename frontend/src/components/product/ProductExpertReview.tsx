@@ -15,6 +15,7 @@ type ProductExpertReviewProps = {
 export function ProductExpertReview({ data }: ProductExpertReviewProps) {
   const [expanded, setExpanded] = useState(false);
   const body = expanded ? data.full : data.preview;
+  if (!data.preview?.trim() && !data.full?.trim()) return null;
 
   return (
     <div

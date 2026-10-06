@@ -353,43 +353,48 @@ function MobileSeller({ buyBox }: { buyBox: ProductBuyBoxData }) {
         </div>
       </Link>
 
-      <div className="flex items-start justify-start gap-3 px-4 py-0.5">
-        <div className="rounded-full bg-[var(--color-neutral-100)] p-2">
-          <GuaranteeIcon className="size-5 text-[var(--color-icon-high-emphasis)]" />
-        </div>
-        <div className="flex grow flex-col gap-1 border-b border-[var(--color-neutral-100)] py-3">
-          <span className="truncate text-[13px] font-semibold text-[var(--color-neutral-900)]">
-            {buyBox.warranty}
-          </span>
-        </div>
-      </div>
-
-      <div className="flex items-center justify-start gap-3 px-4 py-0.5">
-        <div className="rounded-full bg-[var(--color-neutral-100)] p-2">
-          <ProductAvailableIcon className="size-5 text-[var(--color-icon-high-emphasis)]" />
-        </div>
-        <div className="flex grow flex-col gap-1 border-b border-[var(--color-neutral-100)] py-3">
-          <div className="flex items-center justify-between">
-            <span className="truncate text-[13px] font-semibold text-[var(--color-neutral-900)]">
-              {buyBox.delivery.title}
-            </span>
-            <ChevronLeftIcon size={20} />
+      {buyBox.showWarranty !== false && buyBox.warranty ? (
+        <div className="flex items-start justify-start gap-3 px-4 py-0.5">
+          <div className="rounded-full bg-[var(--color-neutral-100)] p-2">
+            <GuaranteeIcon className="size-5 text-[var(--color-icon-high-emphasis)]" />
           </div>
-          <ul className="w-full">
-            <li className="ml-3 flex w-full items-center">
-              <span className="mr-2 flex items-center">
-                <span className="shrink-0 text-[13px] text-[var(--color-neutral-500)]">
-                  {buyBox.delivery.methodLabel}
-                </span>
-                <span className="mx-1 text-[var(--color-neutral-500)]">•</span>
-                <span className="text-[13px] font-semibold text-[var(--color-neutral-650)]">
-                  {buyBox.delivery.costLabel}
-                </span>
-              </span>
-            </li>
-          </ul>
+          <div className="flex grow flex-col gap-1 border-b border-[var(--color-neutral-100)] py-3">
+            <span className="truncate text-[13px] font-semibold text-[var(--color-neutral-900)]">
+              {buyBox.warranty}
+            </span>
+          </div>
         </div>
-      </div>
+      ) : null}
+
+      {buyBox.showDelivery !== false &&
+      (buyBox.delivery.methodLabel || buyBox.delivery.title) ? (
+        <div className="flex items-center justify-start gap-3 px-4 py-0.5">
+          <div className="rounded-full bg-[var(--color-neutral-100)] p-2">
+            <ProductAvailableIcon className="size-5 text-[var(--color-icon-high-emphasis)]" />
+          </div>
+          <div className="flex grow flex-col gap-1 border-b border-[var(--color-neutral-100)] py-3">
+            <div className="flex items-center justify-between">
+              <span className="truncate text-[13px] font-semibold text-[var(--color-neutral-900)]">
+                {buyBox.delivery.title}
+              </span>
+              <ChevronLeftIcon size={20} />
+            </div>
+            <ul className="w-full">
+              <li className="ml-3 flex w-full items-center">
+                <span className="mr-2 flex items-center">
+                  <span className="shrink-0 text-[13px] text-[var(--color-neutral-500)]">
+                    {buyBox.delivery.methodLabel}
+                  </span>
+                  <span className="mx-1 text-[var(--color-neutral-500)]">•</span>
+                  <span className="text-[13px] font-semibold text-[var(--color-neutral-650)]">
+                    {buyBox.delivery.costLabel}
+                  </span>
+                </span>
+              </li>
+            </ul>
+          </div>
+        </div>
+      ) : null}
 
       {buyBox.cheaperByAmount != null && buyBox.cheaperByAmount > 0 ? (
         <div className="mx-4 mt-2">

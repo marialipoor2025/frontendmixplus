@@ -45,7 +45,7 @@ export function ProductVariantInfo({
   return (
     <div
       id="pdp-variant"
-      className="flex w-full min-w-[300px] flex-col items-start justify-center gap-3"
+      className="flex w-full min-w-0 flex-col items-start justify-center gap-3"
     >
       <div className="h-px w-full grow bg-[var(--color-neutral-200)]" />
 
@@ -191,11 +191,8 @@ export function ProductVariantInfo({
         );
       })}
 
-      {activeSku ? (
-        <p className="text-xs text-[var(--color-neutral-500)]" dir="ltr">
-          SKU: {activeSku.sku}
-          {!activeSku.inStock ? " · ناموجود" : ""}
-        </p>
+      {activeSku && !activeSku.inStock ? (
+        <p className="text-xs text-[var(--color-hint-object-error)]">ناموجود</p>
       ) : null}
     </div>
   );

@@ -63,8 +63,8 @@ function mapProduct(row: ApiAdminProduct): AdminProduct {
     brandLogoUrl: row.brandLogoUrl ?? undefined,
     sellerId: row.sellerId,
     sellerName: row.sellerName,
-    categoryId: row.categoryId ?? null,
-    categoryName: row.categoryName ?? null,
+    categoryId: row.categoryId ?? undefined,
+    categoryName: row.categoryName ?? undefined,
     price: { amount: Number(row.price.amount), currency: row.price.currency },
     originalPrice: row.originalPrice
       ? {

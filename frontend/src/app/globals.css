@@ -91,9 +91,10 @@
   --dk-radius-lg: 12px;
 }
 
-/* Auth / admin pages: drop mobile bottom-nav padding from root body */
+/* Auth / admin / seller pages: drop mobile bottom-nav padding from root body */
 body:has([data-auth-page]),
-body:has([data-admin-page]) {
+body:has([data-admin-page]),
+body:has([data-seller-page]) {
   padding-bottom: 0;
 }
 

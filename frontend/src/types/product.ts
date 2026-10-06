@@ -26,4 +26,9 @@ export type Product = {
   /** Product condition: brand-new or used/refurbished. */
   condition?: "new" | "used";
   inStock: boolean;
+  /** Catalog category (for PDP breadcrumb / titleNav). */
+  categoryId?: string;
+  categoryName?: string;
+  categorySlug?: string;
+  categoryHref?: string;
 };

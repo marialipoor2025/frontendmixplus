@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { ChevronLeftIcon } from "@/components/layout/icons";
 import { ProductSectionTitle } from "@/components/product/ProductSectionTitle";
+import { formatFaMeasure } from "@/lib/format/persian";
 import type { ProductSpecGroup } from "@/types/product-detail";
 
 type ProductSpecsProps = {
@@ -30,7 +31,7 @@ function SpecRow({
             {values.length > 1 ? (
               <span className="ml-2 size-1.5 shrink-0 rounded-full bg-[var(--color-neutral-700)]" />
             ) : null}
-            {value}
+            {formatFaMeasure(value)}
           </p>
         ))}
       </div>
@@ -43,6 +44,7 @@ function SpecRow({
  */
 export function ProductSpecs({ groups }: ProductSpecsProps) {
   const [expanded, setExpanded] = useState(false);
+  if (!groups.length) return null;
   const hasHidden = groups.some(
     (g) => (g.previewCount ?? g.attributes.length) < g.attributes.length,
   );

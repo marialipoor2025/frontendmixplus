@@ -15,7 +15,7 @@ type ProductBreadcrumbProps = {
  */
 export function ProductBreadcrumb({
   items,
-  sellerCtaHref = "/sellers/join",
+  sellerCtaHref = "/seller/login",
   sellerCtaLabel = `فروش در ${siteConfig.nameFa}`,
 }: ProductBreadcrumbProps) {
   if (!items.length) return null;

@@ -51,7 +51,7 @@ function defaultColorOption(
 /**
  * Product detail page shell.
  * Mobile: Digikala — fixed mosaic under sticky chrome; opaque card scrolls over it.
- * Desktop: classic two-column PDP.
+ * Desktop: Digikala 3-column row (gallery | info | buy box), then full-width content.
  */
 export function ProductPage({ data, nav }: ProductPageProps) {
   const primaryImage = data.gallery.images[0];
@@ -78,6 +78,10 @@ export function ProductPage({ data, nav }: ProductPageProps) {
           <ProductBreadcrumb items={data.breadcrumb} />
         </div>
 
+        {/*
+          Digikala desktop top: three columns in one row.
+          Mobile: gallery spacer + overlapping content card from PurchasePanel.
+        */}
         <section className="relative mx-auto flex w-full min-w-0 max-w-[var(--page-max-width)] flex-col lg:flex-row lg:items-start lg:gap-4 lg:overflow-x-hidden lg:px-[var(--page-gutter)]">
           <ProductGallery
             title={data.title}
@@ -88,72 +92,63 @@ export function ProductPage({ data, nav }: ProductPageProps) {
             priceAmount={data.buyBox.price}
             breadcrumb={data.breadcrumb}
           />
-
-          {/*
-            Mobile: parent stays TRANSPARENT behind the card’s rounded top so
-            square white corners don’t show in the radius notches. Solid white
-            starts with the card itself, then continues below for lower sections.
-          */}
-          <div className="relative z-[2] w-full min-w-0 pb-28 lg:bg-transparent lg:pb-0">
-            <ProductPurchasePanel data={data} />
-
-            <div className="relative z-[2] bg-white lg:bg-transparent">
-              <div className="site-container">
-                <div className="hidden lg:block">
-                  <ProductInfoFooter />
-                </div>
-
-                {data.sellers?.length ? (
-                  <div className="hidden lg:block">
-                    <ProductSellersList sellers={data.sellers} />
-                  </div>
-                ) : null}
-
-                <div className="hidden lg:block">
-                  <ProductScrollTabs />
-                </div>
-
-                <div className="flex min-w-0 items-start gap-4">
-                  <div className="min-w-0 grow bg-white lg:overflow-x-hidden lg:bg-transparent">
-                    <ProductIntro data={data.content.intro} />
-                    <ProductExpertReview data={data.content.expertReview} />
-                    <ProductSpecs groups={data.content.specs} />
-                    <Suspense fallback={null}>
-                      <ProductComments
-                        data={data.content.comments}
-                        productSlug={data.slug}
-                        productTitle={data.title}
-                      />
-                    </Suspense>
-                    <ProductQuestions data={data.content.questions} />
-                  </div>
-
-                  {primaryImage ? (
-                    <div className="hidden shrink-0 self-start lg:sticky lg:top-[8.25rem] lg:block">
-                      <ProductMiniBuyBox
-                        title={data.title}
-                        imageUrl={primaryImage.url}
-                        color={defaultColor}
-                        buyBox={data.buyBox}
-                        sale={data.gallery.sale}
-                      />
-                    </div>
-                  ) : null}
-                </div>
-
-                {data.recommendationRails?.length ? (
-                  <div id="pdp-suggestions" className="bg-white lg:bg-transparent">
-                    <ProductRecommendationRails
-                      rails={data.recommendationRails}
-                    />
-                  </div>
-                ) : (
-                  <div id="pdp-suggestions" className="h-px" aria-hidden />
-                )}
-              </div>
-            </div>
-          </div>
+          <ProductPurchasePanel data={data} />
         </section>
+
+        {/* Full-width lower PDP (sellers, tabs, intro…) — not nested in a column */}
+        <div className="relative z-[2] bg-white lg:bg-transparent">
+          <div className="site-container">
+            <div className="hidden lg:block">
+              <ProductInfoFooter />
+            </div>
+
+            {data.sellers?.length ? (
+              <div className="hidden lg:block">
+                <ProductSellersList sellers={data.sellers} />
+              </div>
+            ) : null}
+
+            <div className="hidden lg:block">
+              <ProductScrollTabs />
+            </div>
+
+            <div className="flex min-w-0 items-start gap-4">
+              <div className="min-w-0 grow bg-white lg:overflow-x-hidden lg:bg-transparent">
+                <ProductIntro data={data.content.intro} />
+                <ProductExpertReview data={data.content.expertReview} />
+                <ProductSpecs groups={data.content.specs} />
+                <Suspense fallback={null}>
+                  <ProductComments
+                    data={data.content.comments}
+                    productSlug={data.slug}
+                    productTitle={data.title}
+                  />
+                </Suspense>
+                <ProductQuestions data={data.content.questions} />
+              </div>
+
+              {primaryImage ? (
+                <div className="hidden shrink-0 self-start lg:sticky lg:top-[8.25rem] lg:block">
+                  <ProductMiniBuyBox
+                    title={data.title}
+                    imageUrl={primaryImage.url}
+                    color={defaultColor}
+                    buyBox={data.buyBox}
+                    sale={data.gallery.sale}
+                  />
+                </div>
+              ) : null}
+            </div>
+
+            {data.recommendationRails?.length ? (
+              <div id="pdp-suggestions" className="bg-white lg:bg-transparent">
+                <ProductRecommendationRails rails={data.recommendationRails} />
+              </div>
+            ) : (
+              <div id="pdp-suggestions" className="h-px" aria-hidden />
+            )}
+          </div>
+        </div>
       </div>
 
       <div className="relative z-[2] bg-white lg:z-auto lg:bg-transparent">

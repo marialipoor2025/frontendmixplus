@@ -15,6 +15,7 @@ type ProductIntroProps = {
 export function ProductIntro({ data }: ProductIntroProps) {
   const [expanded, setExpanded] = useState(false);
   const text = expanded ? data.full : data.preview;
+  if (!data.preview?.trim() && !data.full?.trim()) return null;
 
   return (
     <article

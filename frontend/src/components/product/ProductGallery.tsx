@@ -132,8 +132,12 @@ function ensureMosaicImages(
   const out = [...images];
   let pad = 0;
   while (out.length < MOSAIC_TARGET_COUNT) {
-    const fallback = out[0]?.url ?? MOSAIC_PAD_URLS[0]!;
-    const url = MOSAIC_PAD_URLS[pad % MOSAIC_PAD_URLS.length] ?? fallback;
+    // Prefer repeating real product images so layout matches Digikala without unrelated placeholders.
+    const source = out[pad % Math.max(out.length, 1)] ?? out[0];
+    const url =
+      source?.url ??
+      MOSAIC_PAD_URLS[pad % MOSAIC_PAD_URLS.length] ??
+      "/placeholders/product-appliance.png";
     out.push({
       id: `mosaic-pad-${out.length + 1}`,
       url,
@@ -510,8 +514,8 @@ export function ProductGallery({
         ) : null}
       </div>
 
-      {/* —— Desktop column —— */}
-      <div className="hidden w-full min-w-0 shrink-0 flex-col lg:ml-4 lg:flex lg:w-[36%] lg:max-w-[580px]">
+      {/* —— Digikala desktop gallery column (end / right in RTL) —— */}
+      <div className="hidden w-full min-w-0 shrink-0 flex-col lg:flex lg:w-[34%] lg:max-w-[420px] xl:max-w-[480px]">
         {sale ? (
           <div className="mb-5 flex items-center justify-between gap-3 bg-[linear-gradient(90deg,rgb(22_114_221_/_0.08),rgb(237_25_68_/_0.08))] px-5 py-2 text-sm">
             <div className="flex items-center justify-center">
@@ -540,7 +544,7 @@ export function ProductGallery({
           </div>
         ) : null}
 
-        <div className="block max-w-[368px] xl:max-w-[580px]">
+        <div className="block w-full">
           <div className="relative flex w-full">
             <div className="flex flex-col gap-y-4 self-start text-[var(--color-neutral-900)]">
               {actions.map((action) => (

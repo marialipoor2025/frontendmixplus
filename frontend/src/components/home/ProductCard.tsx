@@ -123,7 +123,9 @@ export function ProductCard({
   showUsedLabel = false,
 }: ProductCardProps) {
   const hasDiscount =
-    Boolean(product.discountPercent) && Boolean(product.originalPrice);
+    Boolean(product.discountPercent) &&
+    Boolean(product.originalPrice) &&
+    product.originalPrice!.amount > product.price.amount;
   const brandLogoUrl = resolveBrandLogoUrl(
     product.brandId,
     product.brandLogoUrl,

@@ -27,7 +27,9 @@ export function HorizontalProductCard({
   className = "",
 }: HorizontalProductCardProps) {
   const hasDiscount =
-    Boolean(product.discountPercent) && Boolean(product.originalPrice);
+    Boolean(product.discountPercent) &&
+    Boolean(product.originalPrice) &&
+    product.originalPrice!.amount > product.price.amount;
   const hasRating = typeof product.rating === "number";
   const showSpecial =
     hasDiscount || product.badges?.includes("opportunity");

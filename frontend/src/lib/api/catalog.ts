@@ -4,6 +4,10 @@ import {
   getMockBrands,
   resolveMockBrand,
 } from "@/lib/mocks/brand-plp";
+import {
+  absoluteMediaUrl,
+  normalizeDiscountPricing,
+} from "@/lib/media-url";
 import type { Brand } from "@/types/brand";
 import type { Product, ProductBadge } from "@/types/product";
 import { apiClient } from "./client";
@@ -33,6 +37,10 @@ type CatalogProductDto = {
   badges?: string[] | null;
   condition?: "new" | "used" | null;
   inStock: boolean;
+  categoryId?: string | null;
+  categoryName?: string | null;
+  categorySlug?: string | null;
+  categoryHref?: string | null;
 };
 
 function mapBrand(dto: CatalogBrandDto): Brand {
@@ -45,24 +53,39 @@ function mapBrand(dto: CatalogBrandDto): Brand {
 }
 
 function mapProduct(dto: CatalogProductDto): Product {
+  const money = normalizeDiscountPricing({
+    price: Number(dto.price?.amount ?? 0),
+    originalPrice: dto.originalPrice?.amount,
+    discountPercent: dto.discountPercent,
+  });
+  const currency = dto.price?.currency || "IRT";
   return {
     id: dto.id,
     title: dto.title,
     slug: dto.slug,
-    imageUrl: dto.imageUrl,
+    imageUrl: absoluteMediaUrl(dto.imageUrl),
     brandId: dto.brandId,
     brandName: dto.brandName,
-    brandLogoUrl: dto.brandLogoUrl ?? undefined,
+    brandLogoUrl: dto.brandLogoUrl
+      ? absoluteMediaUrl(dto.brandLogoUrl)
+      : undefined,
     sellerId: dto.sellerId,
     sellerName: dto.sellerName,
-    price: dto.price,
-    originalPrice: dto.originalPrice ?? undefined,
-    discountPercent: dto.discountPercent ?? undefined,
+    price: { amount: money.price, currency },
+    originalPrice:
+      money.originalPrice != null
+        ? { amount: money.originalPrice, currency }
+        : undefined,
+    discountPercent: money.discountPercent,
     rating: dto.rating ?? undefined,
     reviewCount: dto.reviewCount ?? undefined,
     badges: (dto.badges as ProductBadge[] | null | undefined) ?? undefined,
     condition: dto.condition ?? undefined,
     inStock: dto.inStock,
+    categoryId: dto.categoryId ?? undefined,
+    categoryName: dto.categoryName ?? undefined,
+    categorySlug: dto.categorySlug ?? undefined,
+    categoryHref: dto.categoryHref ?? undefined,
   };
 }
 
@@ -163,6 +186,45 @@ export async function getProductsByCategorySlug(
   } catch {
     const { getMockCategoryProducts } = await import("@/lib/mocks/category-plp");
     return getMockCategoryProducts(slugParts);
+  }
+}
+
+/** Stock / used products PLP (`condition=used`). */
+export async function getStockProducts(
+  q?: string,
+  sort?: string,
+): Promise<Product[]> {
+  if (siteConfig.useMocks || !siteConfig.apiBaseUrl) {
+    const { mockHomePageData } = await import("@/lib/mocks/home");
+    const all = [
+      ...mockHomePageData.amazingOffers,
+      ...mockHomePageData.productRails.flatMap((r) => r.products),
+    ];
+    const map = new Map<string, Product>();
+    for (const p of all) {
+      if (p.condition === "used") map.set(p.id, p);
+    }
+    let rows = [...map.values()];
+    const needle = q?.trim().toLowerCase();
+    if (needle) {
+      rows = rows.filter((p) =>
+        `${p.title} ${p.brandName} ${p.slug}`.toLowerCase().includes(needle),
+      );
+    }
+    return rows;
+  }
+
+  try {
+    const rows = await apiClient<CatalogProductDto[]>("/api/catalog/products", {
+      query: {
+        condition: "used",
+        q: q?.trim() || undefined,
+        sort: sort || undefined,
+      },
+    });
+    return rows.map(mapProduct);
+  } catch {
+    return [];
   }
 }
 

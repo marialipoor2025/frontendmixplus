@@ -1,5 +1,9 @@
 import { siteConfig } from "@/config/site";
 import { apiClient } from "@/lib/api/client";
+import {
+  absoluteMediaUrl,
+  normalizeDiscountPricing,
+} from "@/lib/media-url";
 import type { Product, ProductBadge } from "@/types/product";
 import type { SearchSuggestion } from "@/lib/search-suggest";
 
@@ -31,19 +35,30 @@ type SuggestDto = {
 };
 
 function mapProduct(dto: CatalogProductDto): Product {
+  const money = normalizeDiscountPricing({
+    price: Number(dto.price?.amount ?? 0),
+    originalPrice: dto.originalPrice?.amount,
+    discountPercent: dto.discountPercent,
+  });
+  const currency = dto.price?.currency || "IRT";
   return {
     id: dto.id,
     title: dto.title,
     slug: dto.slug,
-    imageUrl: dto.imageUrl,
+    imageUrl: absoluteMediaUrl(dto.imageUrl),
     brandId: dto.brandId,
     brandName: dto.brandName,
-    brandLogoUrl: dto.brandLogoUrl ?? undefined,
+    brandLogoUrl: dto.brandLogoUrl
+      ? absoluteMediaUrl(dto.brandLogoUrl)
+      : undefined,
     sellerId: dto.sellerId,
     sellerName: dto.sellerName,
-    price: dto.price,
-    originalPrice: dto.originalPrice ?? undefined,
-    discountPercent: dto.discountPercent ?? undefined,
+    price: { amount: money.price, currency },
+    originalPrice:
+      money.originalPrice != null
+        ? { amount: money.originalPrice, currency }
+        : undefined,
+    discountPercent: money.discountPercent,
     rating: dto.rating ?? undefined,
     reviewCount: dto.reviewCount ?? undefined,
     badges: (dto.badges as ProductBadge[] | null | undefined) ?? undefined,

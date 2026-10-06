@@ -72,7 +72,7 @@ export const STATIC_PAGES: Record<string, StaticPageDef> = {
   },
   stock: {
     title: "کالاهای استوک",
-    description: "کالاهای استوک و فرصت‌های خرید اقتصادی.",
+    description: "لیست کالاهای استوک در /stock نمایش داده می‌شود.",
   },
   "services/install": {
     title: "نصب و سرویس",

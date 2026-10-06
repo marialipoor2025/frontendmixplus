@@ -1,21 +1,30 @@
 import { siteConfig } from "@/config/site";
 
-/** Make Catalog/Media paths loadable from the Next app (absolute API host). */
+/**
+ * Absolutize API-hosted media for the Next app.
+ * Static storefront assets (`/images/*`, `/placeholders/*`, `/brand/*`) stay
+ * on the Next origin — only `/api/media/*` lives on the ASP.NET host.
+ */
 export function absoluteMediaUrl(url: string): string {
   if (!url) return url;
   if (
     url.startsWith("http://") ||
     url.startsWith("https://") ||
     url.startsWith("blob:") ||
-    url.startsWith("data:") ||
-    url.startsWith("/placeholders/") ||
-    url.startsWith("/brand/")
+    url.startsWith("data:")
   ) {
     return url;
   }
+
+  const path = url.startsWith("/") ? url : `/${url}`;
+  // Backend media library only — do not rewrite Next public/ static files.
+  if (!path.startsWith("/api/media/") && !path.startsWith("/api/media?")) {
+    return path;
+  }
+
   const base = (siteConfig.apiBaseUrl || "").replace(/\/$/, "");
-  if (!base) return url;
-  return `${base}${url.startsWith("/") ? "" : "/"}${url}`;
+  if (!base) return path;
+  return `${base}${path}`;
 }
 
 /**

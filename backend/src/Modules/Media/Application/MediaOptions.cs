@@ -7,6 +7,12 @@ public sealed class MediaOptions
     /// <summary>Absolute or relative root folder for uploaded binaries (not in DB).</summary>
     public string RootPath { get; set; } = "storage/media";
 
+    /// <summary>
+    /// Optional folder that receives a copy of each uploaded original
+    /// (e.g. Digikala screenshot products directory for local review).
+    /// </summary>
+    public string? MirrorOriginalsPath { get; set; }
+
     /// <summary>Max upload size in bytes (default 8 MB).</summary>
     public long MaxUploadBytes { get; set; } = 8 * 1024 * 1024;
 }

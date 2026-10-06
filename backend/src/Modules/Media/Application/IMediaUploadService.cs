@@ -27,4 +27,12 @@ public interface IMediaUploadService
         Guid assetId,
         string variantKey,
         CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Copy originals into <see cref="MediaOptions.MirrorOriginalsPath"/> (optional product subfolder).
+    /// </summary>
+    Task MirrorOriginalsAsync(
+        IEnumerable<Guid> assetIds,
+        string? productSlug = null,
+        CancellationToken cancellationToken = default);
 }

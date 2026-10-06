@@ -69,6 +69,39 @@ public sealed class MediaModule : IModule
             .DisableAntiforgery()
             .WithName("UploadMedia");
 
+        group.MapPost("/mirror", async (
+                MirrorMediaRequest body,
+                IMediaUploadService media,
+                IAccessTokenValidator tokens,
+                HttpRequest request,
+                CancellationToken ct) =>
+            {
+                if (!await tokens.IsValidAsync(ReadBearer(request), ct))
+                {
+                    return Results.Unauthorized();
+                }
+
+                if (body.AssetIds is null || body.AssetIds.Count == 0)
+                {
+                    return Results.BadRequest(new { error = "assetIds required" });
+                }
+
+                var ids = new List<Guid>();
+                foreach (var raw in body.AssetIds)
+                {
+                    if (!Guid.TryParse(raw, out var id))
+                    {
+                        return Results.BadRequest(new { error = $"Invalid asset id: {raw}" });
+                    }
+
+                    ids.Add(id);
+                }
+
+                await media.MirrorOriginalsAsync(ids, body.ProductSlug, ct);
+                return Results.Ok(new { mirrored = ids.Count, productSlug = body.ProductSlug });
+            })
+            .WithName("MirrorMediaOriginals");
+
         group.MapGet("/{id:guid}/{variant}", async (
                 Guid id,
                 string variant,
@@ -86,6 +119,8 @@ public sealed class MediaModule : IModule
             })
             .WithName("GetMediaVariant");
     }
+
+    private sealed record MirrorMediaRequest(List<string>? AssetIds, string? ProductSlug);
 
     private static string? ReadBearer(HttpRequest request)
     {

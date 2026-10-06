@@ -73,7 +73,71 @@ public sealed class MediaUploadService(
         db.Assets.Add(asset);
         await db.SaveChangesAsync(cancellationToken);
 
+        TryWriteMirror(safeName, originalBytes, productSlug: null);
+
         return Result.Success(ToDto(asset));
+    }
+
+    public async Task MirrorOriginalsAsync(
+        IEnumerable<Guid> assetIds,
+        string? productSlug = null,
+        CancellationToken cancellationToken = default)
+    {
+        foreach (var assetId in assetIds.Distinct())
+        {
+            var asset = await db.Assets.AsNoTracking()
+                .FirstOrDefaultAsync(x => x.Id == assetId, cancellationToken);
+            if (asset is null) continue;
+
+            var original = asset.FindVariant(MediaVariantKeys.Original)
+                ?? asset.Variants.FirstOrDefault();
+            if (original is null) continue;
+
+            var relative = $"{asset.RelativeFolder}/{original.FileName}";
+            await using var stream = storage.OpenRead(relative);
+            if (stream is null) continue;
+
+            await using var buffer = new MemoryStream();
+            await stream.CopyToAsync(buffer, cancellationToken);
+            TryWriteMirror(asset.OriginalFileName, buffer.ToArray(), productSlug);
+        }
+    }
+
+    private void TryWriteMirror(string originalFileName, byte[] bytes, string? productSlug)
+    {
+        var mirrorRoot = options.Value.MirrorOriginalsPath;
+        if (string.IsNullOrWhiteSpace(mirrorRoot) || bytes.Length == 0) return;
+
+        try
+        {
+            var targetDir = string.IsNullOrWhiteSpace(productSlug)
+                ? Path.GetFullPath(mirrorRoot)
+                : Path.GetFullPath(Path.Combine(mirrorRoot, SanitizeFolder(productSlug)));
+            Directory.CreateDirectory(targetDir);
+
+            var safe = Path.GetFileName(originalFileName);
+            if (string.IsNullOrWhiteSpace(safe)) safe = "image.bin";
+            var dest = Path.Combine(targetDir, safe);
+            if (File.Exists(dest))
+            {
+                var stem = Path.GetFileNameWithoutExtension(safe);
+                var ext = Path.GetExtension(safe);
+                dest = Path.Combine(targetDir, $"{stem}-{DateTime.UtcNow:HHmmss}{ext}");
+            }
+
+            File.WriteAllBytes(dest, bytes);
+        }
+        catch
+        {
+            // Mirror is best-effort for local review; never fail the upload.
+        }
+    }
+
+    private static string SanitizeFolder(string slug)
+    {
+        var cleaned = string.Concat(slug.Trim().Select(ch =>
+            char.IsLetterOrDigit(ch) || ch is '-' or '_' ? ch : '-'));
+        return string.IsNullOrWhiteSpace(cleaned) ? "product" : cleaned;
     }
 
     public async Task<(Stream Stream, string ContentType, string FileName)?> OpenVariantAsync(

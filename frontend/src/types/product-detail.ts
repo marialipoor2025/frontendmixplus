@@ -229,9 +229,26 @@ export type ProductCommentsContent = {
   comments: ProductComment[];
 };
 
+export type ProductQuestionAnswer = {
+  id: string;
+  authorName: string;
+  authorAvatarUrl?: string;
+  /** Seller reply vs buyer/user reply. */
+  role?: "seller" | "buyer";
+  expertLabel?: string;
+  body: string;
+  dateLabel: string;
+  likes: number;
+  dislikes: number;
+};
+
 export type ProductQuestion = {
   id: string;
   text: string;
+  /** Primary answer shown on the card (optional). */
+  answer?: ProductQuestionAnswer;
+  /** Peek card stacked behind the primary answer when more replies exist. */
+  extraAnswer?: ProductQuestionAnswer;
 };
 
 export type ProductQuestionsContent = {

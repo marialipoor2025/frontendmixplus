@@ -4,17 +4,13 @@ using MixPlus.Modules.Identity.Application.Abstractions;
 namespace MixPlus.Modules.Identity.Infrastructure.Messaging;
 
 /// <summary>
-/// Dev/mock SMS — logs the message instead of calling a gateway.
-/// Replace with a real <see cref="ISmsSender"/> when <c>Sms:Provider</c> is not Mock.
+/// Dev/mock SMS — logs the OTP instead of calling a gateway.
 /// </summary>
 public sealed class MockSmsSender(ILogger<MockSmsSender> logger) : ISmsSender
 {
-    public Task SendAsync(string phone, string message, CancellationToken cancellationToken = default)
+    public Task SendOtpAsync(string phone, string code, CancellationToken cancellationToken = default)
     {
-        logger.LogInformation(
-            "[MockSMS] to={Phone} message={Message}",
-            phone,
-            message);
+        logger.LogInformation("[MockSMS] OTP to={Phone} code={Code}", phone, code);
         return Task.CompletedTask;
     }
 }

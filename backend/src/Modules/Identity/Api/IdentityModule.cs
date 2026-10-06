@@ -7,6 +7,7 @@ using MixPlus.BuildingBlocks.Application;
 using MixPlus.BuildingBlocks.Infrastructure;
 using MixPlus.Modules.Identity.Application.Abstractions;
 using MixPlus.Modules.Identity.Application.Auth;
+using MixPlus.Modules.Identity.Application.Options;
 using MixPlus.Modules.Identity.Infrastructure;
 using MixPlus.Modules.Identity.Infrastructure.Messaging;
 using MixPlus.Modules.Identity.Infrastructure.Persistence;
@@ -25,18 +26,23 @@ public sealed class IdentityModule : IModule
                 IdentityDbContext.Schema,
                 typeof(IdentityDbContext).Assembly.GetName().Name));
 
+        services.Configure<MelipayamakOptions>(configuration.GetSection(MelipayamakOptions.SectionName));
+        services.Configure<AdminStaffOptions>(configuration.GetSection(AdminStaffOptions.SectionName));
+
         var provider = configuration["Sms:Provider"] ?? "Mock";
-        if (string.Equals(provider, "Mock", StringComparison.OrdinalIgnoreCase))
+        if (string.Equals(provider, "Melipayamak", StringComparison.OrdinalIgnoreCase))
         {
-            services.AddSingleton<ISmsSender, MockSmsSender>();
-            services.AddSingleton<IEmailSender, MockEmailSender>();
+            services.AddHttpClient<ISmsSender, MelipayamakSmsSender>(client =>
+            {
+                client.Timeout = TimeSpan.FromSeconds(30);
+            });
         }
         else
         {
-            // Future: register HttpSmsSender / Kavenegar / etc.
             services.AddSingleton<ISmsSender, MockSmsSender>();
-            services.AddSingleton<IEmailSender, MockEmailSender>();
         }
+
+        services.AddSingleton<IEmailSender, MockEmailSender>();
 
         services.AddScoped<IOtpAuthService, OtpAuthService>();
         services.AddScoped<ISessionAuthService, SessionAuthService>();
@@ -53,19 +59,33 @@ public sealed class IdentityModule : IModule
 
         group.MapPost("/otp/start", async (StartOtpRequest body, IOtpAuthService auth, CancellationToken ct) =>
             {
-                var result = await auth.StartAsync(body, ct);
-                return result.IsSuccess
-                    ? Results.Ok(result.Value)
-                    : Results.BadRequest(new { error = result.Error });
+                try
+                {
+                    var result = await auth.StartAsync(body, ct);
+                    return result.IsSuccess
+                        ? Results.Ok(result.Value)
+                        : Results.BadRequest(new { error = result.Error });
+                }
+                catch (InvalidOperationException ex)
+                {
+                    return Results.BadRequest(new { error = ex.Message });
+                }
             })
             .WithName("StartOtp");
 
         group.MapPost("/otp/resend", async (ResendOtpRequest body, IOtpAuthService auth, CancellationToken ct) =>
             {
-                var result = await auth.ResendAsync(body, ct);
-                return result.IsSuccess
-                    ? Results.Ok(result.Value)
-                    : Results.BadRequest(new { error = result.Error });
+                try
+                {
+                    var result = await auth.ResendAsync(body, ct);
+                    return result.IsSuccess
+                        ? Results.Ok(result.Value)
+                        : Results.BadRequest(new { error = result.Error });
+                }
+                catch (InvalidOperationException ex)
+                {
+                    return Results.BadRequest(new { error = ex.Message });
+                }
             })
             .WithName("ResendOtp");
 
@@ -98,6 +118,7 @@ public sealed class IdentityModule : IModule
         endpoints.MapAdminCustomerEndpoints();
         endpoints.MapAdminAuditEndpoints();
         endpoints.MapAdminRoleEndpoints();
+        endpoints.MapAdminStaffEndpoints();
     }
 
     private static string? ReadBearer(HttpRequest request)

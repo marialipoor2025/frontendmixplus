@@ -151,18 +151,16 @@ public sealed class OtpAuthService(
         string plainCode,
         CancellationToken cancellationToken)
     {
-        var message = $"کد ورود میکس پلاس: {plainCode}";
-
         if (kind == OtpDestinationKind.Phone)
         {
-            await sms.SendAsync(destination, message, cancellationToken);
+            await sms.SendOtpAsync(destination, plainCode, cancellationToken);
             return;
         }
 
         await email.SendAsync(
             destination,
             "کد ورود میکس پلاس",
-            message,
+            $"کد ورود میکس پلاس: {plainCode}",
             cancellationToken);
     }
 

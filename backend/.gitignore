@@ -12,6 +12,7 @@ obj/
 
 ## Secrets / local
 appsettings.*.local.json
+appsettings.Local.json
 *.pfx
 .env
 .env.*

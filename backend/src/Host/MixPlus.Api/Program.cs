@@ -15,6 +15,9 @@ using MixPlus.Modules.Support.Api;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Optional local secrets (gitignored): Sms credentials, staff phones, etc.
+builder.Configuration.AddJsonFile("appsettings.Local.json", optional: true, reloadOnChange: true);
+
 builder.Services.ConfigureHttpJsonOptions(options =>
 {
     options.SerializerOptions.PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.CamelCase;

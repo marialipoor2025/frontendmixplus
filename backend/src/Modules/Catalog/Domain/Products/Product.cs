@@ -36,6 +36,13 @@ public sealed class Product : AggregateRoot
     public ProductCondition Condition { get; private set; } = ProductCondition.New;
     public bool InStock { get; private set; }
     public bool IsPublished { get; private set; }
+
+    /// <summary>
+    /// JSON blob for PDP sections managed by the seller wizard
+    /// (intro, expert review, features, fulfillment copy, lightweight variants draft).
+    /// </summary>
+    public string? PdpContentJson { get; private set; }
+
     public IReadOnlyCollection<ProductMediaItem> MediaItems => _mediaItems.AsReadOnly();
 
     public static Product Create(
@@ -78,6 +85,50 @@ public sealed class Product : AggregateRoot
     }
 
     public void SetPublished(bool isPublished) => IsPublished = isPublished;
+
+    public void ReplacePdpContent(string? json) =>
+        PdpContentJson = string.IsNullOrWhiteSpace(json) ? null : json;
+
+    /// <summary>Seller portal: update title/brand/category/stock without reassigning seller.</summary>
+    public void UpdateSellerBasics(
+        string title,
+        string slug,
+        string brandExternalKey,
+        string brandName,
+        ProductCondition condition,
+        bool inStock)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(title);
+        ArgumentException.ThrowIfNullOrWhiteSpace(slug);
+        ArgumentException.ThrowIfNullOrWhiteSpace(brandExternalKey);
+        ArgumentException.ThrowIfNullOrWhiteSpace(brandName);
+
+        Title = title.Trim();
+        Slug = slug.Trim().ToLowerInvariant();
+        BrandId = StableGuid.From(brandExternalKey.Trim());
+        BrandExternalKey = brandExternalKey.Trim();
+        BrandName = brandName.Trim();
+        Condition = condition;
+        InStock = inStock;
+    }
+
+    public void ApplyPricing(Money price, Money? originalPrice, int? discountPercent, bool inStock)
+    {
+        Price = price;
+        OriginalPrice = originalPrice;
+        DiscountPercent = discountPercent;
+        InStock = inStock;
+    }
+
+    /// <summary>Reassign product ownership to another seller master (denormalized keys).</summary>
+    public void AssignSeller(string sellerExternalKey, string sellerName)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(sellerExternalKey);
+        ArgumentException.ThrowIfNullOrWhiteSpace(sellerName);
+        SellerId = StableGuid.From(sellerExternalKey.Trim());
+        SellerExternalKey = sellerExternalKey.Trim();
+        SellerName = sellerName.Trim();
+    }
 
     public void ApplyDetails(
         string? brandLogoUrl,

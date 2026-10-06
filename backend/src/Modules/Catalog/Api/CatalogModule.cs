@@ -10,6 +10,7 @@ using MixPlus.BuildingBlocks.Infrastructure;
 using MixPlus.BuildingBlocks.Application.Contracts;
 using MixPlus.Modules.Catalog.Application.Abstractions;
 using MixPlus.Modules.Catalog.Application.Products;
+using MixPlus.Modules.Catalog.Domain.Categories;
 using MixPlus.Modules.Catalog.Domain.Products;
 using MixPlus.Modules.Catalog.Infrastructure;
 using MixPlus.Modules.Catalog.Infrastructure.Persistence;
@@ -43,11 +44,25 @@ public sealed class CatalogModule : IModule
                 CatalogDbContext db,
                 string? brandSlug,
                 string? categorySlug,
+                string? condition,
                 string? q,
                 string? sort,
                 CancellationToken ct) =>
             {
                 var query = db.Products.AsNoTracking().Where(x => x.IsPublished);
+
+                if (!string.IsNullOrWhiteSpace(condition))
+                {
+                    var cond = condition.Trim().ToLowerInvariant();
+                    if (cond is "used" or "stock" or "استوک")
+                    {
+                        query = query.Where(x => x.Condition == ProductCondition.Used);
+                    }
+                    else if (cond is "new" or "نو")
+                    {
+                        query = query.Where(x => x.Condition == ProductCondition.New);
+                    }
+                }
 
                 if (!string.IsNullOrWhiteSpace(brandSlug))
                 {
@@ -134,7 +149,7 @@ public sealed class CatalogModule : IModule
                 };
 
                 var rows = await query.ToListAsync(ct);
-                return Results.Ok(rows.Select(ToDto).ToList());
+                return Results.Ok(rows.Select(p => ToDto(p)).ToList());
             })
             .WithName("ListCatalogProducts");
 
@@ -148,9 +163,24 @@ public sealed class CatalogModule : IModule
                         x => x.IsPublished &&
                              (x.ExternalKey == productKey || x.Slug == productKey),
                         ct);
-                return product is null
-                    ? Results.NotFound(new { error = "محصول یافت نشد" })
-                    : Results.Ok(ToDto(product));
+                if (product is null)
+                {
+                    return Results.NotFound(new { error = "محصول یافت نشد" });
+                }
+
+                Category? category = null;
+                if (product.CategoryId is Guid categoryId)
+                {
+                    category = await db.Categories.AsNoTracking()
+                        .FirstOrDefaultAsync(c => c.Id == categoryId, ct);
+                }
+                else if (!string.IsNullOrWhiteSpace(product.CategoryExternalKey))
+                {
+                    category = await db.Categories.AsNoTracking()
+                        .FirstOrDefaultAsync(c => c.ExternalKey == product.CategoryExternalKey, ct);
+                }
+
+                return Results.Ok(ToDto(product, category));
             })
             .WithName("GetCatalogProduct");
 
@@ -199,15 +229,25 @@ public sealed class CatalogModule : IModule
         endpoints.MapReviewEndpoints();
         endpoints.MapProductMediaEndpoints();
         endpoints.MapSpecEndpoints();
+        endpoints.MapProductPdpContentEndpoints();
+        endpoints.MapSellerCatalogEndpoints();
     }
 
-    private static ProductCardDto ToDto(Product product)
+    private static ProductCardDto ToDto(Product product, Category? category = null)
     {
         IReadOnlyList<string>? badges = null;
         if (!string.IsNullOrWhiteSpace(product.BadgesJson))
         {
             badges = JsonSerializer.Deserialize<List<string>>(product.BadgesJson);
         }
+
+        var categoryId = category?.ExternalKey ?? product.CategoryExternalKey;
+        var categoryName = category?.Title ?? product.CategoryName;
+        var categorySlug = category?.Slug;
+        var categoryHref = category?.Href
+            ?? (string.IsNullOrWhiteSpace(categorySlug)
+                ? null
+                : $"/categories/{categorySlug}");
 
         return new ProductCardDto(
             product.ExternalKey,
@@ -228,7 +268,11 @@ public sealed class CatalogModule : IModule
             product.ReviewCount,
             badges,
             product.Condition == ProductCondition.Used ? "used" : "new",
-            product.InStock);
+            product.InStock,
+            categoryId,
+            categoryName,
+            categorySlug,
+            categoryHref);
     }
 
     /// <summary>

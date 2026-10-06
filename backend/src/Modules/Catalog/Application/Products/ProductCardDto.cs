@@ -18,7 +18,11 @@ public sealed record ProductCardDto(
     int? ReviewCount,
     IReadOnlyList<string>? Badges,
     string? Condition,
-    bool InStock);
+    bool InStock,
+    string? CategoryId = null,
+    string? CategoryName = null,
+    string? CategorySlug = null,
+    string? CategoryHref = null);
 
 public sealed record MoneyDto(decimal Amount, string Currency);
 

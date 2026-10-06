@@ -55,6 +55,7 @@ public sealed class CatalogDbContext : DbContext, ICatalogDbContext
             entity.HasIndex(x => x.CategoryId);
             entity.HasIndex(x => x.CategoryExternalKey);
             entity.Property(x => x.BadgesJson).HasColumnType("jsonb");
+            entity.Property(x => x.PdpContentJson).HasColumnType("jsonb");
             entity.OwnsOne(x => x.Price, money =>
             {
                 money.Property(m => m.Amount).HasColumnName("PriceAmount").HasPrecision(18, 2);

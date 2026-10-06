@@ -65,6 +65,14 @@ public sealed class ProductSku : AggregateRoot
         InStock = stock > 0;
     }
 
+    /** Sync SKU money fields when the product-level buy-box price changes. */
+    public void ApplyPricing(Money price, Money? originalPrice, int? discountPercent)
+    {
+        Price = price;
+        OriginalPrice = originalPrice;
+        DiscountPercent = discountPercent;
+    }
+
     public void AdjustStock(int onHand)
     {
         Stock = Math.Max(0, onHand);

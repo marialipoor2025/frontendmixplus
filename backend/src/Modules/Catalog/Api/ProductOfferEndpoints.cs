@@ -36,7 +36,7 @@ internal static class ProductOfferEndpoints
 
         if (offers.Count == 0)
         {
-            // Fallback: synthesize primary seller from the product card.
+            // Single-seller PDP: use product card + seller PdpContentJson for buy-box copy.
             return Results.Ok(new[]
             {
                 MapSynthetic(product),
@@ -69,24 +69,38 @@ internal static class ProductOfferEndpoints
         return Results.Ok(mapped);
     }
 
-    private static object MapSynthetic(Domain.Products.Product product) => new
+    private static object MapSynthetic(Domain.Products.Product product)
     {
-        id = product.SellerExternalKey,
-        name = product.SellerName,
-        href = $"/seller/{product.SellerExternalKey}",
-        isOfficial = true,
-        performanceLabel = "عالی",
-        deliveryLabel = "باربری توسط میکس پلاس",
-        warranty = "گارانتی اصالت و سلامت فیزیکی کالا",
-        price = product.Price.Amount,
-        originalPrice = product.OriginalPrice != null ? (decimal?)product.OriginalPrice.Amount : null,
-        discountPercent = product.DiscountPercent,
-        stats = new
+        var content = ProductPdpContentEndpoints.ReadContent(product);
+        var delivery =
+            !string.IsNullOrWhiteSpace(content?.DeliveryMethodLabel)
+                ? content!.DeliveryMethodLabel!
+            : !string.IsNullOrWhiteSpace(content?.DeliveryTitle)
+                ? content!.DeliveryTitle!
+                : "باربری توسط میکس پلاس";
+        var warranty = !string.IsNullOrWhiteSpace(content?.Warranty)
+            ? content!.Warranty!
+            : "گارانتی اصالت و سلامت فیزیکی کالا";
+
+        return new
         {
-            memberSinceLabel = "عضو رسمی میکس پلاس",
-            onTimeSupplyPercent = 100m,
-            shipCommitmentPercent = 100m,
-            noReturnPercent = 99m,
-        },
-    };
+            id = product.SellerExternalKey,
+            name = product.SellerName,
+            href = $"/seller/{product.SellerExternalKey}",
+            isOfficial = true,
+            performanceLabel = "عالی",
+            deliveryLabel = delivery,
+            warranty,
+            price = product.Price.Amount,
+            originalPrice = product.OriginalPrice != null ? (decimal?)product.OriginalPrice.Amount : null,
+            discountPercent = product.DiscountPercent,
+            stats = new
+            {
+                memberSinceLabel = "عضو رسمی میکس پلاس",
+                onTimeSupplyPercent = 100m,
+                shipCommitmentPercent = 100m,
+                noReturnPercent = 99m,
+            },
+        };
+    }
 }

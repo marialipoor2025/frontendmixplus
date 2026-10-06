@@ -89,7 +89,7 @@ export function AdminPageHeader({
 
 export type AdminColumn<T> = {
   key: string;
-  header: string;
+  header: ReactNode;
   cell: (row: T) => ReactNode;
   /** Tailwind width utility, e.g. w-[28%] or w-28 */
   widthClass?: string;

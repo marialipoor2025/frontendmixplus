@@ -73,6 +73,7 @@ export function MobileBottomNav() {
   const hideBottomNav =
     pathname.startsWith("/users") ||
     pathname.startsWith("/admin") ||
+    pathname.startsWith("/seller") ||
     pathname.startsWith("/product");
 
   useEffect(() => {

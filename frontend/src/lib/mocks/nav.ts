@@ -8,7 +8,7 @@ export const mockMainNavData: MainNavData = {
   categoryTriggerLabel: "دسته‌بندی کالا",
   sellerCta: {
     title: "فروشنده شو",
-    href: "/sellers/join",
+    href: "/seller/login",
   },
   quickLinks: [
     { id: "q-stock", title: "کالاهای استوک", href: "/stock", icon: "stock", badge: "جدید" },

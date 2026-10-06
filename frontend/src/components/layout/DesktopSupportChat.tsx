@@ -13,7 +13,11 @@ export function DesktopSupportChat() {
   const pathname = usePathname() || "/";
   const [open, setOpen] = useState(false);
 
-  if (pathname.startsWith("/users") || pathname.startsWith("/admin")) {
+  if (
+    pathname.startsWith("/users") ||
+    pathname.startsWith("/admin") ||
+    pathname.startsWith("/seller")
+  ) {
     return null;
   }
 

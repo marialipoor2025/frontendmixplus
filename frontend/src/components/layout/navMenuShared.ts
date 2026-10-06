@@ -2,7 +2,7 @@
 export const NAV_ACTION_LINKS = [
   {
     id: "seller",
-    href: "/sellers/join",
+    href: "/seller/login",
     title: "فروشنده شو",
     icon: "seller",
   },

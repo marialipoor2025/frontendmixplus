@@ -5,10 +5,13 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useId, useState, type FormEvent } from "react";
 import { siteConfig } from "@/config/site";
+import { getAdminStaffMe } from "@/lib/api/admin/staff";
 import { resendOtp, startOtp, verifyOtp } from "@/lib/api/auth";
+import { saveAdminSession } from "@/lib/admin/session";
 import { saveSession } from "@/lib/auth/session";
 
 type Step = "username" | "otp";
+type LoginMode = "customer" | "seller" | "admin";
 
 function isLikelyUsername(value: string) {
   const v = value.trim();
@@ -35,12 +38,21 @@ function safeReturnUrl(raw: string | null): string | null {
 type LoginFormCardProps = {
   /** Used when `returnUrl` query is absent (e.g. seller portal login). */
   defaultReturnUrl?: string;
+  /** customer / seller share storefront session; admin also resolves staff role. */
+  mode?: LoginMode;
+  title?: string;
+  subtitle?: string;
 };
 
 /**
- * Digikala-inspired auth card: identifier → OTP (Identity API + mock SMS).
+ * Shared OTP auth card for customer, seller, and admin (Identity + Melipayamak).
  */
-export function LoginFormCard({ defaultReturnUrl }: LoginFormCardProps = {}) {
+export function LoginFormCard({
+  defaultReturnUrl,
+  mode = "customer",
+  title,
+  subtitle,
+}: LoginFormCardProps = {}) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const usernameId = useId();
@@ -110,7 +122,16 @@ export function LoginFormCard({ defaultReturnUrl }: LoginFormCardProps = {}) {
     try {
       const result = await verifyOtp(challengeId, trimmed);
       saveSession(result.accessToken, result.user);
-      router.replace(returnUrl ?? "/profile");
+
+      if (mode === "admin") {
+        const staff = await getAdminStaffMe(result.accessToken);
+        saveAdminSession(result.accessToken, staff);
+        router.replace(returnUrl ?? "/admin");
+      } else if (mode === "seller") {
+        router.replace(returnUrl ?? "/seller/dashboard");
+      } else {
+        router.replace(returnUrl ?? "/profile");
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : "مشکلی پیش آمد. لطفاً دوباره تلاش کنید.");
     } finally {
@@ -183,10 +204,13 @@ export function LoginFormCard({ defaultReturnUrl }: LoginFormCardProps = {}) {
       {step === "username" ? (
         <>
           <h1 className="text-base font-bold leading-8 text-[#0c0c0c] sm:text-[15px]">
-            ورود یا ثبت‌نام در {siteConfig.nameFa}
+            {title ?? `ورود یا ثبت‌نام در ${siteConfig.nameFa}`}
           </h1>
           <p className="mt-2 text-sm font-medium leading-7 text-[#81858b]">
-            لطفا شماره موبایل یا ایمیل خود را وارد کنید
+            {subtitle ??
+              (mode === "admin"
+                ? "شماره موبایل مدیر را وارد کنید؛ کد یک‌بارمصرف پیامک می‌شود"
+                : "لطفا شماره موبایل یا ایمیل خود را وارد کنید")}
           </p>
 
           <form className="mt-5" onSubmit={handleUsernameSubmit} noValidate>

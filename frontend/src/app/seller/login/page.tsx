@@ -14,11 +14,16 @@ export default function SellerLoginPage() {
           پنل فروشنده میکس‌پلاس
         </p>
         <p className="mt-1 text-sm text-[var(--color-muted)]">
-          با شماره موبایل وارد شوید (کد تست: ۱۲۳۴۵۶)
+          با شماره موبایل وارد شوید؛ کد یک‌بارمصرف پیامک می‌شود
         </p>
       </div>
       <Suspense fallback={<p className="text-sm text-[var(--color-muted)]">در حال بارگذاری…</p>}>
-        <LoginFormCard defaultReturnUrl="/seller/dashboard" />
+        <LoginFormCard
+          mode="seller"
+          defaultReturnUrl="/seller/dashboard"
+          title="ورود فروشنده"
+          subtitle="شماره موبایل فروشنده را وارد کنید"
+        />
       </Suspense>
     </div>
   );

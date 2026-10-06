@@ -133,6 +133,31 @@ body {
   display: none;
 }
 
+/* Digikala-like smooth horizontal mosaic swipe on mobile PDP */
+.pdp-mosaic-scroll {
+  -webkit-overflow-scrolling: touch;
+  touch-action: pan-x;
+  overscroll-behavior-x: contain;
+  scroll-snap-type: x proximity;
+}
+
+.pdp-mosaic-scroll > * {
+  scroll-snap-align: start;
+}
+
+/* Digikala-style full-screen image pager («همه تصویرها») */
+.pdp-zoom-scroll {
+  -webkit-overflow-scrolling: touch;
+  touch-action: pan-x;
+  overscroll-behavior-x: contain;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.pdp-zoom-scroll::-webkit-scrollbar {
+  display: none;
+}
+
 @keyframes slowPing {
   0% {
     transform: scale(1);

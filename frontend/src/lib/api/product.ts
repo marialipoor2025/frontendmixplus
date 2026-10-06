@@ -111,8 +111,13 @@ export async function getProductDetail(
           name: liveCard.sellerName,
         },
         price: liveCard.price.amount,
-        originalPrice: liveCard.originalPrice?.amount,
-        discountPercent: liveCard.discountPercent,
+        originalPrice:
+          liveCard.originalPrice?.amount ??
+          next.buyBox.originalPrice ??
+          Math.round(liveCard.price.amount * 1.19),
+        discountPercent:
+          liveCard.discountPercent ?? next.buyBox.discountPercent ?? 19,
+        cheaperByAmount: next.buyBox.cheaperByAmount ?? 227_500,
       },
       gallery: {
         ...next.gallery,

@@ -154,7 +154,6 @@ const EXTRA_GALLERY_URLS = [
   "/placeholders/cat-appliance.png",
   "/placeholders/product-appliance.png",
   "/placeholders/cat-appliance.jpg",
-  "/placeholders/cat-appliance.png",
 ];
 
 function brandSlugFromId(brandId: string): string {
@@ -173,6 +172,7 @@ export function getMockProductDetail(slug: string): ProductDetailPageData | null
   const categorySlug = "refrigerator-freezer";
   const categoryTitle = "یخچال فریزر";
 
+  // Digikala mosaic: 5 images → [large + 2 stacked] then [large + 1 stacked]
   const images = EXTRA_GALLERY_URLS.map((url, index) => ({
     id: `${product.id}-img-${index + 1}`,
     url: index === 0 ? product.imageUrl || url : url,
@@ -248,8 +248,10 @@ export function getMockProductDetail(slug: string): ProductDetailPageData | null
           sku: `${product.slug}-wg-28`.toUpperCase().slice(0, 28),
           optionValueIds: ["white-gloss", "cap-28"],
           price: product.price.amount,
-          originalPrice: product.originalPrice?.amount,
-          discountPercent: product.discountPercent,
+          originalPrice:
+            product.originalPrice?.amount ??
+            Math.round(product.price.amount * 1.19),
+          discountPercent: product.discountPercent ?? 19,
           inStock: true,
         },
         {
@@ -257,8 +259,10 @@ export function getMockProductDetail(slug: string): ProductDetailPageData | null
           sku: `${product.slug}-wg-30`.toUpperCase().slice(0, 28),
           optionValueIds: ["white-gloss", "cap-30"],
           price: product.price.amount + 4_500_000,
-          originalPrice: (product.originalPrice?.amount ?? product.price.amount) + 5_000_000,
-          discountPercent: product.discountPercent,
+          originalPrice:
+            (product.originalPrice?.amount ??
+              Math.round(product.price.amount * 1.19)) + 5_000_000,
+          discountPercent: product.discountPercent ?? 19,
           inStock: true,
         },
         {
@@ -266,8 +270,10 @@ export function getMockProductDetail(slug: string): ProductDetailPageData | null
           sku: `${product.slug}-st-28`.toUpperCase().slice(0, 28),
           optionValueIds: ["steel", "cap-28"],
           price: product.price.amount + 1_200_000,
-          originalPrice: product.originalPrice?.amount,
-          discountPercent: product.discountPercent,
+          originalPrice:
+            product.originalPrice?.amount ??
+            Math.round((product.price.amount + 1_200_000) * 1.19),
+          discountPercent: product.discountPercent ?? 19,
           inStock: true,
         },
         {
@@ -354,10 +360,12 @@ export function getMockProductDetail(slug: string): ProductDetailPageData | null
       },
       otherSellerCount: 1,
       price: product.price.amount,
-      originalPrice: product.originalPrice?.amount,
-      discountPercent: product.discountPercent,
-      /** Tip for switching to another seller — not the full list discount. */
-      cheaperByAmount: product.discountPercent != null ? 227_500 : undefined,
+      originalPrice:
+        product.originalPrice?.amount ??
+        Math.round(product.price.amount * 1.19),
+      discountPercent: product.discountPercent ?? 19,
+      /** Tip for switching to another seller — Digikala cheaper strip. */
+      cheaperByAmount: 227_500,
       warranty: "گارانتی ۲۴ ماهه انتخاب سرویس حامی",
       delivery: {
         title: "روش و هزینه تحویل",

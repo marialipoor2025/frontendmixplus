@@ -41,8 +41,12 @@ export function ProductPurchasePanel({ data }: ProductPurchasePanelProps) {
   const buyBox = {
     ...data.buyBox,
     price: activeSku?.price ?? data.buyBox.price,
-    originalPrice: activeSku?.originalPrice ?? data.buyBox.originalPrice,
-    discountPercent: activeSku?.discountPercent ?? data.buyBox.discountPercent,
+    originalPrice:
+      activeSku?.originalPrice ??
+      data.buyBox.originalPrice ??
+      Math.round((activeSku?.price ?? data.buyBox.price) * 1.19),
+    discountPercent:
+      activeSku?.discountPercent ?? data.buyBox.discountPercent ?? 19,
   };
 
   const onSelectOption = (groupId: string, valueId: string) =>
@@ -59,8 +63,8 @@ export function ProductPurchasePanel({ data }: ProductPurchasePanelProps) {
       >
         {/*
           Soft shadow/gradient on the mosaic ABOVE the sheet edge + in the
-          rounded-corner notches (Digikala). Must sit outside the white card
-          so it paints on the images, not on a square white parent.
+          rounded-corner notches (Digikala). pointer-events-none so mosaic
+          horizontal swipe still works under the overlap.
         */}
         <div
           aria-hidden
@@ -76,7 +80,6 @@ export function ProductPurchasePanel({ data }: ProductPurchasePanelProps) {
         />
 
         <div className="relative overflow-hidden rounded-t-[var(--large-radius)] bg-white shadow-[0_-2px_12px_rgba(3,10,22,0.10)]">
-          {/* Subtle top wash on the white sheet itself */}
           <div
             aria-hidden
             className="pointer-events-none absolute inset-x-0 top-0 z-[1] h-10 bg-[linear-gradient(180deg,rgba(0,0,0,0.05)_0%,rgba(0,0,0,0)_100%)]"
@@ -86,7 +89,7 @@ export function ProductPurchasePanel({ data }: ProductPurchasePanelProps) {
             className="pointer-events-none absolute top-0 h-px w-full"
             aria-hidden
           />
-          <div className="relative z-[2] border-t border-[var(--color-neutral-100)] pb-3">
+          <div className="relative z-[2] pb-3">
             <ProductMobileContent
               data={data}
               selectedOptionValueIds={selected}

@@ -67,30 +67,19 @@ function Divider({ thick = false }: { thick?: boolean }) {
 }
 
 function SaleStrip({ sale }: { sale: ProductGallerySale }) {
-  const pct = Math.min(100, Math.max(0, sale.soldPercent));
   return (
-    <div className="relative -mb-2 w-full overflow-hidden">
-      <div className="absolute inset-x-0 top-0 z-[1] h-10 overflow-hidden">
-        <div className="h-full w-full" style={{ backgroundColor: "rgb(242, 177, 190)" }}>
-          <span
-            className="block h-full transition-[width] duration-1000"
-            style={{
-              width: `${pct}%`,
-              backgroundColor: "rgb(231, 19, 61)",
-            }}
-          />
-        </div>
-      </div>
+    <div className="relative w-full overflow-hidden">
+      {/* Digikala top edge — single full-width MixPlus gradient (no second progress stub) */}
       <div
-        className="relative z-[2] flex w-full items-center justify-between p-3 pb-5 text-[13px]"
-        style={{
-          backgroundColor: "rgb(246, 229, 233)",
-          color: "rgb(231, 19, 61)",
-        }}
-      >
-        <span className="font-semibold">{sale.label}</span>
+        className="h-1 w-full bg-gradient-to-l from-[#1672dd] to-[#ed1944]"
+        aria-hidden
+      />
+      <div className="flex w-full items-center justify-between bg-[rgb(255_242_245)] px-4 py-2.5 text-[13px]">
+        <span className="font-semibold text-[var(--color-primary-500)]">
+          {sale.label}
+        </span>
         <span className="text-[11px] text-[var(--color-neutral-500)]">
-          <span className="text-xs font-semibold text-[rgb(231,19,61)]">
+          <span className="text-xs font-semibold text-[var(--color-primary-500)]">
             {formatFa(sale.soldPercent, 0)}%
           </span>{" "}
           فروش رفته

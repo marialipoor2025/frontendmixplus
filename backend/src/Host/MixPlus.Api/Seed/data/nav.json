@@ -2,7 +2,7 @@
   "categoryTriggerLabel": "دسته‌بندی کالا",
   "sellerCta": {
     "title": "فروشنده شو",
-    "href": "/sellers/join"
+    "href": "/seller/login"
   },
   "quickLinks": [
     {

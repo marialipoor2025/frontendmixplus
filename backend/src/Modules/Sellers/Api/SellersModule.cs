@@ -5,7 +5,9 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using MixPlus.BuildingBlocks.Application;
+using MixPlus.BuildingBlocks.Application.Contracts;
 using MixPlus.BuildingBlocks.Infrastructure;
+using MixPlus.Modules.Sellers.Infrastructure;
 using MixPlus.Modules.Sellers.Infrastructure.Persistence;
 
 namespace MixPlus.Modules.Sellers.Api;
@@ -21,6 +23,8 @@ public sealed class SellersModule : IModule
                 configuration,
                 SellersDbContext.Schema,
                 typeof(SellersDbContext).Assembly.GetName().Name));
+
+        services.AddScoped<ISellerAccountReadPort, SellerAccountReadAdapter>();
     }
 
     public void MapEndpoints(IEndpointRouteBuilder endpoints)
@@ -42,5 +46,6 @@ public sealed class SellersModule : IModule
             .WithName("ListSellers");
 
         endpoints.MapAdminSellerEndpoints();
+        endpoints.MapSellerPortalEndpoints();
     }
 }

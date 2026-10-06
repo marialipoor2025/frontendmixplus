@@ -19,6 +19,11 @@ public sealed class Seller : AggregateRoot
     /// <summary>approved | pending | suspended</summary>
     public string Status { get; private set; } = "approved";
 
+    /// <summary>
+    /// Identity user id that owns this seller account (Guid-only cross-schema ref).
+    /// </summary>
+    public Guid? OwnerUserId { get; private set; }
+
     public static Seller Create(
         string externalKey,
         string name,
@@ -44,6 +49,19 @@ public sealed class Seller : AggregateRoot
         seller.SetStatus(status);
         return seller;
     }
+
+    /// <summary>Bind this seller shop to an Identity user (phone/email login).</summary>
+    public void AssignOwner(Guid ownerUserId)
+    {
+        if (ownerUserId == Guid.Empty)
+        {
+            throw new ArgumentException("Owner user id is required.", nameof(ownerUserId));
+        }
+
+        OwnerUserId = ownerUserId;
+    }
+
+    public void ClearOwner() => OwnerUserId = null;
 
     public void Update(string name, string? slug = null, decimal? rating = null)
     {

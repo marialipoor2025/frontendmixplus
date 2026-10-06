@@ -41,6 +41,7 @@ public sealed class IdentityModule : IModule
         services.AddScoped<IOtpAuthService, OtpAuthService>();
         services.AddScoped<ISessionAuthService, SessionAuthService>();
         services.AddScoped<IAccessTokenValidator, SessionAccessTokenValidator>();
+        services.AddScoped<ICurrentUserAccessor, CurrentUserAccessor>();
     }
 
     public void MapEndpoints(IEndpointRouteBuilder endpoints)

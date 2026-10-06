@@ -1,7 +1,6 @@
-import { renderStaticPage, staticPageMetadata } from "@/lib/render-static-page";
+import { redirect } from "next/navigation";
 
-export const metadata = staticPageMetadata("sellers/join");
-
+/** Legacy "become seller" URL → seller portal login. */
 export default function SellersJoinPage() {
-  return renderStaticPage("sellers/join");
+  redirect("/seller/login");
 }

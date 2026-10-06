@@ -32,15 +32,22 @@ function safeReturnUrl(raw: string | null): string | null {
   return decoded;
 }
 
+type LoginFormCardProps = {
+  /** Used when `returnUrl` query is absent (e.g. seller portal login). */
+  defaultReturnUrl?: string;
+};
+
 /**
  * Digikala-inspired auth card: identifier → OTP (Identity API + mock SMS).
  */
-export function LoginFormCard() {
+export function LoginFormCard({ defaultReturnUrl }: LoginFormCardProps = {}) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const usernameId = useId();
   const codeId = useId();
-  const returnUrl = safeReturnUrl(searchParams.get("returnUrl"));
+  const returnUrl =
+    safeReturnUrl(searchParams.get("returnUrl")) ??
+    safeReturnUrl(defaultReturnUrl ?? null);
 
   const [step, setStep] = useState<Step>("username");
   const [username, setUsername] = useState("");

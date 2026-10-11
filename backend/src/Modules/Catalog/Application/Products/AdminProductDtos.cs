@@ -22,7 +22,14 @@ public sealed record AdminProductDto(
     string? Condition,
     bool InStock,
     bool IsPublished,
-    IReadOnlyList<ProductMediaDto>? Gallery = null);
+    IReadOnlyList<ProductMediaDto>? Gallery = null,
+    string? SkuCode = null,
+    string? ImageAlt = null,
+    decimal? WeightKg = null,
+    bool AllowCashOnDelivery = false,
+    int MinOrderQuantity = 1,
+    string? MetaTitle = null,
+    string? MetaDescription = null);
 
 public sealed record ProductMediaDto(
     string Id,

@@ -249,11 +249,18 @@ public sealed class CatalogModule : IModule
                 ? null
                 : $"/categories/{categorySlug}");
 
+        var imageUrl = product.ImageUrl?.Trim() ?? string.Empty;
+        if (imageUrl.Equals("/placeholders/product-appliance.png", StringComparison.OrdinalIgnoreCase)
+            || imageUrl.EndsWith("/placeholders/product-appliance.png", StringComparison.OrdinalIgnoreCase))
+        {
+            imageUrl = string.Empty;
+        }
+
         return new ProductCardDto(
             product.ExternalKey,
             product.Title,
             product.Slug,
-            product.ImageUrl,
+            imageUrl,
             product.BrandExternalKey,
             product.BrandName,
             product.BrandLogoUrl,
@@ -272,7 +279,9 @@ public sealed class CatalogModule : IModule
             categoryId,
             categoryName,
             categorySlug,
-            categoryHref);
+            categoryHref,
+            product.SkuCode,
+            product.ImageAlt);
     }
 
     /// <summary>

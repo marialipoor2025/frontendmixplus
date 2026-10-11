@@ -22,7 +22,9 @@ public sealed record ProductCardDto(
     string? CategoryId = null,
     string? CategoryName = null,
     string? CategorySlug = null,
-    string? CategoryHref = null);
+    string? CategoryHref = null,
+    string? SkuCode = null,
+    string? ImageAlt = null);
 
 public sealed record MoneyDto(decimal Amount, string Currency);
 

@@ -67,6 +67,16 @@ internal static class ProductPdpContentEndpoints
             insuranceDiscountPercent = content.InsuranceDiscountPercent,
             sellerId = product.SellerExternalKey,
             sellerName = product.SellerName,
+            skuCode = product.SkuCode,
+            weightKg = product.WeightKg,
+            allowCashOnDelivery = product.AllowCashOnDelivery,
+            minOrderQuantity = product.MinOrderQuantity,
+            taxPercent = product.TaxPercent,
+            dutyPercent = product.DutyPercent,
+            metaTitle = product.MetaTitle,
+            metaDescription = product.MetaDescription,
+            metaKeywords = product.MetaKeywords,
+            imageAlt = product.ImageAlt,
         });
     }
 

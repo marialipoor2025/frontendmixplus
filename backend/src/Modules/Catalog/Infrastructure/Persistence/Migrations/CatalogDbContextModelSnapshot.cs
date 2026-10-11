@@ -198,6 +198,9 @@ namespace MixPlus.Modules.Catalog.Infrastructure.Persistence.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
+                    b.Property<bool>("AllowCashOnDelivery")
+                        .HasColumnType("boolean");
+
                     b.Property<string>("BadgesJson")
                         .HasColumnType("jsonb");
 
@@ -234,10 +237,18 @@ namespace MixPlus.Modules.Catalog.Infrastructure.Persistence.Migrations
                     b.Property<int?>("DiscountPercent")
                         .HasColumnType("integer");
 
+                    b.Property<decimal?>("DutyPercent")
+                        .HasPrecision(9, 2)
+                        .HasColumnType("numeric(9,2)");
+
                     b.Property<string>("ExternalKey")
                         .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("character varying(100)");
+
+                    b.Property<string>("ImageAlt")
+                        .HasMaxLength(300)
+                        .HasColumnType("character varying(300)");
 
                     b.Property<string>("ImageUrl")
                         .IsRequired()
@@ -249,6 +260,21 @@ namespace MixPlus.Modules.Catalog.Infrastructure.Persistence.Migrations
                     b.Property<bool>("IsPublished")
                         .HasColumnType("boolean");
 
+                    b.Property<string>("MetaDescription")
+                        .HasMaxLength(1000)
+                        .HasColumnType("character varying(1000)");
+
+                    b.Property<string>("MetaKeywords")
+                        .HasMaxLength(1000)
+                        .HasColumnType("character varying(1000)");
+
+                    b.Property<string>("MetaTitle")
+                        .HasMaxLength(300)
+                        .HasColumnType("character varying(300)");
+
+                    b.Property<int>("MinOrderQuantity")
+                        .HasColumnType("integer");
+
                     b.Property<string>("PdpContentJson")
                         .HasColumnType("jsonb");
 
@@ -257,6 +283,9 @@ namespace MixPlus.Modules.Catalog.Infrastructure.Persistence.Migrations
 
                     b.Property<int?>("ReviewCount")
                         .HasColumnType("integer");
+
+                    b.Property<string>("SchemaJson")
+                        .HasColumnType("jsonb");
 
                     b.Property<string>("SellerExternalKey")
                         .IsRequired()
@@ -271,15 +300,27 @@ namespace MixPlus.Modules.Catalog.Infrastructure.Persistence.Migrations
                         .HasMaxLength(200)
                         .HasColumnType("character varying(200)");
 
+                    b.Property<string>("SkuCode")
+                        .HasMaxLength(80)
+                        .HasColumnType("character varying(80)");
+
                     b.Property<string>("Slug")
                         .IsRequired()
                         .HasMaxLength(300)
                         .HasColumnType("character varying(300)");
 
+                    b.Property<decimal?>("TaxPercent")
+                        .HasPrecision(9, 2)
+                        .HasColumnType("numeric(9,2)");
+
                     b.Property<string>("Title")
                         .IsRequired()
                         .HasMaxLength(500)
                         .HasColumnType("character varying(500)");
+
+                    b.Property<decimal?>("WeightKg")
+                        .HasPrecision(18, 3)
+                        .HasColumnType("numeric(18,3)");
 
                     b.HasKey("Id");
 
@@ -289,6 +330,8 @@ namespace MixPlus.Modules.Catalog.Infrastructure.Persistence.Migrations
 
                     b.HasIndex("ExternalKey")
                         .IsUnique();
+
+                    b.HasIndex("SkuCode");
 
                     b.HasIndex("Slug")
                         .IsUnique();

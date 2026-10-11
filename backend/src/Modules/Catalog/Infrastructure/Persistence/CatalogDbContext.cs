@@ -56,6 +56,16 @@ public sealed class CatalogDbContext : DbContext, ICatalogDbContext
             entity.HasIndex(x => x.CategoryExternalKey);
             entity.Property(x => x.BadgesJson).HasColumnType("jsonb");
             entity.Property(x => x.PdpContentJson).HasColumnType("jsonb");
+            entity.Property(x => x.SkuCode).HasMaxLength(80);
+            entity.HasIndex(x => x.SkuCode);
+            entity.Property(x => x.WeightKg).HasPrecision(18, 3);
+            entity.Property(x => x.TaxPercent).HasPrecision(9, 2);
+            entity.Property(x => x.DutyPercent).HasPrecision(9, 2);
+            entity.Property(x => x.MetaTitle).HasMaxLength(300);
+            entity.Property(x => x.MetaDescription).HasMaxLength(1000);
+            entity.Property(x => x.MetaKeywords).HasMaxLength(1000);
+            entity.Property(x => x.ImageAlt).HasMaxLength(300);
+            entity.Property(x => x.SchemaJson).HasColumnType("jsonb");
             entity.OwnsOne(x => x.Price, money =>
             {
                 money.Property(m => m.Amount).HasColumnName("PriceAmount").HasPrecision(18, 2);

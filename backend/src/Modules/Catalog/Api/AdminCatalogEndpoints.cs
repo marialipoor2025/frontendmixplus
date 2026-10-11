@@ -336,7 +336,14 @@ internal static class AdminCatalogEndpoints
             product.Condition == ProductCondition.Used ? "used" : "new",
             product.InStock,
             product.IsPublished,
-            gallery.Count > 0 ? gallery : null);
+            gallery.Count > 0 ? gallery : null,
+            product.SkuCode,
+            product.ImageAlt,
+            product.WeightKg,
+            product.AllowCashOnDelivery,
+            product.MinOrderQuantity,
+            product.MetaTitle,
+            product.MetaDescription);
     }
 }
 

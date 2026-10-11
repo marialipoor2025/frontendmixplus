@@ -31,4 +31,7 @@ export type Product = {
   categoryName?: string;
   categorySlug?: string;
   categoryHref?: string;
+  /** Optional merchant SKU when provided by import/seller. */
+  skuCode?: string;
+  imageAlt?: string;
 };

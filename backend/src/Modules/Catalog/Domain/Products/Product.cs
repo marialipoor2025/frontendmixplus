@@ -43,6 +43,31 @@ public sealed class Product : AggregateRoot
     /// </summary>
     public string? PdpContentJson { get; private set; }
 
+    /// <summary>Optional merchant SKU / MPN from import or seller catalog.</summary>
+    public string? SkuCode { get; private set; }
+
+    /// <summary>Shipping weight in kilograms (optional).</summary>
+    public decimal? WeightKg { get; private set; }
+
+    public bool AllowCashOnDelivery { get; private set; }
+
+    public int MinOrderQuantity { get; private set; } = 1;
+
+    public decimal? TaxPercent { get; private set; }
+
+    public decimal? DutyPercent { get; private set; }
+
+    public string? MetaTitle { get; private set; }
+
+    public string? MetaDescription { get; private set; }
+
+    public string? MetaKeywords { get; private set; }
+
+    public string? ImageAlt { get; private set; }
+
+    /// <summary>Optional raw schema.org JSON for SEO (imported or authored).</summary>
+    public string? SchemaJson { get; private set; }
+
     public IReadOnlyCollection<ProductMediaItem> MediaItems => _mediaItems.AsReadOnly();
 
     public static Product Create(
@@ -187,6 +212,50 @@ public sealed class Product : AggregateRoot
         CategoryId = categoryId;
         CategoryExternalKey = categoryExternalKey.Trim();
         CategoryName = string.IsNullOrWhiteSpace(categoryName) ? null : categoryName.Trim();
+    }
+
+    /// <summary>
+    /// Commerce + SEO fields from spreadsheet / ERP import (weight, COD, meta, schema).
+    /// </summary>
+    public void ApplyCommerceAndSeo(
+        string? skuCode,
+        decimal? weightKg,
+        bool allowCashOnDelivery,
+        int minOrderQuantity,
+        decimal? taxPercent,
+        decimal? dutyPercent,
+        string? metaTitle,
+        string? metaDescription,
+        string? metaKeywords,
+        string? imageAlt,
+        string? schemaJson)
+    {
+        SkuCode = string.IsNullOrWhiteSpace(skuCode) ? null : skuCode.Trim();
+        WeightKg = weightKg is > 0 ? weightKg : null;
+        AllowCashOnDelivery = allowCashOnDelivery;
+        MinOrderQuantity = minOrderQuantity < 1 ? 1 : minOrderQuantity;
+        TaxPercent = taxPercent is >= 0 ? taxPercent : null;
+        DutyPercent = dutyPercent is >= 0 ? dutyPercent : null;
+        MetaTitle = Truncate(metaTitle, 300);
+        MetaDescription = Truncate(metaDescription, 1000);
+        MetaKeywords = Truncate(metaKeywords, 1000);
+        ImageAlt = Truncate(imageAlt, 300);
+        SchemaJson = string.IsNullOrWhiteSpace(schemaJson) ? null : schemaJson;
+    }
+
+    public void SetCardImage(string imageUrl)
+    {
+        if (!string.IsNullOrWhiteSpace(imageUrl))
+        {
+            ImageUrl = imageUrl.Trim();
+        }
+    }
+
+    private static string? Truncate(string? value, int max)
+    {
+        if (string.IsNullOrWhiteSpace(value)) return null;
+        var t = value.Trim();
+        return t.Length <= max ? t : t[..max];
     }
 
     /// <summary>

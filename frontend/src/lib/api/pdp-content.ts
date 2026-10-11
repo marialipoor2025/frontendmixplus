@@ -81,15 +81,21 @@ export async function getProductPdpContent(
           label: f.label,
           value: f.value,
         })),
-      showWarranty: row.showWarranty !== false,
+      showWarranty: row.showWarranty === true && Boolean(row.warranty?.trim()),
       warranty: row.warranty ?? "",
-      showDelivery: row.showDelivery !== false,
+      showDelivery:
+        row.showDelivery === true &&
+        Boolean(
+          row.deliveryTitle?.trim() ||
+            row.deliveryMethodLabel?.trim() ||
+            row.deliveryCostLabel?.trim(),
+        ),
       deliveryTitle: row.deliveryTitle ?? "",
       deliveryMethodLabel: row.deliveryMethodLabel ?? "",
       deliveryCostLabel: row.deliveryCostLabel ?? "",
-      showPricePolicy: row.showPricePolicy !== false,
-      pricePolicyLabel:
-        row.pricePolicyLabel || "فرآیند قیمت‌گذاری و نظارت بر قیمت",
+      showPricePolicy:
+        row.showPricePolicy === true && Boolean(row.pricePolicyLabel?.trim()),
+      pricePolicyLabel: row.pricePolicyLabel ?? "",
       insurance:
         showInsurance && row.insuranceTitle
           ? {

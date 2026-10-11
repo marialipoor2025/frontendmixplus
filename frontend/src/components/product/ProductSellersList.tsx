@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { AddToCartButton } from "@/components/cart/AddToCartButton";
 import {
   DeliveryExpressIcon,
   GuaranteeIcon,
@@ -7,10 +8,14 @@ import {
   TomanIcon,
 } from "@/components/layout/icons";
 import { formatDiscountPercent, formatPrice } from "@/lib/format";
+import type { AddCartItemInput } from "@/types/cart";
 import type { ProductSellerOffer } from "@/types/product-detail";
 
 type ProductSellersListProps = {
   sellers: ProductSellerOffer[];
+  productSlug: string;
+  productTitle: string;
+  imageUrl: string;
 };
 
 function formatPercent(value: number): string {
@@ -87,7 +92,33 @@ function SellerStatsHover({ offer }: { offer: ProductSellerOffer }) {
   );
 }
 
-function SellerRow({ offer }: { offer: ProductSellerOffer }) {
+function SellerRow({
+  offer,
+  productSlug,
+  productTitle,
+  imageUrl,
+}: {
+  offer: ProductSellerOffer;
+  productSlug: string;
+  productTitle: string;
+  imageUrl: string;
+}) {
+  const cartInput: AddCartItemInput = {
+    productSlug,
+    offerExternalKey: offer.id,
+    skuExternalKey: "default",
+    sellerExternalKey: offer.id,
+    sellerName: offer.name,
+    title: productTitle,
+    imageUrl,
+    unitPrice: offer.price,
+    originalPrice: offer.originalPrice,
+    discountPercent: offer.discountPercent,
+    currency: "IRT",
+    quantity: 1,
+    stockAvailable: 5,
+  };
+
   const nameNode = (
     <p className="ml-2 text-sm font-semibold text-[var(--color-neutral-700)]">
       {offer.name}
@@ -181,13 +212,12 @@ function SellerRow({ offer }: { offer: ProductSellerOffer }) {
             </div>
           </div>
           <div className="shrink-0">
-            <button
-              type="button"
-              data-testid="add-to-cart"
-              className="relative flex h-12 w-full min-w-[160px] select-none items-center justify-center rounded-[var(--medium-radius)] bg-[var(--color-primary-500)] px-4 text-sm font-medium text-white transition hover:bg-[var(--color-primary-700)]"
-            >
-              افزودن به سبد خرید
-            </button>
+            <AddToCartButton
+              input={cartInput}
+              testId="add-to-cart"
+              wrapperClassName="min-w-[160px]"
+              className="relative flex h-12 w-full min-w-[160px] select-none items-center justify-center rounded-[var(--medium-radius)] bg-[var(--color-primary-500)] px-4 text-sm font-medium text-white transition enabled:hover:bg-[var(--color-primary-700)]"
+            />
           </div>
         </div>
       </div>
@@ -198,7 +228,12 @@ function SellerRow({ offer }: { offer: ProductSellerOffer }) {
 /**
  * Desktop multi-seller offers under the main PDP columns.
  */
-export function ProductSellersList({ sellers }: ProductSellersListProps) {
+export function ProductSellersList({
+  sellers,
+  productSlug,
+  productTitle,
+  imageUrl,
+}: ProductSellersListProps) {
   if (sellers.length === 0) return null;
 
   return (
@@ -217,7 +252,13 @@ export function ProductSellersList({ sellers }: ProductSellersListProps) {
 
       <div className="divide-y divide-[var(--color-neutral-100)]">
         {sellers.map((offer) => (
-          <SellerRow key={offer.id} offer={offer} />
+          <SellerRow
+            key={offer.id}
+            offer={offer}
+            productSlug={productSlug}
+            productTitle={productTitle}
+            imageUrl={imageUrl}
+          />
         ))}
       </div>
     </section>

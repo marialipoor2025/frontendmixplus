@@ -1,4 +1,5 @@
 import Image from "next/image";
+import { AddToCartButton } from "@/components/cart/AddToCartButton";
 import {
   GuaranteeIcon,
   ProductAvailableIcon,
@@ -7,6 +8,7 @@ import {
 } from "@/components/layout/icons";
 import { formatDiscountPercent, formatPrice } from "@/lib/format";
 import { siteConfig } from "@/config/site";
+import type { AddCartItemInput } from "@/types/cart";
 import type {
   ProductBuyBoxData,
   ProductColorOption,
@@ -19,6 +21,8 @@ type ProductMiniBuyBoxProps = {
   color?: ProductColorOption;
   buyBox: ProductBuyBoxData;
   sale?: ProductGallerySale;
+  cartInput?: AddCartItemInput;
+  inStock?: boolean;
 };
 
 /**
@@ -30,6 +34,8 @@ export function ProductMiniBuyBox({
   color,
   buyBox,
   sale,
+  cartInput,
+  inStock = true,
 }: ProductMiniBuyBoxProps) {
   return (
     <aside
@@ -134,14 +140,24 @@ export function ProductMiniBuyBox({
         </div>
 
         <div className="flex items-center">
-          <button
-            type="button"
-            data-testid="add-to-cart"
-            data-cro-id="pdp-mini-add-to-cart"
-            className="relative flex h-12 w-full select-none items-center justify-center rounded-[var(--medium-radius)] bg-[var(--color-primary-500)] text-sm font-medium text-white transition hover:bg-[var(--color-primary-700)]"
-          >
-            افزودن به سبد خرید
-          </button>
+          {cartInput ? (
+            <AddToCartButton
+              input={cartInput}
+              disabled={!inStock}
+              testId="add-to-cart"
+              className="relative flex h-12 w-full select-none items-center justify-center rounded-[var(--medium-radius)] bg-[var(--color-primary-500)] text-sm font-medium text-white transition enabled:hover:bg-[var(--color-primary-700)] disabled:cursor-not-allowed disabled:bg-[var(--color-button-disable)] disabled:text-[var(--color-neutral-500)]"
+            />
+          ) : (
+            <button
+              type="button"
+              data-testid="add-to-cart"
+              data-cro-id="pdp-mini-add-to-cart"
+              disabled
+              className="relative flex h-12 w-full select-none items-center justify-center rounded-[var(--medium-radius)] bg-[var(--color-button-disable)] text-sm font-medium text-[var(--color-neutral-500)]"
+            >
+              افزودن به سبد خرید
+            </button>
+          )}
         </div>
       </div>
     </aside>

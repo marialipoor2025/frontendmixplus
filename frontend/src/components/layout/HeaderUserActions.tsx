@@ -9,11 +9,17 @@ import {
 } from "@/components/layout/icons";
 import { identityLabel } from "@/components/profile/profileNav";
 import {
+  CART_CHANGED_EVENT,
+  getCart,
+  getCartCount,
+} from "@/lib/api/cart";
+import {
   getWishlistCount,
   WISHLIST_CHANGED_EVENT,
 } from "@/lib/api/wishlist";
 import { AUTH_CHANGED_EVENT } from "@/lib/auth/session";
 import { useAuth } from "@/lib/auth/useAuth";
+import { formatPrice } from "@/lib/format";
 
 type HeaderUserActionsProps = {
   loginLabel?: string;
@@ -33,11 +39,13 @@ export function HeaderUserActions({
   loginHref = "/users/login",
   cartHref = "/checkout/cart/",
   wishlistHref = "/profile/wishlist",
-  cartCount = 0,
+  cartCount: cartCountProp = 0,
   emptyCartTitle = "سبد خرید شما خالی است!",
 }: HeaderUserActionsProps) {
   const { ready, isAuthenticated, user } = useAuth();
   const [hasFavorites, setHasFavorites] = useState(false);
+  const [cartCount, setCartCount] = useState(cartCountProp);
+  const [cartSubtotal, setCartSubtotal] = useState(0);
   const accountHref = isAuthenticated ? "/profile" : loginHref;
   const accountLabel =
     ready && isAuthenticated && user ? identityLabel(user) : loginLabel;
@@ -48,23 +56,37 @@ export function HeaderUserActions({
   useEffect(() => {
     if (!ready || !isAuthenticated) {
       setHasFavorites(false);
+      setCartCount(0);
+      setCartSubtotal(0);
       return;
     }
 
     let cancelled = false;
-    const refresh = () => {
+    const refreshWishlist = () => {
       void getWishlistCount().then((count) => {
         if (!cancelled) setHasFavorites(count > 0);
       });
     };
+    const refreshCart = () => {
+      void Promise.all([getCartCount(), getCart()]).then(([count, cart]) => {
+        if (cancelled) return;
+        setCartCount(count);
+        setCartSubtotal(cart?.payableBeforeShipping ?? 0);
+      });
+    };
 
-    refresh();
-    window.addEventListener(WISHLIST_CHANGED_EVENT, refresh);
-    window.addEventListener(AUTH_CHANGED_EVENT, refresh);
+    refreshWishlist();
+    refreshCart();
+    window.addEventListener(WISHLIST_CHANGED_EVENT, refreshWishlist);
+    window.addEventListener(CART_CHANGED_EVENT, refreshCart);
+    window.addEventListener(AUTH_CHANGED_EVENT, refreshWishlist);
+    window.addEventListener(AUTH_CHANGED_EVENT, refreshCart);
     return () => {
       cancelled = true;
-      window.removeEventListener(WISHLIST_CHANGED_EVENT, refresh);
-      window.removeEventListener(AUTH_CHANGED_EVENT, refresh);
+      window.removeEventListener(WISHLIST_CHANGED_EVENT, refreshWishlist);
+      window.removeEventListener(CART_CHANGED_EVENT, refreshCart);
+      window.removeEventListener(AUTH_CHANGED_EVENT, refreshWishlist);
+      window.removeEventListener(AUTH_CHANGED_EVENT, refreshCart);
     };
   }, [ready, isAuthenticated]);
 
@@ -101,11 +123,13 @@ export function HeaderUserActions({
             <div className="mt-2 flex w-full flex-col items-center gap-3">
               <div className="flex w-full items-center justify-between text-sm font-medium">
                 <span className="text-[var(--color-neutral-400)]">جمع کل</span>
-                <span>۰</span>
+                <span>{formatPrice(cartSubtotal)}</span>
               </div>
-              <p className="w-full text-center text-xs text-[var(--color-muted)]">
-                {emptyCartTitle}
-              </p>
+              {cartCount === 0 ? (
+                <p className="w-full text-center text-xs text-[var(--color-muted)]">
+                  {emptyCartTitle}
+                </p>
+              ) : null}
               <Link
                 href={cartHref}
                 className="inline-flex w-full items-center justify-center rounded-md bg-[var(--color-primary)] py-2 text-sm text-white"

@@ -1,15 +1,18 @@
 "use client";
 
+import { AddToCartButton } from "@/components/cart/AddToCartButton";
 import {
   InfoFilledIcon,
   TomanIcon,
 } from "@/components/layout/icons";
 import { formatDiscountPercent, formatPrice } from "@/lib/format";
+import type { AddCartItemInput } from "@/types/cart";
 import type { ProductBuyBoxData } from "@/types/product-detail";
 
 type ProductMobileBuyBarProps = {
   buyBox: ProductBuyBoxData;
   inStock: boolean;
+  cartInput?: AddCartItemInput;
 };
 
 /**
@@ -19,6 +22,7 @@ type ProductMobileBuyBarProps = {
 export function ProductMobileBuyBar({
   buyBox,
   inStock,
+  cartInput,
 }: ProductMobileBuyBarProps) {
   const hasDiscount =
     buyBox.originalPrice != null &&
@@ -41,14 +45,24 @@ export function ProductMobileBuyBar({
       ) : null}
 
       <div className="flex items-center justify-between gap-3 border-t border-[var(--color-neutral-100)] px-4 py-3">
-        <button
-          type="button"
-          data-testid="add-to-cart-mobile"
-          disabled={!inStock}
-          className="relative flex h-12 shrink-0 select-none items-center justify-center rounded-[var(--medium-radius)] bg-[var(--color-primary-500)] px-5 text-sm font-medium whitespace-nowrap text-white transition enabled:hover:bg-[var(--color-primary-700)] disabled:cursor-not-allowed disabled:bg-[var(--color-button-disable)] disabled:text-[var(--color-neutral-500)]"
-        >
-          {inStock ? "افزودن به سبد خرید" : "ناموجود"}
-        </button>
+        {cartInput ? (
+          <AddToCartButton
+            input={cartInput}
+            disabled={!inStock}
+            testId="add-to-cart-mobile"
+            wrapperClassName="shrink-0"
+            className="relative flex h-12 shrink-0 select-none items-center justify-center rounded-[var(--medium-radius)] bg-[var(--color-primary-500)] px-5 text-sm font-medium whitespace-nowrap text-white transition enabled:hover:bg-[var(--color-primary-700)] disabled:cursor-not-allowed disabled:bg-[var(--color-button-disable)] disabled:text-[var(--color-neutral-500)]"
+          />
+        ) : (
+          <button
+            type="button"
+            data-testid="add-to-cart-mobile"
+            disabled
+            className="relative flex h-12 shrink-0 select-none items-center justify-center rounded-[var(--medium-radius)] bg-[var(--color-button-disable)] px-5 text-sm font-medium whitespace-nowrap text-[var(--color-neutral-500)]"
+          >
+            {inStock ? "افزودن به سبد خرید" : "ناموجود"}
+          </button>
+        )}
 
         <div className="flex min-w-0 flex-col items-end">
           {hasDiscount ? (

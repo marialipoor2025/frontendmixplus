@@ -104,7 +104,12 @@ export function ProductPage({ data, nav }: ProductPageProps) {
 
             {data.sellers?.length ? (
               <div className="hidden lg:block">
-                <ProductSellersList sellers={data.sellers} />
+                <ProductSellersList
+                  sellers={data.sellers}
+                  productSlug={data.slug}
+                  productTitle={data.title}
+                  imageUrl={primaryImage?.url ?? ""}
+                />
               </div>
             ) : null}
 
@@ -135,6 +140,24 @@ export function ProductPage({ data, nav }: ProductPageProps) {
                     color={defaultColor}
                     buyBox={data.buyBox}
                     sale={data.gallery.sale}
+                    cartInput={{
+                      productSlug: data.slug,
+                      offerExternalKey: data.buyBox.seller.id,
+                      skuExternalKey:
+                        data.variant.skus.find((s) => s.inStock)?.id ??
+                        data.variant.skus[0]?.id ??
+                        "default",
+                      sellerExternalKey: data.buyBox.seller.id,
+                      sellerName: data.buyBox.seller.name,
+                      title: data.title,
+                      imageUrl: primaryImage.url,
+                      unitPrice: data.buyBox.price,
+                      originalPrice: data.buyBox.originalPrice,
+                      discountPercent: data.buyBox.discountPercent,
+                      currency: "IRT",
+                      quantity: 1,
+                      stockAvailable: 5,
+                    }}
                   />
                 </div>
               ) : null}

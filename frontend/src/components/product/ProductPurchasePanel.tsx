@@ -52,6 +52,28 @@ export function ProductPurchasePanel({ data }: ProductPurchasePanelProps) {
 
   const inStock = activeSku?.inStock ?? true;
 
+  const variantLabel = groups
+    .map((g) => g.values.find((v) => v.id === selected[g.id])?.label)
+    .filter(Boolean)
+    .join(" / ");
+
+  const cartInput = {
+    productSlug: data.slug,
+    offerExternalKey: buyBox.seller.id,
+    skuExternalKey: activeSku?.id ?? "default",
+    sellerExternalKey: buyBox.seller.id,
+    sellerName: buyBox.seller.name,
+    title: data.title,
+    imageUrl: data.gallery.images[0]?.url ?? "",
+    variantLabel: variantLabel || activeSku?.sku,
+    unitPrice: buyBox.price,
+    originalPrice: buyBox.originalPrice,
+    discountPercent: buyBox.discountPercent,
+    currency: "IRT",
+    quantity: 1,
+    stockAvailable: inStock ? 5 : 0,
+  };
+
   return (
     <>
       {/* —— Mobile Digikala content card (slides up over pinned mosaic) —— */}
@@ -93,7 +115,11 @@ export function ProductPurchasePanel({ data }: ProductPurchasePanelProps) {
           </div>
         </div>
       </div>
-      <ProductMobileBuyBar buyBox={buyBox} inStock={inStock} />
+      <ProductMobileBuyBar
+        buyBox={buyBox}
+        inStock={inStock}
+        cartInput={cartInput}
+      />
 
       {/* —— Digikala desktop: info column (center) —— */}
       <div className="hidden min-w-0 grow basis-0 px-0 pt-0 lg:block">
@@ -117,7 +143,7 @@ export function ProductPurchasePanel({ data }: ProductPurchasePanelProps) {
 
       {/* —— Digikala desktop: sticky buy box (start / left in RTL) —— */}
       <div className="hidden w-[300px] shrink-0 flex-col gap-2 lg:sticky lg:top-28 lg:flex">
-        <ProductBuyBox data={buyBox} />
+        <ProductBuyBox data={buyBox} cartInput={cartInput} inStock={inStock} />
         {!inStock ? (
           <p className="rounded-lg border border-[var(--color-hint-object-error)]/30 bg-red-50 px-3 py-2 text-center text-xs font-medium text-[var(--color-hint-object-error)]">
             این ترکیب در حال حاضر موجود نیست

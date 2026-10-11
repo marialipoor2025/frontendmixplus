@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { AddToCartButton } from "@/components/cart/AddToCartButton";
 import {
   ChevronLeftIcon,
   GuaranteeIcon,
@@ -8,10 +9,13 @@ import {
   TomanIcon,
 } from "@/components/layout/icons";
 import { formatDiscountPercent, formatPrice } from "@/lib/format";
+import type { AddCartItemInput } from "@/types/cart";
 import type { ProductBuyBoxData } from "@/types/product-detail";
 
 type ProductBuyBoxProps = {
   data: ProductBuyBoxData;
+  cartInput?: AddCartItemInput;
+  inStock?: boolean;
 };
 
 function formatOtherSellers(count: number): string {
@@ -21,7 +25,11 @@ function formatOtherSellers(count: number): string {
 /**
  * Sticky-style PDP buy box: seller, price, add-to-cart, warranty, delivery.
  */
-export function ProductBuyBox({ data }: ProductBuyBoxProps) {
+export function ProductBuyBox({
+  data,
+  cartInput,
+  inStock = true,
+}: ProductBuyBoxProps) {
   return (
     <aside
       data-testid="buy-box"
@@ -122,13 +130,22 @@ export function ProductBuyBox({ data }: ProductBuyBoxProps) {
           </div>
 
           <div className="flex items-center">
-            <button
-              type="button"
-              data-testid="add-to-cart"
-              className="relative flex h-12 w-full select-none items-center justify-center rounded-[var(--medium-radius)] bg-[var(--color-primary-500)] text-sm font-medium text-white transition hover:bg-[var(--color-primary-700)]"
-            >
-              افزودن به سبد خرید
-            </button>
+            {cartInput ? (
+              <AddToCartButton
+                input={cartInput}
+                disabled={!inStock}
+                className="relative flex h-12 w-full select-none items-center justify-center rounded-[var(--medium-radius)] bg-[var(--color-primary-500)] text-sm font-medium text-white transition enabled:hover:bg-[var(--color-primary-700)] disabled:cursor-not-allowed disabled:bg-[var(--color-button-disable)] disabled:text-[var(--color-neutral-500)]"
+              />
+            ) : (
+              <button
+                type="button"
+                data-testid="add-to-cart"
+                disabled
+                className="relative flex h-12 w-full select-none items-center justify-center rounded-[var(--medium-radius)] bg-[var(--color-button-disable)] text-sm font-medium text-[var(--color-neutral-500)]"
+              >
+                افزودن به سبد خرید
+              </button>
+            )}
           </div>
         </div>
       </div>

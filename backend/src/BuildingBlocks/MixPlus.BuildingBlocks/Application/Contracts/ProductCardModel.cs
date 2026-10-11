@@ -20,7 +20,8 @@ public sealed record ProductCardModel(
     int? ReviewCount,
     IReadOnlyList<string>? Badges,
     string? Condition,
-    bool InStock);
+    bool InStock,
+    string? CategoryId = null);
 
 public sealed record MoneyModel(decimal Amount, string Currency);
 

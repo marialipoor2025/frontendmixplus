@@ -51,7 +51,8 @@ public sealed record HomeProductDto(
     int? ReviewCount,
     IReadOnlyList<string>? Badges,
     string? Condition,
-    bool InStock);
+    bool InStock,
+    string? CategoryId = null);
 
 public sealed record HomeProductRailDto(
     string Id,

@@ -1,7 +1,12 @@
 import Image from "next/image";
 import Link from "next/link";
 import { TomanIcon } from "@/components/layout/icons";
+import { CategoryProductPlaceholder } from "@/components/product/CategoryProductPlaceholder";
 import { formatDiscountPercent, formatPrice } from "@/lib/format";
+import {
+  isMissingProductImage,
+  productPlaceholderSeed,
+} from "@/lib/product-image-placeholder";
 import type { Product } from "@/types/product";
 
 type ProductRecommendationCardProps = {
@@ -27,17 +32,21 @@ export function ProductRecommendationCard({
     >
       <div className="flex w-full items-center justify-center">
         <div
-          className="relative size-[140px] lg:size-[164px]"
+          className="relative size-[140px] overflow-hidden lg:size-[164px]"
           role="img"
           aria-label={product.title}
         >
-          <Image
-            src={product.imageUrl}
-            alt={product.title}
-            fill
-            sizes="(min-width: 1024px) 164px, 140px"
-            className="object-contain"
-          />
+          {isMissingProductImage(product.imageUrl) ? (
+            <CategoryProductPlaceholder seed={productPlaceholderSeed(product)} />
+          ) : (
+            <Image
+              src={product.imageUrl}
+              alt={product.title}
+              fill
+              sizes="(min-width: 1024px) 164px, 140px"
+              className="object-contain"
+            />
+          )}
         </div>
       </div>
 

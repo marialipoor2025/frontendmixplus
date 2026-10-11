@@ -15,9 +15,10 @@ function mapHomeProduct(p: Product): Product {
     discountPercent: p.discountPercent,
   });
   const currency = p.price?.currency || "IRT";
+  const imageUrl = p.imageUrl?.trim() ? absoluteMediaUrl(p.imageUrl) : "";
   return {
     ...p,
-    imageUrl: absoluteMediaUrl(p.imageUrl),
+    imageUrl,
     brandLogoUrl: p.brandLogoUrl
       ? absoluteMediaUrl(p.brandLogoUrl)
       : undefined,

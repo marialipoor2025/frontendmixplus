@@ -1,12 +1,17 @@
 import Image from "next/image";
 import Link from "next/link";
 import { TomanIcon } from "@/components/layout/icons";
+import { CategoryProductPlaceholder } from "@/components/product/CategoryProductPlaceholder";
 import { resolveBrandLogoUrl } from "@/lib/brand-logos";
 import {
   formatDiscountPercent,
   formatPrice,
   formatReviewCount,
 } from "@/lib/format";
+import {
+  isMissingProductImage,
+  productPlaceholderSeed,
+} from "@/lib/product-image-placeholder";
 import type { Product, ProductBadge } from "@/types/product";
 
 type ProductCardProps = {
@@ -184,19 +189,21 @@ export function ProductCard({
         ) : null}
 
         <div
-          className={`relative aspect-square min-w-0 flex-1 ${
+          className={`relative aspect-square min-w-0 flex-1 overflow-hidden rounded-sm ${
             showBadgeColumn ? "" : "w-full"
-          }`}
+          } ${product.inStock ? "" : "opacity-60"}`}
         >
-          <Image
-            src={product.imageUrl}
-            alt={product.title}
-            fill
-            sizes={PRODUCT_IMAGE_SIZES}
-            className={`object-contain p-1 sm:p-1.5 ${
-              product.inStock ? "" : "opacity-60"
-            }`}
-          />
+          {isMissingProductImage(product.imageUrl) ? (
+            <CategoryProductPlaceholder seed={productPlaceholderSeed(product)} />
+          ) : (
+            <Image
+              src={product.imageUrl}
+              alt={product.title}
+              fill
+              sizes={PRODUCT_IMAGE_SIZES}
+              className="object-contain p-1 sm:p-1.5"
+            />
+          )}
         </div>
       </div>
 

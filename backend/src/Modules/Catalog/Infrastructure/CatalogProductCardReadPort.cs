@@ -188,6 +188,25 @@ public sealed class CatalogProductCardReadPort(CatalogDbContext db) : IProductCa
         return prev[m];
     }
 
+    private const string DefaultProductPlaceholder = "/placeholders/product-appliance.png";
+
+    private static string NormalizeCardImageUrl(string? imageUrl)
+    {
+        if (string.IsNullOrWhiteSpace(imageUrl))
+        {
+            return string.Empty;
+        }
+
+        var trimmed = imageUrl.Trim();
+        if (trimmed.Equals(DefaultProductPlaceholder, StringComparison.OrdinalIgnoreCase)
+            || trimmed.EndsWith(DefaultProductPlaceholder, StringComparison.OrdinalIgnoreCase))
+        {
+            return string.Empty;
+        }
+
+        return trimmed;
+    }
+
     private static ProductCardModel ToModel(Product product)
     {
         IReadOnlyList<string>? badges = null;
@@ -200,7 +219,7 @@ public sealed class CatalogProductCardReadPort(CatalogDbContext db) : IProductCa
             product.ExternalKey,
             product.Title,
             product.Slug,
-            product.ImageUrl,
+            NormalizeCardImageUrl(product.ImageUrl),
             product.BrandExternalKey,
             product.BrandName,
             product.BrandLogoUrl,
@@ -215,6 +234,7 @@ public sealed class CatalogProductCardReadPort(CatalogDbContext db) : IProductCa
             product.ReviewCount,
             badges,
             product.Condition == ProductCondition.Used ? "used" : "new",
-            product.InStock);
+            product.InStock,
+            product.CategoryExternalKey);
     }
 }

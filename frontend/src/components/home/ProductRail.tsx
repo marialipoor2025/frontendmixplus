@@ -3,7 +3,13 @@ import Link from "next/link";
 import { ProductCard } from "@/components/home/ProductCard";
 import { ScrollHorizontalWrapper } from "@/components/home/ScrollHorizontalWrapper";
 import { ChevronLeftIcon } from "@/components/layout/icons";
+import { CategoryProductPlaceholder } from "@/components/product/CategoryProductPlaceholder";
+import {
+  isMissingProductImage,
+  productPlaceholderSeed,
+} from "@/lib/product-image-placeholder";
 import type { ProductRailSection } from "@/types/home";
+import type { Product } from "@/types/product";
 
 type ProductRailProps = {
   rail: ProductRailSection;
@@ -11,10 +17,12 @@ type ProductRailProps = {
 
 function SeeAllCard({
   href,
-  previewImages,
+  previewProducts,
+  railSeed,
 }: {
   href: string;
-  previewImages: string[];
+  previewProducts: Product[];
+  railSeed: string;
 }) {
   return (
     <Link
@@ -23,9 +31,9 @@ function SeeAllCard({
       className="flex min-w-[140px] shrink-0 flex-col items-center justify-center gap-3 lg:min-w-[164px]"
     >
       <span className="relative flex h-[100px] w-[100px] items-center justify-center">
-        {previewImages.slice(0, 3).map((src, index) => (
+        {previewProducts.slice(0, 3).map((product, index) => (
           <span
-            key={`${src}-${index}`}
+            key={`${product.id}-${index}`}
             className="absolute overflow-hidden rounded-md border border-[var(--color-neutral-200)] bg-[var(--color-neutral-000)] shadow-sm"
             style={{
               width: 56,
@@ -34,13 +42,19 @@ function SeeAllCard({
               zIndex: index,
             }}
           >
-            <Image
-              src={src}
-              alt=""
-              width={56}
-              height={56}
-              className="h-full w-full object-contain"
-            />
+            {isMissingProductImage(product.imageUrl) ? (
+              <CategoryProductPlaceholder
+                seed={productPlaceholderSeed(product) || railSeed}
+              />
+            ) : (
+              <Image
+                src={product.imageUrl}
+                alt=""
+                width={56}
+                height={56}
+                className="h-full w-full object-contain"
+              />
+            )}
           </span>
         ))}
       </span>
@@ -57,7 +71,7 @@ function SeeAllCard({
  */
 export function ProductRail({ rail }: ProductRailProps) {
   const seeAllHref = rail.href ?? "#";
-  const previewImages = rail.products.map((p) => p.imageUrl);
+  const railSeed = rail.href ?? rail.id;
 
   return (
     <section className="w-full" aria-label={rail.title}>
@@ -87,15 +101,30 @@ export function ProductRail({ rail }: ProductRailProps) {
 
         <ScrollHorizontalWrapper>
           <div className="flex w-max gap-3 pe-1">
-            {rail.products.map((product) => (
-              <ProductCard
-                key={product.id}
-                product={product}
-                showUsedLabel={rail.showUsedLabel}
-              />
-            ))}
+            {rail.products.map((product) => {
+              const withCategory: Product = {
+                ...product,
+                categoryId: product.categoryId ?? railSeed,
+                categoryHref: product.categoryHref ?? rail.href,
+              };
+              return (
+                <ProductCard
+                  key={product.id}
+                  product={withCategory}
+                  showUsedLabel={rail.showUsedLabel}
+                />
+              );
+            })}
             {rail.href && rail.products.length > 0 ? (
-              <SeeAllCard href={seeAllHref} previewImages={previewImages} />
+              <SeeAllCard
+                href={seeAllHref}
+                previewProducts={rail.products.map((product) => ({
+                  ...product,
+                  categoryId: product.categoryId ?? railSeed,
+                  categoryHref: product.categoryHref ?? rail.href,
+                }))}
+                railSeed={railSeed}
+              />
             ) : null}
           </div>
         </ScrollHorizontalWrapper>

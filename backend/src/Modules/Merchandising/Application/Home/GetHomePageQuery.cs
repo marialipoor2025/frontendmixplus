@@ -70,7 +70,8 @@ public sealed class GetHomePageQuery(
                     p.ReviewCount,
                     p.Badges,
                     p.Condition,
-                    p.InStock)
+                    p.InStock,
+                    p.CategoryId)
                 : null;
 
         var top = banners.FirstOrDefault(b => b.Slot == BannerSlot.Top);

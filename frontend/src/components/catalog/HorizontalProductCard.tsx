@@ -7,11 +7,16 @@ import {
   RatingStarIcon,
   TomanIcon,
 } from "@/components/layout/icons";
+import { CategoryProductPlaceholder } from "@/components/product/CategoryProductPlaceholder";
 import { siteConfig } from "@/config/site";
 import {
   formatDiscountPercent,
   formatPrice,
 } from "@/lib/format";
+import {
+  isMissingProductImage,
+  productPlaceholderSeed,
+} from "@/lib/product-image-placeholder";
 import type { Product } from "@/types/product";
 
 type HorizontalProductCardProps = {
@@ -50,16 +55,24 @@ export function HorizontalProductCard({
 
       <div className="relative flex grow flex-row">
         <div className="ms-0 me-3 flex shrink-0 flex-col items-center">
-          <div className="relative size-[118px] overflow-hidden rounded-lg">
-            <Image
-              src={product.imageUrl}
-              alt={product.title}
-              width={118}
-              height={118}
-              className={`size-full object-contain ${
-                product.inStock ? "" : "opacity-60"
-              }`}
-            />
+          <div
+            className={`relative size-[118px] overflow-hidden rounded-lg ${
+              product.inStock ? "" : "opacity-60"
+            }`}
+          >
+            {isMissingProductImage(product.imageUrl) ? (
+              <CategoryProductPlaceholder
+                seed={productPlaceholderSeed(product)}
+              />
+            ) : (
+              <Image
+                src={product.imageUrl}
+                alt={product.title}
+                width={118}
+                height={118}
+                className="size-full object-contain"
+              />
+            )}
           </div>
         </div>
 

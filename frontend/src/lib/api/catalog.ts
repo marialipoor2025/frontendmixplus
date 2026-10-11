@@ -41,6 +41,8 @@ type CatalogProductDto = {
   categoryName?: string | null;
   categorySlug?: string | null;
   categoryHref?: string | null;
+  skuCode?: string | null;
+  imageAlt?: string | null;
 };
 
 function mapBrand(dto: CatalogBrandDto): Brand {
@@ -63,7 +65,7 @@ function mapProduct(dto: CatalogProductDto): Product {
     id: dto.id,
     title: dto.title,
     slug: dto.slug,
-    imageUrl: absoluteMediaUrl(dto.imageUrl),
+    imageUrl: dto.imageUrl?.trim() ? absoluteMediaUrl(dto.imageUrl) : "",
     brandId: dto.brandId,
     brandName: dto.brandName,
     brandLogoUrl: dto.brandLogoUrl
@@ -86,6 +88,8 @@ function mapProduct(dto: CatalogProductDto): Product {
     categoryName: dto.categoryName ?? undefined,
     categorySlug: dto.categorySlug ?? undefined,
     categoryHref: dto.categoryHref ?? undefined,
+    skuCode: dto.skuCode ?? undefined,
+    imageAlt: dto.imageAlt ?? undefined,
   };
 }
 

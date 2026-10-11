@@ -22,6 +22,14 @@ function mediaRemotePatterns() {
       /* ignore bad env */
     }
   }
+
+  // Imported catalog images hosted on the legacy CDN (schema.org image URLs).
+  patterns.push({
+    protocol: "https",
+    hostname: "s3.webazto.ir",
+    pathname: "/**",
+  });
+
   return patterns;
 }
 

@@ -32,33 +32,56 @@ public static class SellerPortalSeeder
             x => x.ExternalKey == DemoSellerKey,
             cancellationToken);
 
+        // OwnerUserId is unique — if MixPlus (or another shop) already owns this phone, do not steal it.
+        var ownerTakenByOther = await sellers.Sellers.AnyAsync(
+            x => x.OwnerUserId == ownerUserId && x.ExternalKey != DemoSellerKey,
+            cancellationToken);
+
         if (seller is null)
         {
             seller = Seller.Create(DemoSellerKey, DemoSellerName, rating: 4.8m, status: "approved");
-            seller.AssignOwner(ownerUserId);
+            if (!ownerTakenByOther)
+            {
+                seller.AssignOwner(ownerUserId);
+            }
+
             sellers.Sellers.Add(seller);
             logger.LogInformation(
-                "Seller portal seed: created seller {Key} owned by user {UserId}",
+                "Seller portal seed: created seller {Key} owned by user {UserId} (ownerAssigned={Assigned})",
                 DemoSellerKey,
-                ownerUserId);
+                ownerUserId,
+                !ownerTakenByOther);
         }
         else
         {
-            // Always refresh name/owner so corrupted encodings from prior seeds are repaired.
-            seller.AssignOwner(ownerUserId);
+            // Always refresh name so corrupted encodings from prior seeds are repaired.
             seller.Update(DemoSellerName);
             seller.SetStatus("approved");
+            if (ownerTakenByOther)
+            {
+                if (seller.OwnerUserId == ownerUserId)
+                {
+                    seller.ClearOwner();
+                }
+            }
+            else
+            {
+                seller.AssignOwner(ownerUserId);
+            }
+
             logger.LogInformation(
-                "Seller portal seed: refreshed seller {Key} for user {UserId}",
+                "Seller portal seed: refreshed seller {Key} for user {UserId} (ownerAssigned={Assigned})",
                 DemoSellerKey,
-                ownerUserId);
+                ownerUserId,
+                !ownerTakenByOther);
         }
 
         await sellers.SaveChangesAsync(cancellationToken);
 
         // Assign a handful of published products so the dashboard is usable for PDP image uploads.
+        // Never steal MixPlus official catalog imports (external keys mp-*).
         var candidates = await catalog.Products
-            .Where(x => x.IsPublished)
+            .Where(x => x.IsPublished && !x.ExternalKey.StartsWith("mp-"))
             .OrderBy(x => x.ExternalKey)
             .Take(8)
             .ToListAsync(cancellationToken);

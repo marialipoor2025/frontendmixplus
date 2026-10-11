@@ -51,6 +51,7 @@ public static class DatabaseInitializer
         await HomeCompositionSeeder.SeedAsync(services, config, logger);
         await NavigationSeeder.SeedAsync(services, config, logger);
         await SellerPortalSeeder.SeedAsync(services, logger);
+        await MixPlusCatalogSeeder.SeedAsync(services, config, logger);
     }
 
     private static async Task MigrateModulesAsync(

@@ -25,6 +25,7 @@ public sealed class PromotionsModule : IModule
                 typeof(PromotionsDbContext).Assembly.GetName().Name));
 
         services.AddScoped<IOfferCampaignReadPort, OfferCampaignReadPort>();
+        services.AddScoped<ICouponValidationPort, CouponValidationAdapter>();
     }
 
     public void MapEndpoints(IEndpointRouteBuilder endpoints)

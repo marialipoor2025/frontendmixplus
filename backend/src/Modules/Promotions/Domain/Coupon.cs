@@ -46,4 +46,12 @@ public sealed class Coupon : AggregateRoot
         UsageLimit = Math.Max(0, usageLimit);
         IsActive = isActive;
     }
+
+    public bool TryIncrementUsage()
+    {
+        if (!IsActive) return false;
+        if (UsageLimit > 0 && UsageCount >= UsageLimit) return false;
+        UsageCount++;
+        return true;
+    }
 }

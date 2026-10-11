@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using MixPlus.BuildingBlocks.Application;
+using MixPlus.BuildingBlocks.Application.Contracts;
 using MixPlus.BuildingBlocks.Infrastructure;
 using MixPlus.Modules.Identity.Application.Abstractions;
 using MixPlus.Modules.Identity.Application.Auth;
@@ -46,6 +47,7 @@ public sealed class IdentityModule : IModule
 
         services.AddScoped<IOtpAuthService, OtpAuthService>();
         services.AddScoped<ISessionAuthService, SessionAuthService>();
+        services.AddScoped<IShopperSessionPort, ShopperSessionAdapter>();
         services.AddScoped<IAccessTokenValidator, SessionAccessTokenValidator>();
         services.AddScoped<ICurrentUserAccessor, CurrentUserAccessor>();
     }

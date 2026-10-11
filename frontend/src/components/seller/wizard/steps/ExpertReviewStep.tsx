@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import type { SellerProductDraft, SellerProductDescription } from "@/types/seller-wizard";
 import { PdpComponentPreview } from "../PdpComponentPreview";
 import {
@@ -24,6 +24,15 @@ export function ExpertReviewStep({ draft, onSave, onBack, onSkip }: Props) {
   const [full, setFull] = useState(draft.description.expertReview.full);
   const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    setTitle(draft.description.expertReview.title || "نقد و بررسی");
+    setFull(draft.description.expertReview.full);
+  }, [
+    draft.description.expertReview.title,
+    draft.description.expertReview.full,
+    draft.updatedAt,
+  ]);
 
   const expertReview = {
     title: title.trim() || "نقد و بررسی",

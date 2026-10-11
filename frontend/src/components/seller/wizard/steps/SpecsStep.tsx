@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import type { ProductSpecAttribute, ProductSpecGroup } from "@/types/product-detail";
 import type { SellerProductDraft } from "@/types/seller-wizard";
 import { SELLER_WIZARD_STEPS } from "@/lib/seller/wizard-steps";
@@ -90,6 +90,10 @@ export function SpecsStep({ draft, onSave, onBack, onSkip }: Props) {
   );
   const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    setGroups(draft.specs.length ? hydrateGroups(draft.specs) : [emptyGroup()]);
+  }, [draft.specs, draft.updatedAt]);
   const [dragAttr, setDragAttr] = useState<{
     groupId: string;
     index: number;

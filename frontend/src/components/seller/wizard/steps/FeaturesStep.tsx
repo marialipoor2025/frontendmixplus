@@ -1,8 +1,13 @@
 "use client";
 
-import { useState } from "react";
-import type { SellerProductDraft, SellerProductDescription } from "@/types/seller-wizard";
+import { useEffect, useState } from "react";
+import type { PdpSplitDraftPatch } from "@/lib/seller/apply-pdp-split";
+import type {
+  SellerProductDraft,
+  SellerProductDescription,
+} from "@/types/seller-wizard";
 import { PdpComponentPreview } from "../PdpComponentPreview";
+import { PdpPasteFormatPanel } from "../PdpPasteFormatPanel";
 import {
   WizardNavButtons,
   WizardStepChrome,
@@ -12,14 +17,26 @@ import {
 type Props = {
   draft: SellerProductDraft;
   onSave: (description: SellerProductDescription) => Promise<void> | void;
+  /** Apply Format result to draft (intro/expert/specs/warranty) before save. */
+  onApplyFormat: (patch: PdpSplitDraftPatch) => void;
   onBack?: () => void;
   onSkip?: () => void;
 };
 
-export function FeaturesStep({ draft, onSave, onBack, onSkip }: Props) {
+export function FeaturesStep({
+  draft,
+  onSave,
+  onApplyFormat,
+  onBack,
+  onSkip,
+}: Props) {
   const [features, setFeatures] = useState(draft.description.features);
   const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    setFeatures(draft.description.features);
+  }, [draft.description.features, draft.updatedAt]);
 
   const previewDraft = {
     ...draft,
@@ -39,10 +56,15 @@ export function FeaturesStep({ draft, onSave, onBack, onSkip }: Props) {
     }
   }
 
+  function handleApplyFormat(patch: PdpSplitDraftPatch) {
+    setFeatures(patch.description.features);
+    onApplyFormat(patch);
+  }
+
   return (
     <WizardStepChrome
       title="هایلایت ویژگی‌ها"
-      hint="کارت‌های ویژگی که کنار عنوان و در ستون خرید صفحه جزییات محصول دیده می‌شوند."
+      hint="کارت‌های ویژگی که کنار عنوان و در ستون خرید صفحه جزییات محصول دیده می‌شوند. با «فرمت» می‌توانید متن کامل را بچسبانید و بین بخش‌های PDP تقسیم کنید."
       pdpComponent="ProductFeatures"
       aside={
         <PdpComponentPreview draft={previewDraft} stepId="features" />
@@ -61,6 +83,16 @@ export function FeaturesStep({ draft, onSave, onBack, onSkip }: Props) {
           {error}
         </p>
       ) : null}
+
+      <PdpPasteFormatPanel
+        draft={draft}
+        onApply={handleApplyFormat}
+        initialText={
+          draft.description.intro.full ||
+          draft.description.expertReview.full ||
+          ""
+        }
+      />
 
       <div className="flex items-center justify-between">
         <p className="text-xs font-medium text-[var(--color-neutral-700)]">
@@ -120,7 +152,8 @@ export function FeaturesStep({ draft, onSave, onBack, onSkip }: Props) {
 
       {features.length === 0 ? (
         <p className="text-xs text-[var(--color-muted)]">
-          هنوز ویژگی‌ای نیست — می‌توانید رد کنید یا چند ردیف اضافه کنید.
+          هنوز ویژگی‌ای نیست — متن را بالا بچسبانید و «فرمت» را بزنید، یا چند ردیف
+          دستی اضافه کنید.
         </p>
       ) : null}
     </WizardStepChrome>

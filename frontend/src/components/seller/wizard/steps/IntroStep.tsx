@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import type { SellerProductDraft, SellerProductDescription } from "@/types/seller-wizard";
 import { PdpComponentPreview } from "../PdpComponentPreview";
 import {
@@ -21,6 +21,10 @@ export function IntroStep({ draft, onSave, onBack, onSkip }: Props) {
   const [full, setFull] = useState(draft.description.intro.full);
   const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    setFull(draft.description.intro.full);
+  }, [draft.description.intro.full, draft.updatedAt]);
 
   const intro = {
     full,

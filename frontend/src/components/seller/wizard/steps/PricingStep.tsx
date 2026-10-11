@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import type { SellerProductDraft, SellerProductPricing } from "@/types/seller-wizard";
 import { emptyPricing } from "@/types/seller-wizard";
 import { formatFaMoney } from "@/lib/format/persian";
@@ -158,6 +158,10 @@ export function PricingStep({ draft, onSave, onBack, onSkip }: Props) {
   );
   const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    setForm(normalizePricing(draft.pricing));
+  }, [draft.pricing, draft.updatedAt]);
 
   function patch(p: Partial<SellerProductPricing>) {
     setForm((prev) => ({ ...prev, ...p }));

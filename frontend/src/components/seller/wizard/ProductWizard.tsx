@@ -14,6 +14,7 @@ import {
   saveSellerProductSpecs,
   saveSellerProductVariants,
 } from "@/lib/api/seller-wizard";
+import type { PdpSplitDraftPatch } from "@/lib/seller/apply-pdp-split";
 import {
   ensureDraft,
   loadDraft,
@@ -36,6 +37,7 @@ import type {
   SellerProductPricing,
   SellerProductVariants,
   SellerWizardStepId,
+  SellerWizardStepStatus,
 } from "@/types/seller-wizard";
 import { normalizeStepStatus } from "@/types/seller-wizard";
 import { WizardStepper } from "./WizardStepper";
@@ -235,12 +237,58 @@ export function ProductWizard({ mode, productId, initialStep }: Props) {
     description: SellerProductDescription,
   ) {
     if (!draft) return;
-    const result = await saveSellerProductDescription(
-      { ...draft, description },
-      description,
-    );
-    setDraft(markStep(result, stepId, "saved"));
+    // Features Format may have filled intro/expert/specs/warranty locally —
+    // persist those together when possible so preview matches save.
+    let working: SellerProductDraft = { ...draft, description };
+    if (
+      stepId === "features" &&
+      draft.specs.length > 0 &&
+      draft.stepStatus.specs === "draft"
+    ) {
+      working = await saveSellerProductSpecs(working, draft.specs);
+    }
+    if (
+      stepId === "features" &&
+      draft.stepStatus.pricing === "draft" &&
+      draft.pricing.warranty.trim()
+    ) {
+      working = await saveSellerProductPricing(working, draft.pricing);
+    }
+    const result = await saveSellerProductDescription(working, description);
+    let next = markStep(result, stepId, "saved");
+    if (description.intro.full.trim()) {
+      next = markStep(next, "intro", "saved");
+    }
+    if (description.expertReview.full.trim()) {
+      next = markStep(next, "expertReview", "saved");
+    }
+    if (draft.stepStatus.specs === "draft" && draft.specs.length > 0) {
+      next = markStep(next, "specs", "saved");
+    }
+    if (draft.stepStatus.pricing === "draft") {
+      next = markStep(next, "pricing", "saved");
+    }
+    setDraft(next);
     goNext();
+  }
+
+  function applyPdpFormat(patch: PdpSplitDraftPatch) {
+    if (!draft) return;
+    const mergedStatus = {
+      ...draft.stepStatus,
+      ...(patch.stepStatus as Partial<
+        Record<SellerWizardStepId, SellerWizardStepStatus>
+      >),
+    };
+    setDraft(
+      saveDraft({
+        ...draft,
+        description: patch.description,
+        specs: patch.specs,
+        pricing: patch.pricing,
+        stepStatus: normalizeStepStatus(mergedStatus),
+      }),
+    );
   }
 
   async function persistPublish(publish: boolean) {
@@ -321,6 +369,7 @@ export function ProductWizard({ mode, productId, initialStep }: Props) {
             <FeaturesStep
               draft={draft}
               onSave={(d) => persistDescriptionPart("features", d)}
+              onApplyFormat={applyPdpFormat}
               onBack={goBack}
               onSkip={skipCurrent}
             />

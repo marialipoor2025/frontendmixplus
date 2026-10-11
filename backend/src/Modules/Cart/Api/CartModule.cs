@@ -30,6 +30,8 @@ public sealed class CartModule : IModule
             .WithTags("Cart")
             .WithName("CartHealth");
 
+        endpoints.MapCartEndpoints();
+        endpoints.MapCheckoutEndpoints();
         endpoints.MapAdminOrderEndpoints();
     }
 }

@@ -112,6 +112,11 @@ internal static class AdminCategoryEndpoints
             return Results.BadRequest(new { error = "دسته والد یافت نشد" });
         }
 
+        if (parentId is Guid newParent && await WouldCreateCycleAsync(db, category.Id, newParent, ct))
+        {
+            return Results.BadRequest(new { error = "نمی‌توان زیردسته را به عنوان والد انتخاب کرد" });
+        }
+
         var href = string.IsNullOrWhiteSpace(body.Href)
             ? $"/category/{slug}"
             : body.Href.Trim();
@@ -161,6 +166,29 @@ internal static class AdminCategoryEndpoints
         var parent = await db.Categories.AsNoTracking()
             .FirstOrDefaultAsync(x => x.ExternalKey == parentExternalKey, ct);
         return parent?.Id;
+    }
+
+    /// <summary>Walk ancestors of <paramref name="newParentId"/>; cycle if we hit <paramref name="nodeId"/>.</summary>
+    private static async Task<bool> WouldCreateCycleAsync(
+        CatalogDbContext db,
+        Guid nodeId,
+        Guid newParentId,
+        CancellationToken ct)
+    {
+        var current = newParentId;
+        var guard = 0;
+        while (guard++ < 10_000)
+        {
+            if (current == nodeId) return true;
+            var parent = await db.Categories.AsNoTracking()
+                .Where(x => x.Id == current)
+                .Select(x => x.ParentId)
+                .FirstOrDefaultAsync(ct);
+            if (parent is null) return false;
+            current = parent.Value;
+        }
+
+        return true;
     }
 
     private static AdminCategoryDto ToDto(

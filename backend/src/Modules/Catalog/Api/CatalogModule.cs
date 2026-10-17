@@ -206,18 +206,58 @@ public sealed class CatalogModule : IModule
                 var rows = await db.Categories.AsNoTracking()
                     .Where(x => x.IsActive)
                     .OrderBy(x => x.SortOrder)
-                    .Select(x => new CategoryDto(
-                        x.ExternalKey,
-                        x.Title,
-                        x.Href,
-                        x.ImageUrl,
-                        x.ParentId.HasValue ? x.ParentId.Value.ToString("D") : null,
-                        x.Slug,
-                        x.SortOrder))
+                    .ThenBy(x => x.Title)
                     .ToListAsync(ct);
-                return Results.Ok(rows);
+                var byId = rows.ToDictionary(x => x.Id);
+                var dtos = rows.Select(x => new CategoryDto(
+                    x.ExternalKey,
+                    x.Title,
+                    x.Href,
+                    x.ImageUrl,
+                    x.ParentId is Guid pid && byId.TryGetValue(pid, out var parent)
+                        ? parent.ExternalKey
+                        : null,
+                    x.Slug,
+                    x.SortOrder)).ToList();
+                return Results.Ok(dtos);
             })
             .WithName("ListCatalogCategories");
+
+        // Nested Digikala-style tree (unlimited depth).
+        group.MapGet("/categories/tree", async (CatalogDbContext db, CancellationToken ct) =>
+            {
+                var rows = await db.Categories.AsNoTracking()
+                    .Where(x => x.IsActive)
+                    .OrderBy(x => x.SortOrder)
+                    .ThenBy(x => x.Title)
+                    .ToListAsync(ct);
+                var byId = rows.ToDictionary(x => x.Id);
+                var children = rows
+                    .GroupBy(x => x.ParentId)
+                    .ToDictionary(g => g.Key ?? Guid.Empty, g => g.ToList());
+
+                List<object> Build(Guid? parentId)
+                {
+                    var key = parentId ?? Guid.Empty;
+                    if (!children.TryGetValue(key, out var list)) return [];
+                    return list.Select(c => (object)new
+                    {
+                        id = c.ExternalKey,
+                        title = c.Title,
+                        slug = c.Slug,
+                        href = c.Href,
+                        imageUrl = c.ImageUrl,
+                        parentId = c.ParentId is Guid pid && byId.TryGetValue(pid, out var p)
+                            ? p.ExternalKey
+                            : null,
+                        sortOrder = c.SortOrder,
+                        children = Build(c.Id),
+                    }).ToList();
+                }
+
+                return Results.Ok(Build(null));
+            })
+            .WithName("ListCatalogCategoryTree");
 
         endpoints.MapAdminCatalogEndpoints();
         endpoints.MapAdminCategoryEndpoints();

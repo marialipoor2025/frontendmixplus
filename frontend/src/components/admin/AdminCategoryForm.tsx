@@ -1,7 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { AdminButton, AdminOutlineButton } from "@/components/admin/AdminUi";
+import { flatCategoryOptionsWithDepth } from "@/lib/category-tree";
 import type { AdminCategory } from "@/types/admin";
 
 type Props = {
@@ -52,18 +53,29 @@ export function AdminCategoryForm({
     }
   }, [form.name, slugTouched]);
 
-  const parentOptions = parents.filter((p) => p.id !== form.id);
+  const parentOptions = useMemo(() => {
+    const flat = parents
+      .filter((p) => p.id !== form.id)
+      .map((p) => ({
+        id: p.id,
+        name: p.name,
+        slug: p.slug,
+        parentId: p.parentId ?? null,
+      }));
+    return flatCategoryOptionsWithDepth(flat).filter((o) => o.id !== form.id);
+  }, [parents, form.id]);
 
   return (
     <form
       className="space-y-4 rounded-xl border border-[var(--color-neutral-200)] bg-white p-4"
       onSubmit={(e) => {
         e.preventDefault();
-        const parent = parentOptions.find((p) => p.id === form.parentId);
+        const parentLabel =
+          parentOptions.find((p) => p.id === form.parentId)?.label ?? "—";
         onSave({
           ...form,
           id: form.id || `c-${Date.now()}`,
-          parent: parent?.name ?? "—",
+          parent: parentLabel,
           href: form.href || `/category/${form.slug}`,
         });
       }}
@@ -71,6 +83,9 @@ export function AdminCategoryForm({
       <h3 className="text-sm font-bold text-[var(--color-neutral-900)]">
         {initial ? "ویرایش دسته" : "دسته جدید"}
       </h3>
+      <p className="text-xs text-[var(--color-neutral-500)]">
+        ساختار دیجی‌کالا پایه است؛ می‌توانید در هر عمقی والد انتخاب یا ریشه جدید بسازید.
+      </p>
 
       <div className="grid gap-3 sm:grid-cols-2">
         <label className="block space-y-1 text-sm">
@@ -83,7 +98,7 @@ export function AdminCategoryForm({
           />
         </label>
         <label className="block space-y-1 text-sm">
-          <span className="text-[var(--color-neutral-600)]">والد</span>
+          <span className="text-[var(--color-neutral-600)]">والد (عمق نامحدود)</span>
           <select
             value={form.parentId ?? ""}
             onChange={(e) =>
@@ -97,7 +112,7 @@ export function AdminCategoryForm({
             <option value="">— ریشه —</option>
             {parentOptions.map((p) => (
               <option key={p.id} value={p.id}>
-                {p.name}
+                {p.label}
               </option>
             ))}
           </select>

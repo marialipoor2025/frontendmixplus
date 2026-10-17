@@ -325,7 +325,8 @@ public static class MixPlusCatalogSeeder
     }
 
     /// <summary>
-    /// One homepage product rail per MixPlus XLS category so uploaded catalog is visible on /.
+    /// Digikala-style homepage rails: broad appliance sections (any seller/brand) + popular products.
+    /// Replaces MixPlus-only leaf rails (rail-mp-*).
     /// </summary>
     private static async Task SeedCategoryHomeRailsAsync(
         CatalogDbContext catalog,
@@ -334,95 +335,119 @@ public static class MixPlusCatalogSeeder
         ILogger logger,
         CancellationToken ct)
     {
-        const string railPrefix = "rail-mp-";
+        _ = sellerExternalKey;
         const int maxPerRail = 16;
-        // After demo rails from home.json (sort 1..n).
         const int sortBase = 100;
 
-        var published = await catalog.Products.AsNoTracking()
-            .Where(x =>
-                x.IsPublished
-                && x.SellerExternalKey == sellerExternalKey
-                && x.CategoryExternalKey != null
-                && x.CategoryExternalKey.StartsWith("c-mp-"))
-            .Select(x => new
-            {
-                x.ExternalKey,
-                x.CategoryExternalKey,
-                x.CategoryName,
-            })
-            .ToListAsync(ct);
-
-        var categoryMeta = await catalog.Categories.AsNoTracking()
-            .Where(x => x.ExternalKey.StartsWith("c-mp-"))
-            .ToDictionaryAsync(x => x.ExternalKey, x => x, StringComparer.OrdinalIgnoreCase, ct);
-
-        var groups = published
-            .GroupBy(x => x.CategoryExternalKey!, StringComparer.OrdinalIgnoreCase)
-            .OrderByDescending(g => g.Count())
-            .ThenBy(g => g.First().CategoryName)
-            .ToList();
+        // Digikala «لوازم خانگی برقی» style sections → matching category keys (parent + MixPlus leaves).
+        var sections = new (string RailKey, string Title, string Href, string[] CategoryKeys)[]
+        {
+            ("rail-cat-builtin", "لوازم توکار", "/categories/built-in-appliances",
+            [
+                "cat-builtin",
+                "c-mp-87dd3abe33", "c-mp-bc077a334e", "c-mp-a5ea97f384", "c-mp-fbc904729c",
+                "c-mp-f03069e731", "c-mp-537da60363", "c-mp-barista", "c-mp-49ba62d328",
+                "c-mp-granite-sink", "c-mp-inset-fantasy-sink", "c-mp-outset-fantasy-sink",
+                "c-mp-undermount-sink", "c-mp-hand-made-box", "c-mp-7bca76d581", "c-mp-51d01b0a95",
+            ]),
+            ("rail-cat-cooking", "لوازم پخت و پز", "/categories/cooking",
+            [
+                "cat-cooking", "c-mp-01631b8e14", "c-mp-e4ddf0cfb9", "c-mp-276fbbf974", "c-mp-49ba62d328",
+            ]),
+            ("rail-cat-fridge", "یخچال و فریزر", "/categories/refrigerator-freezer", ["cat-fridge"]),
+            ("rail-cat-washer", "ماشین لباسشویی", "/categories/washing-machines", ["cat-washer"]),
+            ("rail-cat-dishwasher", "ماشین ظرفشویی", "/categories/dishwasher", ["cat-dishwasher"]),
+            ("rail-cat-tv", "تلویزیون", "/categories/tv", ["cat-tv", "cat-av"]),
+            ("rail-cat-vacuum", "جاروبرقی", "/categories/vaccum-cleaner", ["cat-vacuum"]),
+            ("rail-cat-air", "تهویه و سرمایش", "/categories/airtreatment", ["cat-air"]),
+        };
 
         var keepKeys = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
         var sort = sortBase;
         var railsTouched = 0;
 
-        foreach (var group in groups)
+        foreach (var section in sections)
         {
-            var categoryKey = group.Key;
-            var title = group.First().CategoryName?.Trim();
-            if (string.IsNullOrWhiteSpace(title))
+            var keys = section.CategoryKeys;
+            var products = await catalog.Products.AsNoTracking()
+                .Where(x =>
+                    x.IsPublished
+                    && x.CategoryExternalKey != null
+                    && keys.Contains(x.CategoryExternalKey))
+                .OrderByDescending(x => x.DiscountPercent ?? 0)
+                .ThenByDescending(x => x.Rating ?? 0)
+                .ThenBy(x => x.Title)
+                .Select(x => new { x.ExternalKey, x.SellerExternalKey })
+                .ToListAsync(ct);
+
+            if (products.Count == 0)
             {
-                title = categoryKey;
+                continue;
             }
 
-            var railKey = railPrefix + categoryKey;
-            if (railKey.Length > 100)
-            {
-                railKey = railKey[..100];
-            }
-
-            keepKeys.Add(railKey);
-
-            categoryMeta.TryGetValue(categoryKey, out var category);
-            var href = category?.Href;
-            if (string.IsNullOrWhiteSpace(href) && !string.IsNullOrWhiteSpace(category?.Slug))
-            {
-                href = $"/categories/{category.Slug}";
-            }
-
-            var productKeys = group
+            var productKeys = products
                 .Select(x => x.ExternalKey)
                 .Distinct(StringComparer.OrdinalIgnoreCase)
-                .OrderBy(x => x, StringComparer.OrdinalIgnoreCase)
                 .Take(maxPerRail)
                 .ToList();
+            var sellerCount = products
+                .Select(x => x.SellerExternalKey)
+                .Where(x => !string.IsNullOrWhiteSpace(x))
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .Count();
 
-            var subtitle = $"{group.Count()} کالا · میکس پلاس";
-            var existing = await merchandising.ProductRails.FirstOrDefaultAsync(
-                x => x.ExternalKey == railKey,
+            var subtitle = sellerCount > 1
+                ? $"{products.Count} کالا · {sellerCount} فروشنده"
+                : $"{products.Count} کالا";
+
+            keepKeys.Add(section.RailKey);
+            await UpsertRailAsync(
+                merchandising,
+                section.RailKey,
+                section.Title,
+                subtitle,
+                section.Href,
+                sort,
+                productKeys,
                 ct);
-
-            if (existing is null)
-            {
-                var rail = ProductRail.Create(railKey, title, sort, subtitle, href, showUsedLabel: false);
-                rail.SetProductKeys(productKeys);
-                merchandising.ProductRails.Add(rail);
-            }
-            else
-            {
-                existing.Update(title, subtitle, href, showUsedLabel: false, sortOrder: sort);
-                existing.SetProductKeys(productKeys);
-            }
-
             sort++;
             railsTouched++;
         }
 
-        var existingMpRails = await merchandising.ProductRails
-            .Where(x => x.ExternalKey.StartsWith(railPrefix))
+        // Popular = rating × reviews, then discount (marketplace-wide, not seller-specific).
+        var popularKeys = await catalog.Products.AsNoTracking()
+            .Where(x => x.IsPublished && x.InStock)
+            .OrderByDescending(x => (x.Rating ?? 0m) * (x.ReviewCount ?? 0))
+            .ThenByDescending(x => x.DiscountPercent ?? 0)
+            .ThenByDescending(x => x.ReviewCount ?? 0)
+            .Select(x => x.ExternalKey)
+            .Take(maxPerRail)
             .ToListAsync(ct);
-        var orphans = existingMpRails.Where(x => !keepKeys.Contains(x.ExternalKey)).ToList();
+
+        if (popularKeys.Count > 0)
+        {
+            const string popularKey = "rail-popular";
+            keepKeys.Add(popularKey);
+            await UpsertRailAsync(
+                merchandising,
+                popularKey,
+                "محبوب‌ترین‌ها",
+                "بر اساس امتیاز و تعداد دیدگاه خریداران",
+                "/search?sort=popular",
+                sortBase - 1,
+                popularKeys,
+                ct);
+            railsTouched++;
+        }
+
+        // Drop legacy MixPlus-only leaf rails and unused section rails.
+        var managed = await merchandising.ProductRails
+            .Where(x =>
+                x.ExternalKey.StartsWith("rail-mp-")
+                || x.ExternalKey.StartsWith("rail-cat-")
+                || x.ExternalKey == "rail-popular")
+            .ToListAsync(ct);
+        var orphans = managed.Where(x => !keepKeys.Contains(x.ExternalKey)).ToList();
         if (orphans.Count > 0)
         {
             merchandising.ProductRails.RemoveRange(orphans);
@@ -430,10 +455,36 @@ public static class MixPlusCatalogSeeder
 
         await merchandising.SaveChangesAsync(ct);
         logger.LogInformation(
-            "MixPlus home rails: upserted={Upserted} removedOrphans={Orphans} categories={Categories}",
+            "Marketplace home rails: upserted={Upserted} removedOrphans={Orphans} kept={Kept}",
             railsTouched,
             orphans.Count,
-            groups.Count);
+            keepKeys.Count);
+    }
+
+    private static async Task UpsertRailAsync(
+        MerchandisingDbContext merchandising,
+        string railKey,
+        string title,
+        string subtitle,
+        string href,
+        int sortOrder,
+        IReadOnlyList<string> productKeys,
+        CancellationToken ct)
+    {
+        var existing = await merchandising.ProductRails.FirstOrDefaultAsync(
+            x => x.ExternalKey == railKey,
+            ct);
+        if (existing is null)
+        {
+            var rail = ProductRail.Create(railKey, title, sortOrder, subtitle, href, showUsedLabel: false);
+            rail.SetProductKeys(productKeys);
+            merchandising.ProductRails.Add(rail);
+        }
+        else
+        {
+            existing.Update(title, subtitle, href, showUsedLabel: false, sortOrder: sortOrder);
+            existing.SetProductKeys(productKeys);
+        }
     }
 
     private static async Task<Seller> EnsureSellerAsync(
@@ -545,7 +596,16 @@ public static class MixPlusCatalogSeeder
                     href = $"/categories/{slug}";
                 }
 
-                category = Category.Create(key, title, slug, href, imageUrl: null, parentId: null, sortOrder: order++);
+                // Prefer Digikala parents when present (tree seeder runs first).
+                Guid? parentId = null;
+                var preferredParent = PreferParentKey(key);
+                if (preferredParent is not null)
+                {
+                    parentId = (await catalog.Categories.AsNoTracking()
+                        .FirstOrDefaultAsync(x => x.ExternalKey == preferredParent, ct))?.Id;
+                }
+
+                category = Category.Create(key, title, slug, href, imageUrl: null, parentId, sortOrder: order++);
                 catalog.Categories.Add(category);
             }
             else
@@ -561,6 +621,21 @@ public static class MixPlusCatalogSeeder
         logger.LogInformation("MixPlus seed: ensured {Count} categories", map.Count);
         return map;
     }
+
+    private static string? PreferParentKey(string categoryKey) =>
+        categoryKey.Trim().ToLowerInvariant() switch
+        {
+            "cat-cooktop" or "cat-oven" or "cat-hood" or "cat-sink" or "cat-microwave-builtin"
+                => "cat-builtin",
+            "cat-stove" or "cat-microwave" => "cat-cooking",
+            "cat-av" => "cat-tv",
+            "cat-fridge" or "cat-washer" or "cat-dishwasher" or "cat-vacuum"
+                or "cat-air" or "cat-tv" or "cat-cooking" or "cat-drink"
+                or "cat-foodproc" or "cat-iron" or "cat-water" or "cat-steam"
+                or "cat-sewing" or "cat-builtin"
+                => DigikalaCategoryTreeSeeder.RootKey,
+            _ => DigikalaCategoryTreeSeeder.RootKey,
+        };
 
     private static string ResolveBrandKey(string? brandName, Brand defaultBrand)
     {

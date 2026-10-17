@@ -9,6 +9,7 @@ import {
   type CatalogBrandOption,
   type CatalogCategoryOption,
 } from "@/lib/api/catalog-lookups";
+import { CategoryTreePicker } from "../CategoryTreePicker";
 import { PdpComponentPreview } from "../PdpComponentPreview";
 import {
   WizardField,
@@ -36,7 +37,6 @@ export function BasicsStep({ draft, onSave, onBack, onSkip }: Props) {
   const [categories, setCategories] = useState<CatalogCategoryOption[]>([]);
   const [lookupsLoading, setLookupsLoading] = useState(true);
   const [brandMode, setBrandMode] = useState<"pick" | "custom">("pick");
-  const [categoryMode, setCategoryMode] = useState<"pick" | "custom">("pick");
 
   useEffect(() => {
     let cancelled = false;
@@ -60,9 +60,6 @@ export function BasicsStep({ draft, onSave, onBack, onSkip }: Props) {
       );
       setBrandMode(
         draft.basics.brandName && !brandMatch ? "custom" : "pick",
-      );
-      setCategoryMode(
-        draft.basics.categoryName && !catMatch ? "custom" : "pick",
       );
       if (brandMatch) {
         setForm((prev) => ({
@@ -143,12 +140,6 @@ export function BasicsStep({ draft, onSave, onBack, onSkip }: Props) {
       ? CUSTOM
       : brands.some((b) => b.id === form.brandId)
         ? form.brandId
-        : "";
-  const categorySelectValue =
-    categoryMode === "custom"
-      ? CUSTOM
-      : categories.some((c) => c.id === form.categoryId)
-        ? form.categoryId
         : "";
 
   return (
@@ -242,50 +233,23 @@ export function BasicsStep({ draft, onSave, onBack, onSkip }: Props) {
       </WizardField>
 
       <WizardField
-        label="دسته‌بندی"
+        label="دسته‌بندی (ساختار دیجی‌کالا + عمق نامحدود)"
         hint={
           lookupsLoading
-            ? "در حال بارگذاری دسته‌ها…"
-            : `${categories.length} دسته ثبت‌شده در کاتالوگ`
+            ? "در حال بارگذاری درخت دسته‌ها…"
+            : "هر سطح را انتخاب کنید؛ در صورت نیاز زیردسته جدید بسازید"
         }
       >
-        <select
-          className={wizardInputClass}
-          value={categorySelectValue}
+        <CategoryTreePicker
+          categories={categories}
+          selectedId={form.categoryId}
+          selectedName={form.categoryName}
           disabled={lookupsLoading}
-          onChange={(e) => {
-            const v = e.target.value;
-            if (v === CUSTOM) {
-              setCategoryMode("custom");
-              patch({ categoryId: "", categoryName: form.categoryName || "" });
-              return;
-            }
-            setCategoryMode("pick");
-            const match = categories.find((c) => c.id === v);
-            patch({
-              categoryId: match?.id ?? "",
-              categoryName: match?.name ?? "",
-            });
-          }}
-        >
-          <option value="">انتخاب دسته‌بندی…</option>
-          {categories.map((c) => (
-            <option key={c.id} value={c.id}>
-              {c.name}
-            </option>
-          ))}
-          <option value={CUSTOM}>سایر (ورود دستی)</option>
-        </select>
-        {categoryMode === "custom" ? (
-          <input
-            className={`${wizardInputClass} mt-2`}
-            value={form.categoryName}
-            onChange={(e) =>
-              patch({ categoryName: e.target.value, categoryId: "" })
-            }
-            placeholder="نام دسته جدید — مثلاً فر توکار"
-          />
-        ) : null}
+          onCategoriesChanged={setCategories}
+          onChange={({ id, name }) =>
+            patch({ categoryId: id, categoryName: name })
+          }
+        />
       </WizardField>
 
       <div className="grid gap-3 sm:grid-cols-3">

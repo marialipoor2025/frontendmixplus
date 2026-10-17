@@ -46,6 +46,7 @@ public static class DatabaseInitializer
 
         await SeedHomeAndNavAsync(services, config, logger);
         await CatalogSeeder.SeedAsync(services, config, logger);
+        await DigikalaCategoryTreeSeeder.SeedAsync(services, logger);
         await VariantSeeder.SeedAsync(services, config, logger);
         await OfferSeeder.SeedAsync(services, config, logger);
         await HomeCompositionSeeder.SeedAsync(services, config, logger);

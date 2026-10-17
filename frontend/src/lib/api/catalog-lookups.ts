@@ -69,3 +69,34 @@ export async function listCatalogCategoryOptions(): Promise<
     return [];
   }
 }
+
+/** Create a category at any depth (seller). Parent null = root. */
+export async function createSellerCategory(
+  title: string,
+  parentId?: string | null,
+): Promise<CatalogCategoryOption | null> {
+  if (!enabled()) return null;
+  try {
+    const row = await apiClient<{
+      id: string;
+      title: string;
+      slug: string;
+      parentId?: string | null;
+    }>("/api/seller/categories", {
+      method: "POST",
+      auth: true,
+      body: JSON.stringify({
+        title,
+        parentId: parentId || null,
+      }),
+    });
+    return {
+      id: row.id,
+      name: row.title,
+      slug: row.slug,
+      parentId: row.parentId ?? null,
+    };
+  } catch {
+    return null;
+  }
+}

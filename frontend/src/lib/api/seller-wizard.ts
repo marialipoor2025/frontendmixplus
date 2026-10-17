@@ -452,3 +452,44 @@ export async function publishSellerProduct(
     basics: { ...draft.basics, isPublished: publish },
   });
 }
+
+export type AmazingOfferStatus = {
+  productExternalKey: string;
+  status: string;
+  reason: string | null;
+  discountPercent: number;
+  inCampaign: boolean;
+  nominatedAtUtc: string;
+  startsAtUtc: string | null;
+  endsAtUtc: string | null;
+};
+
+export async function getAmazingOfferStatus(
+  productId: string,
+): Promise<AmazingOfferStatus | null> {
+  if (!useLiveApi() || productId.startsWith("draft-")) return null;
+  try {
+    return await apiClient<AmazingOfferStatus>(
+      `/api/seller/products/${encodeURIComponent(productId)}/amazing-offer`,
+      { auth: true },
+    );
+  } catch {
+    return null;
+  }
+}
+
+export async function nominateAmazingOffer(
+  productId: string,
+): Promise<AmazingOfferStatus> {
+  return apiClient<AmazingOfferStatus>(
+    `/api/seller/products/${encodeURIComponent(productId)}/amazing-offer`,
+    { method: "PUT", auth: true, body: JSON.stringify({}) },
+  );
+}
+
+export async function withdrawAmazingOffer(productId: string): Promise<void> {
+  await apiClient(
+    `/api/seller/products/${encodeURIComponent(productId)}/amazing-offer`,
+    { method: "DELETE", auth: true },
+  );
+}

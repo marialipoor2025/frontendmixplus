@@ -26,6 +26,7 @@ public sealed class PromotionsModule : IModule
 
         services.AddScoped<IOfferCampaignReadPort, OfferCampaignReadPort>();
         services.AddScoped<ICouponValidationPort, CouponValidationAdapter>();
+        services.AddScoped<IAmazingOfferNominationPort, AmazingOfferNominationAdapter>();
     }
 
     public void MapEndpoints(IEndpointRouteBuilder endpoints)

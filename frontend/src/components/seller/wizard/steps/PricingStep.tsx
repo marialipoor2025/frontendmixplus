@@ -3,6 +3,12 @@
 import { useEffect, useState, type ReactNode } from "react";
 import type { SellerProductDraft, SellerProductPricing } from "@/types/seller-wizard";
 import { emptyPricing } from "@/types/seller-wizard";
+import {
+  getAmazingOfferStatus,
+  nominateAmazingOffer,
+  withdrawAmazingOffer,
+  type AmazingOfferStatus,
+} from "@/lib/api/seller-wizard";
 import { formatFaMoney } from "@/lib/format/persian";
 import { SELLER_WIZARD_STEPS } from "@/lib/seller/wizard-steps";
 import { MoneyInput } from "../MoneyInput";
@@ -158,10 +164,60 @@ export function PricingStep({ draft, onSave, onBack, onSkip }: Props) {
   );
   const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
+  const [amazing, setAmazing] = useState<AmazingOfferStatus | null>(null);
+  const [amazingBusy, setAmazingBusy] = useState(false);
+  const [amazingError, setAmazingError] = useState<string | null>(null);
 
   useEffect(() => {
     setForm(normalizePricing(draft.pricing));
   }, [draft.pricing, draft.updatedAt]);
+
+  useEffect(() => {
+    if (draft.isLocalOnly || draft.id.startsWith("draft-")) {
+      setAmazing(null);
+      return;
+    }
+    let cancelled = false;
+    void getAmazingOfferStatus(draft.id).then((row) => {
+      if (!cancelled) setAmazing(row);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [draft.id, draft.isLocalOnly]);
+
+  async function toggleAmazing(enabled: boolean) {
+    if (draft.isLocalOnly || draft.id.startsWith("draft-")) {
+      setAmazingError("ابتدا محصول را ذخیره کنید، سپس برای شگفت‌انگیز علامت بزنید");
+      return;
+    }
+    setAmazingBusy(true);
+    setAmazingError(null);
+    try {
+      if (enabled) {
+        await onSave(form);
+        setAmazing(await nominateAmazingOffer(draft.id));
+      } else {
+        await withdrawAmazingOffer(draft.id);
+        setAmazing({
+          productExternalKey: draft.id,
+          status: "withdrawn",
+          reason: null,
+          discountPercent: form.discountPercent ?? 0,
+          inCampaign: false,
+          nominatedAtUtc: new Date().toISOString(),
+          startsAtUtc: null,
+          endsAtUtc: null,
+        });
+      }
+    } catch (err) {
+      setAmazingError(
+        err instanceof Error ? err.message : "ثبت درخواست شگفت‌انگیز ناموفق بود",
+      );
+    } finally {
+      setAmazingBusy(false);
+    }
+  }
 
   function patch(p: Partial<SellerProductPricing>) {
     setForm((prev) => ({ ...prev, ...p }));
@@ -261,6 +317,59 @@ export function PricingStep({ draft, onSave, onBack, onSkip }: Props) {
         <WizardField label="قیمت پس از تخفیف">
           <AfterDiscountDisplay amount={salePrice} />
         </WizardField>
+      </div>
+
+      <div className="space-y-2 rounded-lg border border-[var(--color-neutral-100)] p-3">
+        <div className="flex items-center justify-between gap-2">
+          <div>
+            <p className="text-sm font-medium text-[var(--color-neutral-800)]">
+              نمایش در شگفت‌انگیز
+            </p>
+            <p className="mt-1 text-[11px] leading-5 text-[var(--color-neutral-400)]">
+              حداقل ۱۰٪ تخفیف، موجودی و انتشار محصول لازم است. صلاحیت نهایی بر اساس
+              امتیاز، سقف هر فروشنده و ظرفیت کمپین اعمال می‌شود.
+            </p>
+          </div>
+          <button
+            type="button"
+            disabled={amazingBusy}
+            onClick={() =>
+              void toggleAmazing(
+                !(
+                  amazing?.status === "qualified" ||
+                  amazing?.status === "pending" ||
+                  amazing?.inCampaign
+                ),
+              )
+            }
+            className="shrink-0 rounded-lg bg-[var(--color-primary)] px-3 py-1.5 text-xs font-medium text-white disabled:opacity-60"
+          >
+            {amazingBusy
+              ? "…"
+              : amazing?.status === "qualified" ||
+                  amazing?.status === "pending" ||
+                  amazing?.inCampaign
+                ? "لغو درخواست"
+                : "ثبت درخواست"}
+          </button>
+        </div>
+        {amazingError ? (
+          <p className="text-xs text-red-600">{amazingError}</p>
+        ) : null}
+        {amazing && amazing.status !== "none" && amazing.status !== "withdrawn" ? (
+          <p className="text-xs text-[var(--color-neutral-600)]">
+            وضعیت:{" "}
+            {amazing.inCampaign
+              ? "در کمپین شگفت‌انگیز"
+              : amazing.status === "qualified"
+                ? "واجد شرایط (در صف ظرفیت)"
+                : amazing.status === "pending"
+                  ? amazing.reason ?? "در انتظار صلاحیت"
+                  : amazing.status === "rejected"
+                    ? amazing.reason ?? "رد شده"
+                    : amazing.status}
+          </p>
+        ) : null}
       </div>
 
       <ToggleBlock

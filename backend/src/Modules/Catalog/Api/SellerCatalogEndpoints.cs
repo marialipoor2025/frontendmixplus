@@ -8,6 +8,7 @@ using MixPlus.BuildingBlocks.Application.Contracts;
 using MixPlus.BuildingBlocks.Domain;
 using MixPlus.Modules.Catalog.Application.Products;
 using MixPlus.Modules.Catalog.Application.Specs;
+using MixPlus.Modules.Catalog.Domain.Categories;
 using MixPlus.Modules.Catalog.Domain.Products;
 using MixPlus.Modules.Catalog.Domain.Specs;
 using MixPlus.Modules.Catalog.Domain.Variants;
@@ -42,6 +43,10 @@ internal static class SellerCatalogEndpoints
         group.MapPut("/products/{id}/content", UpdateContent).WithName("SellerUpdateProductContent");
         group.MapPut("/products/{id}/variants", UpdateVariants).WithName("SellerUpdateProductVariants");
         group.MapPut("/products/{id}/publish", PublishProduct).WithName("SellerPublishProduct");
+        group.MapGet("/products/{id}/amazing-offer", GetAmazingOffer).WithName("SellerGetAmazingOffer");
+        group.MapPut("/products/{id}/amazing-offer", NominateAmazingOffer).WithName("SellerNominateAmazingOffer");
+        group.MapDelete("/products/{id}/amazing-offer", WithdrawAmazingOffer).WithName("SellerWithdrawAmazingOffer");
+        group.MapPost("/categories", CreateSellerCategory).WithName("SellerCreateCategory");
     }
 
     private static async Task<IResult> ListProducts(
@@ -604,6 +609,170 @@ internal static class SellerCatalogEndpoints
     }
 
     /// <summary>
+    /// Seller may add a category at any depth under an existing Digikala (or custom) parent.
+    /// </summary>
+    private static async Task<IResult> CreateSellerCategory(
+        CreateSellerCategoryRequest body,
+        HttpRequest request,
+        CatalogDbContext db,
+        ICurrentUserAccessor users,
+        ISellerAccountReadPort sellers,
+        CancellationToken ct)
+    {
+        var (seller, error) = await ResolveSellerAsync(request, users, sellers, ct);
+        if (error is not null) return error;
+        _ = seller;
+
+        if (string.IsNullOrWhiteSpace(body.Title))
+        {
+            return Results.BadRequest(new { error = "عنوان دسته الزامی است" });
+        }
+
+        var title = body.Title.Trim();
+        var slug = string.IsNullOrWhiteSpace(body.Slug)
+            ? Slugify(title)
+            : body.Slug.Trim().ToLowerInvariant();
+        if (string.IsNullOrWhiteSpace(slug))
+        {
+            slug = $"cat-{Guid.NewGuid():N}"[..12];
+        }
+
+        Guid? parentId = null;
+        string? parentKey = null;
+        if (!string.IsNullOrWhiteSpace(body.ParentId))
+        {
+            var parent = await db.Categories.AsNoTracking()
+                .FirstOrDefaultAsync(x => x.ExternalKey == body.ParentId.Trim(), ct);
+            if (parent is null)
+            {
+                return Results.BadRequest(new { error = "دسته والد یافت نشد" });
+            }
+
+            parentId = parent.Id;
+            parentKey = parent.ExternalKey;
+        }
+
+        if (await db.Categories.AnyAsync(x => x.Slug == slug, ct))
+        {
+            slug = $"{slug}-{Guid.NewGuid():N}"[..Math.Min(slug.Length + 9, 80)];
+        }
+
+        var externalKey = $"cat-s-{Guid.NewGuid():N}"[..16];
+        var href = $"/categories/{slug}";
+        var sort = await db.Categories.CountAsync(x => x.ParentId == parentId, ct) + 1;
+        var category = Category.Create(externalKey, title, slug, href, null, parentId, sort);
+        db.Categories.Add(category);
+        await db.SaveChangesAsync(ct);
+
+        return Results.Created(
+            $"/api/catalog/categories",
+            new
+            {
+                id = category.ExternalKey,
+                title = category.Title,
+                slug = category.Slug,
+                href = category.Href,
+                parentId = parentKey,
+                sortOrder = category.SortOrder,
+            });
+    }
+
+    private static string Slugify(string value)
+    {
+        var chars = value.Trim().ToLowerInvariant()
+            .Select(ch => char.IsLetterOrDigit(ch) || ch is '-' ? ch : '-')
+            .ToArray();
+        var slug = new string(chars);
+        while (slug.Contains("--", StringComparison.Ordinal))
+        {
+            slug = slug.Replace("--", "-", StringComparison.Ordinal);
+        }
+
+        return slug.Trim('-');
+    }
+
+    private static async Task<IResult> GetAmazingOffer(
+        string id,
+        HttpRequest request,
+        CatalogDbContext db,
+        ICurrentUserAccessor users,
+        ISellerAccountReadPort sellers,
+        IAmazingOfferNominationPort nominations,
+        CancellationToken ct)
+    {
+        var (seller, error) = await ResolveSellerAsync(request, users, sellers, ct);
+        if (error is not null) return error;
+
+        var product = await FindOwnedAsync(db, id, seller!.Id, ct, tracking: false);
+        if (product is null) return Results.NotFound(new { error = "محصول یافت نشد" });
+
+        var status = await nominations.GetAsync(product.ExternalKey, seller.Id, ct);
+        return Results.Ok(status ?? new AmazingOfferNominationDto(
+            product.ExternalKey,
+            "none",
+            null,
+            product.DiscountPercent ?? 0,
+            false,
+            default,
+            null,
+            null));
+    }
+
+    private static async Task<IResult> NominateAmazingOffer(
+        string id,
+        NominateAmazingOfferRequest? body,
+        HttpRequest request,
+        CatalogDbContext db,
+        ICurrentUserAccessor users,
+        ISellerAccountReadPort sellers,
+        IAmazingOfferNominationPort nominations,
+        CancellationToken ct)
+    {
+        var (seller, error) = await ResolveSellerAsync(request, users, sellers, ct);
+        if (error is not null) return error;
+
+        var product = await FindOwnedAsync(db, id, seller!.Id, ct, tracking: false);
+        if (product is null) return Results.NotFound(new { error = "محصول یافت نشد" });
+
+        var dto = await nominations.NominateAsync(
+            new AmazingOfferNominateCommand(
+                product.ExternalKey,
+                seller.Id,
+                seller.ExternalKey,
+                product.DiscountPercent ?? 0,
+                product.Price.Amount,
+                product.OriginalPrice?.Amount,
+                product.IsPublished,
+                product.InStock,
+                product.Rating,
+                product.ReviewCount ?? 0,
+                body?.StartsAtUtc,
+                body?.EndsAtUtc),
+            ct);
+
+        return Results.Ok(dto);
+    }
+
+    private static async Task<IResult> WithdrawAmazingOffer(
+        string id,
+        HttpRequest request,
+        CatalogDbContext db,
+        ICurrentUserAccessor users,
+        ISellerAccountReadPort sellers,
+        IAmazingOfferNominationPort nominations,
+        CancellationToken ct)
+    {
+        var (seller, error) = await ResolveSellerAsync(request, users, sellers, ct);
+        if (error is not null) return error;
+
+        var product = await FindOwnedAsync(db, id, seller!.Id, ct, tracking: false);
+        if (product is null) return Results.NotFound(new { error = "محصول یافت نشد" });
+
+        await nominations.WithdrawAsync(product.ExternalKey, seller.Id, ct);
+        return Results.NoContent();
+    }
+
+    /// <summary>
     /// Product-level buy-box price is authoritative for seller wizard; keep SKUs aligned.
     /// </summary>
     private static async Task SyncSkuPricingAsync(
@@ -980,6 +1149,10 @@ internal static class SellerCatalogEndpoints
         public int? DiscountPercent { get; set; }
         public int? Stock { get; set; }
     }
+
+    private sealed record NominateAmazingOfferRequest(DateTime? StartsAtUtc, DateTime? EndsAtUtc);
+
+    private sealed record CreateSellerCategoryRequest(string Title, string? Slug, string? ParentId);
 
     private sealed record CreateSellerProductRequest(
         string Title,

@@ -54,6 +54,8 @@ public sealed class HomeBanner : AggregateRoot
         SortOrder = sortOrder;
     }
 
+    public void SetSlot(BannerSlot slot) => Slot = slot;
+
     public void SetActive(bool isActive) => IsActive = isActive;
 }
 

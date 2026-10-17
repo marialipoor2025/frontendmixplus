@@ -4,10 +4,10 @@ import type { HomePageData } from "@/types/home";
 export const mockHomePageData: HomePageData = {
   topBanner: {
     id: "top-1",
-    title: "Free delivery on appliances over $500",
+    title: "ارسال رایگان برای خریدهای ویژه لوازم خانگی",
     imageUrl: "/placeholders/top-banner.svg",
-    href: "/promotions/free-delivery",
-    alt: "Free delivery promotion",
+    href: "/incredible-offers",
+    alt: "ارسال رایگان — پیشنهادهای ویژه میکپلاس",
   },
   heroSlides: [
     {

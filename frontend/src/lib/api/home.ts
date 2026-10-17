@@ -66,6 +66,25 @@ function mapHomeData(data: HomePageData): HomePageData {
 }
 
 /**
+ * Fill empty marketing slots with seeded defaults so the homepage never looks blank.
+ */
+function withMarketingDefaults(data: HomePageData): HomePageData {
+  const defaults = mockHomePageData;
+  return {
+    ...data,
+    topBanner: data.topBanner ?? defaults.topBanner,
+    heroSlides:
+      data.heroSlides.length > 0 ? data.heroSlides : defaults.heroSlides,
+    midBanners:
+      data.midBanners.length > 0 ? data.midBanners : defaults.midBanners,
+    bottomBanners:
+      data.bottomBanners.length > 0
+        ? data.bottomBanners
+        : defaults.bottomBanners,
+  };
+}
+
+/**
  * Home page data source.
  * - Mock mode (default): returns local fixtures
  * - Live mode: GET /api/home from ASP.NET Core
@@ -76,5 +95,5 @@ export async function getHomePageData(): Promise<HomePageData> {
   }
 
   const data = await apiClient<HomePageData>("/api/home");
-  return mapHomeData(data);
+  return withMarketingDefaults(mapHomeData(data));
 }

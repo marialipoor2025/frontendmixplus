@@ -18,15 +18,27 @@ import {
 } from "@/lib/api/cms";
 import { siteConfig } from "@/config/site";
 import { mockAdminCms } from "@/lib/mocks/admin";
-import type { AdminCmsItem } from "@/types/admin";
+import type { AdminCmsItem, AdminCmsSlot } from "@/types/admin";
 import { paginateLocal } from "@/types/paging";
+
+const SLOT_LABELS: Record<AdminCmsSlot, string> = {
+  top: "بالای صفحه",
+  hero: "اسلایدر اصلی",
+  mid: "میانی (۴تایی)",
+  bottom: "پایین صفحه",
+};
 
 const empty: AdminCmsItem = {
   id: "",
   title: "",
   kind: "banner",
+  slot: "hero",
   status: "published",
   updatedAt: "",
+  imageUrl: "",
+  href: "/",
+  alt: "",
+  sortOrder: 1,
 };
 
 export default function AdminCmsPage() {
@@ -40,6 +52,7 @@ export default function AdminCmsPage() {
   const [notice, setNotice] = useState<string | null>(null);
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
+  const [slotFilter, setSlotFilter] = useState<AdminCmsSlot | "all">("all");
 
   useEffect(() => {
     let cancelled = false;
@@ -57,18 +70,25 @@ export default function AdminCmsPage() {
     };
   }, []);
 
+  const filtered = useMemo(
+    () =>
+      slotFilter === "all"
+        ? rows
+        : rows.filter((r) => (r.slot ?? "hero") === slotFilter),
+    [rows, slotFilter],
+  );
+
   const paged = useMemo(
-    () => paginateLocal(rows, page, pageSize),
-    [rows, page, pageSize],
+    () => paginateLocal(filtered, page, pageSize),
+    [filtered, page, pageSize],
   );
 
   const columns: AdminColumn<AdminCmsItem>[] = [
     { key: "title", header: "عنوان", cell: (r) => r.title },
     {
-      key: "kind",
-      header: "نوع",
-      cell: (r) =>
-        r.kind === "banner" ? "بنر" : r.kind === "blog" ? "بلاگ" : "صفحه",
+      key: "slot",
+      header: "جایگاه",
+      cell: (r) => SLOT_LABELS[r.slot ?? "hero"],
     },
     {
       key: "status",
@@ -77,6 +97,15 @@ export default function AdminCmsPage() {
         <StatusPill tone={r.status === "published" ? "success" : "warn"}>
           {r.status === "published" ? "منتشر" : "پیش‌نویس"}
         </StatusPill>
+      ),
+    },
+    {
+      key: "href",
+      header: "لینک",
+      cell: (r) => (
+        <span className="max-w-[10rem] truncate text-xs" dir="ltr">
+          {r.href || "—"}
+        </span>
       ),
     },
     { key: "updated", header: "به‌روزرسانی", cell: (r) => r.updatedAt },
@@ -88,7 +117,7 @@ export default function AdminCmsPage() {
           onEdit={() => {
             setCreating(false);
             setEditing(r);
-            setForm(r);
+            setForm({ ...empty, ...r, slot: r.slot ?? "hero" });
           }}
           onDelete={() => {
             void (async () => {
@@ -106,11 +135,11 @@ export default function AdminCmsPage() {
   return (
     <RequireAdmin permission="cms:manage">
       <AdminPageHeader
-        title="مدیریت محتوا"
+        title="بازاریابی صفحه اصلی"
         description={
           source === "api"
-            ? "بنرهای صفحه اصلی از Merchandising"
-            : "بنر، صفحه و بلاگ (mock)"
+            ? "بنرهای Top / Hero / Mid / Bottom از Merchandising"
+            : "جایگاه‌های بازاریابی صفحه اصلی (mock)"
         }
         actions={
           <>
@@ -131,11 +160,40 @@ export default function AdminCmsPage() {
                 setForm(empty);
               }}
             >
-              آیتم جدید
+              بنر جدید
             </AdminButton>
           </>
         }
       />
+
+      <div className="mb-3 flex flex-wrap gap-2">
+        {(
+          [
+            ["all", "همه"],
+            ["top", SLOT_LABELS.top],
+            ["hero", SLOT_LABELS.hero],
+            ["mid", SLOT_LABELS.mid],
+            ["bottom", SLOT_LABELS.bottom],
+          ] as const
+        ).map(([id, label]) => (
+          <button
+            key={id}
+            type="button"
+            onClick={() => {
+              setSlotFilter(id);
+              setPage(1);
+            }}
+            className={[
+              "rounded-lg px-3 py-1.5 text-xs font-medium",
+              slotFilter === id
+                ? "bg-[var(--color-primary)] text-white"
+                : "bg-[var(--color-neutral-100)] text-[var(--color-neutral-700)]",
+            ].join(" ")}
+          >
+            {label}
+          </button>
+        ))}
+      </div>
 
       {notice ? (
         <p className="mb-3 rounded-lg bg-[var(--color-primary-soft)] px-3 py-2 text-sm text-[var(--color-primary)]">
@@ -149,11 +207,13 @@ export default function AdminCmsPage() {
           onSubmit={(e) => {
             e.preventDefault();
             void (async () => {
-              const payload = {
+              const payload: AdminCmsItem = {
                 ...form,
                 id: form.id || `cms-local-${Date.now()}`,
-                kind: "banner" as const,
-                updatedAt: form.updatedAt || new Date().toISOString().slice(0, 10),
+                kind: "banner",
+                slot: form.slot ?? "hero",
+                updatedAt:
+                  form.updatedAt || new Date().toISOString().slice(0, 10),
               };
               const live = await upsertAdminCms(payload);
               const saved = live ?? payload;
@@ -166,14 +226,14 @@ export default function AdminCmsPage() {
               setCreating(false);
               setEditing(null);
               setNotice(
-                live ? "محتوا ذخیره شد" : "محتوا ذخیره شد (mock محلی)",
+                live ? "بنر بازاریابی ذخیره شد" : "ذخیره شد (mock محلی)",
               );
               window.setTimeout(() => setNotice(null), 2200);
             })();
           }}
         >
           <h3 className="text-sm font-bold">
-            {editing ? "ویرایش محتوا" : "محتوای جدید"}
+            {editing ? "ویرایش بنر" : "بنر بازاریابی جدید"}
           </h3>
           <label className="block space-y-1 text-sm">
             <span className="text-[var(--color-neutral-600)]">عنوان</span>
@@ -186,21 +246,73 @@ export default function AdminCmsPage() {
               className="w-full rounded-lg border border-[var(--color-neutral-200)] px-3 py-2"
             />
           </label>
+          <div className="grid gap-3 sm:grid-cols-2">
+            <label className="block space-y-1 text-sm">
+              <span className="text-[var(--color-neutral-600)]">جایگاه</span>
+              <select
+                value={form.slot ?? "hero"}
+                onChange={(e) =>
+                  setForm((p) => ({
+                    ...p,
+                    slot: e.target.value as AdminCmsSlot,
+                  }))
+                }
+                className="w-full rounded-lg border border-[var(--color-neutral-200)] px-3 py-2"
+              >
+                {(Object.keys(SLOT_LABELS) as AdminCmsSlot[]).map((s) => (
+                  <option key={s} value={s}>
+                    {SLOT_LABELS[s]}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label className="block space-y-1 text-sm">
+              <span className="text-[var(--color-neutral-600)]">وضعیت</span>
+              <select
+                value={form.status}
+                onChange={(e) =>
+                  setForm((p) => ({
+                    ...p,
+                    status: e.target.value as AdminCmsItem["status"],
+                  }))
+                }
+                className="w-full rounded-lg border border-[var(--color-neutral-200)] px-3 py-2"
+              >
+                <option value="published">منتشر</option>
+                <option value="draft">پیش‌نویس</option>
+              </select>
+            </label>
+          </div>
           <label className="block space-y-1 text-sm">
-            <span className="text-[var(--color-neutral-600)]">وضعیت</span>
-            <select
-              value={form.status}
+            <span className="text-[var(--color-neutral-600)]">آدرس تصویر</span>
+            <input
+              dir="ltr"
+              value={form.imageUrl ?? ""}
               onChange={(e) =>
-                setForm((p) => ({
-                  ...p,
-                  status: e.target.value as AdminCmsItem["status"],
-                }))
+                setForm((p) => ({ ...p, imageUrl: e.target.value }))
               }
-              className="w-full max-w-xs rounded-lg border border-[var(--color-neutral-200)] px-3 py-2"
-            >
-              <option value="published">منتشر</option>
-              <option value="draft">پیش‌نویس</option>
-            </select>
+              placeholder="/images/marketings/…"
+              className="w-full rounded-lg border border-[var(--color-neutral-200)] px-3 py-2"
+            />
+          </label>
+          <label className="block space-y-1 text-sm">
+            <span className="text-[var(--color-neutral-600)]">لینک مقصد</span>
+            <input
+              dir="ltr"
+              value={form.href ?? "/"}
+              onChange={(e) =>
+                setForm((p) => ({ ...p, href: e.target.value }))
+              }
+              className="w-full rounded-lg border border-[var(--color-neutral-200)] px-3 py-2"
+            />
+          </label>
+          <label className="block space-y-1 text-sm">
+            <span className="text-[var(--color-neutral-600)]">متن جایگزین (alt)</span>
+            <input
+              value={form.alt ?? ""}
+              onChange={(e) => setForm((p) => ({ ...p, alt: e.target.value }))}
+              className="w-full rounded-lg border border-[var(--color-neutral-200)] px-3 py-2"
+            />
           </label>
           <div className="flex gap-2">
             <AdminButton type="submit">ذخیره</AdminButton>

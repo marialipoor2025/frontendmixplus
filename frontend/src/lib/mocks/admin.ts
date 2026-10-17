@@ -233,9 +233,47 @@ export const mockAdminCoupons: AdminCoupon[] = [
 ];
 
 export const mockAdminCms: AdminCmsItem[] = [
-  { id: "cms1", title: "بنر اسلایدر اصلی ۱", kind: "banner", status: "published", updatedAt: "۱۴۰۴/۰۷/۱۰" },
-  { id: "cms2", title: "راهنمای خرید یخچال", kind: "blog", status: "draft", updatedAt: "۱۴۰۴/۰۷/۰۹" },
-  { id: "cms3", title: "صفحه درباره ما", kind: "page", status: "published", updatedAt: "۱۴۰۴/۰۶/۲۰" },
+  {
+    id: "top-1",
+    title: "ارسال رایگان برای خریدهای ویژه لوازم خانگی",
+    kind: "banner",
+    slot: "top",
+    status: "published",
+    updatedAt: "۱۴۰۴/۰۷/۱۰",
+    imageUrl: "/placeholders/top-banner.svg",
+    href: "/incredible-offers",
+  },
+  {
+    id: "hero-1",
+    title: "بنر اسلایدر اصلی ۱",
+    kind: "banner",
+    slot: "hero",
+    status: "published",
+    updatedAt: "۱۴۰۴/۰۷/۱۰",
+    imageUrl:
+      "/images/hero/banner_SlideBanner_E5BmGK_a48a7ba8-cbeb-4f2d-8a07-6832deaf4ca2.png",
+    href: "/promotions/hero-1",
+  },
+  {
+    id: "mid-1",
+    title: "بنر میانی ۱",
+    kind: "banner",
+    slot: "mid",
+    status: "published",
+    updatedAt: "۱۴۰۴/۰۷/۰۹",
+    imageUrl: "/images/marketings/mid-1.webp",
+    href: "/promotions/mid-1",
+  },
+  {
+    id: "bottom-1",
+    title: "خرید سر ماه",
+    kind: "banner",
+    slot: "bottom",
+    status: "published",
+    updatedAt: "۱۴۰۴/۰۶/۲۰",
+    imageUrl: "/images/marketings/bottom-1.png",
+    href: "/promotions/payday",
+  },
 ];
 
 export const mockAdminReviews: AdminReview[] = [

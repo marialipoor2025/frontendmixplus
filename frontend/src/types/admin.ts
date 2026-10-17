@@ -181,12 +181,20 @@ export type AdminCoupon = {
   status: "active" | "expired";
 };
 
+export type AdminCmsSlot = "top" | "hero" | "mid" | "bottom";
+
 export type AdminCmsItem = {
   id: string;
   title: string;
   kind: "banner" | "page" | "blog";
+  /** Homepage marketing placement (banner kind). */
+  slot?: AdminCmsSlot;
   status: "published" | "draft";
   updatedAt: string;
+  imageUrl?: string;
+  href?: string;
+  alt?: string;
+  sortOrder?: number;
 };
 
 export type AdminReview = {

@@ -304,7 +304,7 @@ def main() -> int:
             "externalKey": "sel-mixplus",
             "name": "میکس پلاس",
             "slug": "mixplus",
-            "ownerPhone": "09913800445",
+            "ownerPhone": "09925935188",
             "rating": 4.9,
         },
         "brand": {

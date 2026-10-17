@@ -166,7 +166,18 @@ public sealed class MediaUploadService(
             return null;
         }
 
-        return (stream, asset.ContentType, variant.FileName);
+        return (stream, ContentTypeFor(variant.FileName, asset.ContentType), variant.FileName);
+    }
+
+    private static string ContentTypeFor(string fileName, string fallback)
+    {
+        return Path.GetExtension(fileName).ToLowerInvariant() switch
+        {
+            ".jpg" or ".jpeg" => "image/jpeg",
+            ".png" => "image/png",
+            ".webp" => "image/webp",
+            _ => string.IsNullOrWhiteSpace(fallback) ? "application/octet-stream" : fallback,
+        };
     }
 
     private static MediaAssetDto ToDto(MediaAsset asset) =>

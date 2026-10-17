@@ -106,6 +106,7 @@ public sealed class MediaModule : IModule
                 Guid id,
                 string variant,
                 IMediaUploadService media,
+                HttpResponse response,
                 CancellationToken ct) =>
             {
                 var opened = await media.OpenVariantAsync(id, variant, ct);
@@ -115,6 +116,8 @@ public sealed class MediaModule : IModule
                 }
 
                 var (stream, contentType, fileName) = opened.Value;
+                // Pre-generated files are immutable per asset id + variant key.
+                response.Headers.CacheControl = "public, max-age=31536000, immutable";
                 return Results.File(stream, contentType, fileDownloadName: fileName, enableRangeProcessing: true);
             })
             .WithName("GetMediaVariant");

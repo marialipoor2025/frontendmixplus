@@ -1,3 +1,4 @@
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
 using MixPlus.Modules.Media.Application;
 
@@ -10,9 +11,13 @@ public interface ILocalMediaStorage
     Stream? OpenRead(string relativePath);
 }
 
-public sealed class LocalMediaStorage(IOptions<MediaOptions> options) : ILocalMediaStorage
+/// <summary>
+/// Stores originals + pre-generated viewport variants on the deploy host disk
+/// (not resized on the fly at request time).
+/// </summary>
+public sealed class LocalMediaStorage(IOptions<MediaOptions> options, IHostEnvironment env) : ILocalMediaStorage
 {
-    private readonly string _root = Path.GetFullPath(options.Value.RootPath);
+    private readonly string _root = ResolveRoot(options.Value.RootPath, env.ContentRootPath);
 
     public string RootPath => _root;
 
@@ -44,6 +49,19 @@ public sealed class LocalMediaStorage(IOptions<MediaOptions> options) : ILocalMe
             throw new InvalidOperationException("Invalid media path.");
         }
 
+        return full;
+    }
+
+    private static string ResolveRoot(string configured, string contentRoot)
+    {
+        var path = string.IsNullOrWhiteSpace(configured) ? "storage/media" : configured.Trim();
+        if (!Path.IsPathRooted(path))
+        {
+            path = Path.Combine(contentRoot, path);
+        }
+
+        var full = Path.GetFullPath(path);
+        Directory.CreateDirectory(full);
         return full;
     }
 }

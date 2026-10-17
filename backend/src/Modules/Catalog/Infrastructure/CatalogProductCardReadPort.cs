@@ -153,6 +153,23 @@ public sealed class CatalogProductCardReadPort(CatalogDbContext db) : IProductCa
         return suggestions.Take(limit).ToList();
     }
 
+    public async Task<IReadOnlyList<ProductCardModel>> GetPopularProductsAsync(
+        int limit = 48,
+        CancellationToken cancellationToken = default)
+    {
+        limit = limit is < 1 or > 100 ? 48 : limit;
+
+        var rows = await db.Products.AsNoTracking()
+            .Where(x => x.IsPublished && x.InStock)
+            .OrderByDescending(x => (x.Rating ?? 0m) * (x.ReviewCount ?? 0))
+            .ThenByDescending(x => x.DiscountPercent ?? 0)
+            .ThenByDescending(x => x.ReviewCount ?? 0)
+            .Take(limit)
+            .ToListAsync(cancellationToken);
+
+        return rows.Select(ToModel).ToList();
+    }
+
     private static bool FuzzyMatch(string haystack, string needle)
     {
         var hay = haystack.ToLowerInvariant();

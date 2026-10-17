@@ -53,6 +53,14 @@ public interface IProductCardReadPort
         string query,
         int limit = 8,
         CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Popular / visual-search candidates (rating×reviews, then discount).
+    /// Used until embedding-based visual search is wired.
+    /// </summary>
+    Task<IReadOnlyList<ProductCardModel>> GetPopularProductsAsync(
+        int limit = 48,
+        CancellationToken cancellationToken = default);
 }
 
 public sealed record SearchSuggestionModel(

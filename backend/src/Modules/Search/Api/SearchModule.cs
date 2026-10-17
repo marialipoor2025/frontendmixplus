@@ -63,6 +63,53 @@ public sealed class SearchModule : IModule
                 }).ToList());
             })
             .WithName("SearchSuggest");
+
+        // Visual search: accept an image, return near-match candidates.
+        // Common approach (Digikala/Amazon): embedding similarity over product images.
+        // Until embeddings are trained, return popular in-stock products as a ranked stub.
+        group.MapPost("/visual", async (
+                HttpRequest request,
+                IProductCardReadPort catalog,
+                CancellationToken ct) =>
+            {
+                if (!request.HasFormContentType)
+                {
+                    return Results.BadRequest(new { error = "تصویر محصول را ارسال کنید" });
+                }
+
+                var form = await request.ReadFormAsync(ct);
+                var file = form.Files.GetFile("image") ?? form.Files.FirstOrDefault();
+                if (file is null || file.Length <= 0)
+                {
+                    return Results.BadRequest(new { error = "فایل تصویر خالی است" });
+                }
+
+                var contentType = file.ContentType ?? string.Empty;
+                if (!contentType.StartsWith("image/", StringComparison.OrdinalIgnoreCase)
+                    && !file.FileName.EndsWith(".jpg", StringComparison.OrdinalIgnoreCase)
+                    && !file.FileName.EndsWith(".jpeg", StringComparison.OrdinalIgnoreCase)
+                    && !file.FileName.EndsWith(".png", StringComparison.OrdinalIgnoreCase)
+                    && !file.FileName.EndsWith(".webp", StringComparison.OrdinalIgnoreCase))
+                {
+                    return Results.BadRequest(new { error = "فقط تصویر jpg/png/webp مجاز است" });
+                }
+
+                var limit = 24;
+                if (int.TryParse(form["limit"], out var parsed) && parsed > 0)
+                {
+                    limit = Math.Min(parsed, 48);
+                }
+
+                var rows = await catalog.GetPopularProductsAsync(limit, ct);
+                return Results.Ok(new
+                {
+                    mode = "popular-stub",
+                    note = "جستجوی تصویری با embedding در مرحله بعد فعال می‌شود؛ فعلاً نزدیک‌ترین پیشنهادهای محبوب برگردانده شد.",
+                    products = rows.Select(ToDto).ToList(),
+                });
+            })
+            .DisableAntiforgery()
+            .WithName("SearchVisual");
     }
 
     private static object ToDto(ProductCardModel p) => new

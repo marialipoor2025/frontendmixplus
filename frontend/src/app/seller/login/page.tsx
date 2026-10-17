@@ -14,15 +14,15 @@ export default function SellerLoginPage() {
           پنل فروشنده میکس‌پلاس
         </p>
         <p className="mt-1 text-sm text-[var(--color-muted)]">
-          با شماره موبایل وارد شوید؛ کد یک‌بارمصرف پیامک می‌شود
+          با موبایل یا ایمیل وارد شوید؛ سپس در صورت نیاز فروشگاه بسازید
         </p>
       </div>
       <Suspense fallback={<p className="text-sm text-[var(--color-muted)]">در حال بارگذاری…</p>}>
         <LoginFormCard
           mode="seller"
           defaultReturnUrl="/seller/dashboard"
-          title="ورود فروشنده"
-          subtitle="شماره موبایل فروشنده را وارد کنید"
+          title="ورود یا ثبت‌نام فروشنده"
+          subtitle="شماره موبایل یا ایمیل خود را وارد کنید — هر فروشنده‌ای می‌تواند شروع کند"
         />
       </Suspense>
     </div>

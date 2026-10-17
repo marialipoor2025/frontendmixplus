@@ -79,6 +79,33 @@ export async function getSellerMe(): Promise<SellerMe> {
   return apiClient<SellerMe>("/api/seller/me", { auth: true });
 }
 
+/**
+ * Soft lookup for portal gate: null = not registered yet; throws on inactive/auth errors.
+ */
+export async function tryGetSellerMe(): Promise<SellerMe | null> {
+  try {
+    return await getSellerMe();
+  } catch (err) {
+    const message = err instanceof Error ? err.message : "";
+    if (
+      message.includes("یافت نشد") ||
+      message.includes("seller_not_registered")
+    ) {
+      return null;
+    }
+    throw err;
+  }
+}
+
+/** Self-serve shop creation for any authenticated phone/email user. */
+export async function registerSeller(shopName: string): Promise<SellerMe> {
+  return apiClient<SellerMe>("/api/seller/register", {
+    method: "POST",
+    auth: true,
+    body: JSON.stringify({ shopName }),
+  });
+}
+
 export async function listSellerProducts(
   params?: ListSellerProductsParams,
 ): Promise<PagedResult<SellerProductListItem>> {

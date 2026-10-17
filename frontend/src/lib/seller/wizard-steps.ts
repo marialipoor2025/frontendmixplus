@@ -30,7 +30,8 @@ export const SELLER_WIZARD_STEPS: SellerWizardStepDef[] = [
     title: "تنوع‌ها",
     shortTitle: "تنوع",
     pdpComponent: "ProductVariantInfo",
-    pdpHint: "رنگ، ظرفیت و گزینه‌های انتخاب خریدار",
+    pdpHint:
+      "گروه‌های گزینه پویا مثل دیجی‌کالا (رنگ، ظرفیت، …) و قیمت هر ترکیب SKU — برای هر محصول متفاوت است",
   },
   {
     id: "features",

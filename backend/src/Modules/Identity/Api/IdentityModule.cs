@@ -46,6 +46,7 @@ public sealed class IdentityModule : IModule
         services.AddSingleton<IEmailSender, MockEmailSender>();
 
         services.AddScoped<IOtpAuthService, OtpAuthService>();
+        services.AddScoped<IPasswordAuthService, PasswordAuthService>();
         services.AddScoped<ISessionAuthService, SessionAuthService>();
         services.AddScoped<IShopperSessionPort, ShopperSessionAdapter>();
         services.AddScoped<IAccessTokenValidator, SessionAccessTokenValidator>();
@@ -99,6 +100,54 @@ public sealed class IdentityModule : IModule
                     : Results.BadRequest(new { error = result.Error });
             })
             .WithName("VerifyOtp");
+
+        group.MapPost("/password/login", async (PasswordLoginRequest body, IPasswordAuthService auth, CancellationToken ct) =>
+            {
+                var result = await auth.LoginAsync(body, ct);
+                return result.IsSuccess
+                    ? Results.Ok(result.Value)
+                    : Results.BadRequest(new { error = result.Error });
+            })
+            .WithName("PasswordLogin");
+
+        group.MapPost("/password/forgot/start", async (StartOtpRequest body, IPasswordAuthService auth, CancellationToken ct) =>
+            {
+                try
+                {
+                    var result = await auth.StartForgotAsync(body, ct);
+                    return result.IsSuccess
+                        ? Results.Ok(result.Value)
+                        : Results.BadRequest(new { error = result.Error });
+                }
+                catch (InvalidOperationException ex)
+                {
+                    return Results.BadRequest(new { error = ex.Message });
+                }
+            })
+            .WithName("ForgotPasswordStart");
+
+        group.MapPost("/password/forgot/confirm", async (ConfirmForgotPasswordRequest body, IPasswordAuthService auth, CancellationToken ct) =>
+            {
+                var result = await auth.ConfirmForgotAsync(body, ct);
+                return result.IsSuccess
+                    ? Results.Ok(result.Value)
+                    : Results.BadRequest(new { error = result.Error });
+            })
+            .WithName("ForgotPasswordConfirm");
+
+        group.MapPost("/password/set", async (HttpRequest request, SetPasswordRequest body, IPasswordAuthService auth, CancellationToken ct) =>
+            {
+                var result = await auth.SetPasswordAsync(ReadBearer(request), body, ct);
+                if (!result.IsSuccess && result.Error == "Unauthorized")
+                {
+                    return Results.Unauthorized();
+                }
+
+                return result.IsSuccess
+                    ? Results.NoContent()
+                    : Results.BadRequest(new { error = result.Error });
+            })
+            .WithName("SetPassword");
 
         group.MapGet("/me", async (HttpRequest request, ISessionAuthService sessions, CancellationToken ct) =>
             {

@@ -9,8 +9,7 @@ export const metadata: Metadata = {
 };
 
 /**
- * Digikala-style identifier step (phone / email).
- * OTP / password step + Identity API come next.
+ * Digikala-style login: identifier → OTP or password (+ forgot password).
  */
 export default function LoginPage() {
   return (

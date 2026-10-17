@@ -24,3 +24,12 @@ public sealed record VerifyOtpResponse(
     string AccessToken,
     int ExpiresInSeconds,
     AuthUserDto User);
+
+public sealed record PasswordLoginRequest(string Username, string Password);
+
+public sealed record ConfirmForgotPasswordRequest(
+    string ChallengeId,
+    string Code,
+    string NewPassword);
+
+public sealed record SetPasswordRequest(string NewPassword);

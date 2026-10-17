@@ -25,6 +25,36 @@ export async function verifyOtp(
   });
 }
 
+export async function loginWithPassword(
+  username: string,
+  password: string,
+): Promise<VerifyOtpResponse> {
+  return apiClient<VerifyOtpResponse>("/api/auth/password/login", {
+    method: "POST",
+    body: JSON.stringify({ username, password }),
+  });
+}
+
+export async function startForgotPassword(
+  username: string,
+): Promise<StartOtpResponse> {
+  return apiClient<StartOtpResponse>("/api/auth/password/forgot/start", {
+    method: "POST",
+    body: JSON.stringify({ username }),
+  });
+}
+
+export async function confirmForgotPassword(
+  challengeId: string,
+  code: string,
+  newPassword: string,
+): Promise<VerifyOtpResponse> {
+  return apiClient<VerifyOtpResponse>("/api/auth/password/forgot/confirm", {
+    method: "POST",
+    body: JSON.stringify({ challengeId, code, newPassword }),
+  });
+}
+
 export async function getMe(): Promise<AuthUser> {
   return apiClient<AuthUser>("/api/auth/me", { auth: true });
 }

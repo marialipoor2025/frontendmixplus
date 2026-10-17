@@ -16,6 +16,9 @@ public sealed class User : AggregateRoot
     public DateTime? LastLoginAtUtc { get; private set; }
     public bool IsBlocked { get; private set; }
 
+    /// <summary>ASP.NET Core Identity PBKDF2 hash; null when user only uses OTP.</summary>
+    public string? PasswordHash { get; private set; }
+
     public static User CreatePhone(string normalizedPhone)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(normalizedPhone);
@@ -52,6 +55,16 @@ public sealed class User : AggregateRoot
     }
 
     public void SetBlocked(bool blocked) => IsBlocked = blocked;
+
+    public bool HasPassword => !string.IsNullOrEmpty(PasswordHash);
+
+    public void SetPasswordHash(string passwordHash)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(passwordHash);
+        PasswordHash = passwordHash;
+    }
+
+    public void ClearPassword() => PasswordHash = null;
 
     private static string MaskPhone(string phone)
     {

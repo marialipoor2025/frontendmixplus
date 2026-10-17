@@ -32,6 +32,7 @@ public sealed class IdentityDbContext : DbContext
             entity.Property(x => x.Phone).HasMaxLength(20);
             entity.Property(x => x.Email).HasMaxLength(320);
             entity.Property(x => x.DisplayName).HasMaxLength(200).IsRequired();
+            entity.Property(x => x.PasswordHash).HasMaxLength(500);
         });
 
         modelBuilder.Entity<OtpChallenge>(entity =>

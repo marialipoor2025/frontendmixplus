@@ -1,8 +1,14 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import type { SellerProductBasics, SellerProductDraft } from "@/types/seller-wizard";
 import { slugifyTitle } from "@/lib/seller/wizard-draft";
+import {
+  listCatalogBrandOptions,
+  listCatalogCategoryOptions,
+  type CatalogBrandOption,
+  type CatalogCategoryOption,
+} from "@/lib/api/catalog-lookups";
 import { PdpComponentPreview } from "../PdpComponentPreview";
 import {
   WizardField,
@@ -19,28 +25,67 @@ type Props = {
   onSkip?: () => void;
 };
 
-const BRAND_SUGGESTIONS = [
-  { id: "b-samsung", name: "سامسونگ" },
-  { id: "b-xiaomi", name: "شیائومی" },
-  { id: "b-lg", name: "ال‌جی" },
-  { id: "b-philips", name: "فیلیپس" },
-  { id: "b-bosch", name: "بوش" },
-];
-
-const CATEGORY_SUGGESTIONS = [
-  { id: "cat-builtin", name: "لوازم توکار" },
-  { id: "cat-cooking", name: "لوازم پخت و پز" },
-  { id: "cat-fridge", name: "یخچال فریزر" },
-  { id: "cat-washer", name: "ماشین لباسشویی" },
-  { id: "cat-dishwasher", name: "ماشین ظرفشویی" },
-  { id: "cat-tv", name: "تلویزیون" },
-];
+const CUSTOM = "__custom__";
 
 export function BasicsStep({ draft, onSave, onBack, onSkip }: Props) {
   const [form, setForm] = useState<SellerProductBasics>(draft.basics);
   const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [slugTouched, setSlugTouched] = useState(Boolean(draft.basics.slug));
+  const [brands, setBrands] = useState<CatalogBrandOption[]>([]);
+  const [categories, setCategories] = useState<CatalogCategoryOption[]>([]);
+  const [lookupsLoading, setLookupsLoading] = useState(true);
+  const [brandMode, setBrandMode] = useState<"pick" | "custom">("pick");
+  const [categoryMode, setCategoryMode] = useState<"pick" | "custom">("pick");
+
+  useEffect(() => {
+    let cancelled = false;
+    setLookupsLoading(true);
+    void Promise.all([
+      listCatalogBrandOptions(),
+      listCatalogCategoryOptions(),
+    ]).then(([b, c]) => {
+      if (cancelled) return;
+      setBrands(b);
+      setCategories(c);
+
+      const brandMatch = b.find(
+        (x) =>
+          x.id === draft.basics.brandId || x.name === draft.basics.brandName,
+      );
+      const catMatch = c.find(
+        (x) =>
+          x.id === draft.basics.categoryId ||
+          x.name === draft.basics.categoryName,
+      );
+      setBrandMode(
+        draft.basics.brandName && !brandMatch ? "custom" : "pick",
+      );
+      setCategoryMode(
+        draft.basics.categoryName && !catMatch ? "custom" : "pick",
+      );
+      if (brandMatch) {
+        setForm((prev) => ({
+          ...prev,
+          brandId: brandMatch.id,
+          brandName: brandMatch.name,
+        }));
+      }
+      if (catMatch) {
+        setForm((prev) => ({
+          ...prev,
+          categoryId: catMatch.id,
+          categoryName: catMatch.name,
+        }));
+      }
+      setLookupsLoading(false);
+    });
+    return () => {
+      cancelled = true;
+    };
+    // Only on mount / draft id change
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [draft.id]);
 
   function patch(p: Partial<SellerProductBasics>) {
     setForm((prev) => {
@@ -62,7 +107,11 @@ export function BasicsStep({ draft, onSave, onBack, onSkip }: Props) {
       return;
     }
     if (!form.brandName.trim()) {
-      setError("برند را انتخاب یا وارد کنید");
+      setError("برند را از لیست انتخاب یا وارد کنید");
+      return;
+    }
+    if (!form.categoryName.trim()) {
+      setError("دسته‌بندی را از لیست انتخاب یا وارد کنید");
       return;
     }
     setError(null);
@@ -75,7 +124,9 @@ export function BasicsStep({ draft, onSave, onBack, onSkip }: Props) {
         slug: form.slug.trim().toLowerCase(),
         brandId,
         brandName: form.brandName.trim(),
-        categoryId: form.categoryId || (form.categoryName ? `c-${slugifyTitle(form.categoryName)}` : ""),
+        categoryId:
+          form.categoryId ||
+          (form.categoryName ? `c-${slugifyTitle(form.categoryName)}` : ""),
         categoryName: form.categoryName.trim(),
       });
     } catch (err) {
@@ -87,6 +138,18 @@ export function BasicsStep({ draft, onSave, onBack, onSkip }: Props) {
 
   const stepMeta = SELLER_WIZARD_STEPS.find((s) => s.id === "basics");
   const previewDraft = { ...draft, basics: form };
+  const brandSelectValue =
+    brandMode === "custom"
+      ? CUSTOM
+      : brands.some((b) => b.id === form.brandId)
+        ? form.brandId
+        : "";
+  const categorySelectValue =
+    categoryMode === "custom"
+      ? CUSTOM
+      : categories.some((c) => c.id === form.categoryId)
+        ? form.categoryId
+        : "";
 
   return (
     <WizardStepChrome
@@ -114,7 +177,7 @@ export function BasicsStep({ draft, onSave, onBack, onSkip }: Props) {
           className={wizardInputClass}
           value={form.title}
           onChange={(e) => patch({ title: e.target.value })}
-          placeholder="مثلاً جاروبرقی رباتیک شیائومی S10"
+          placeholder="مثلاً فر برقی میکس پلاس مدل E6500"
         />
       </WizardField>
 
@@ -127,46 +190,102 @@ export function BasicsStep({ draft, onSave, onBack, onSkip }: Props) {
             setSlugTouched(true);
             patch({ slug: e.target.value });
           }}
-          placeholder="xiaomi-vacuum-s10"
+          placeholder="mixplus-electric-oven-e6500"
         />
       </WizardField>
 
-      <WizardField label="برند">
-        <input
+      <WizardField
+        label="برند"
+        hint={
+          lookupsLoading
+            ? "در حال بارگذاری برندها…"
+            : `${brands.length} برند ثبت‌شده در کاتالوگ`
+        }
+      >
+        <select
           className={wizardInputClass}
-          list="seller-brand-suggestions"
-          value={form.brandName}
+          value={brandSelectValue}
+          disabled={lookupsLoading}
           onChange={(e) => {
-            const name = e.target.value;
-            const match = BRAND_SUGGESTIONS.find((b) => b.name === name);
-            patch({ brandName: name, brandId: match?.id ?? "" });
+            const v = e.target.value;
+            if (v === CUSTOM) {
+              setBrandMode("custom");
+              patch({ brandId: "", brandName: form.brandName || "" });
+              return;
+            }
+            setBrandMode("pick");
+            const match = brands.find((b) => b.id === v);
+            patch({
+              brandId: match?.id ?? "",
+              brandName: match?.name ?? "",
+            });
           }}
-          placeholder="نام برند"
-        />
-        <datalist id="seller-brand-suggestions">
-          {BRAND_SUGGESTIONS.map((b) => (
-            <option key={b.id} value={b.name} />
+        >
+          <option value="">انتخاب برند…</option>
+          {brands.map((b) => (
+            <option key={b.id} value={b.id}>
+              {b.name}
+            </option>
           ))}
-        </datalist>
+          <option value={CUSTOM}>سایر (ورود دستی)</option>
+        </select>
+        {brandMode === "custom" ? (
+          <input
+            className={`${wizardInputClass} mt-2`}
+            value={form.brandName}
+            onChange={(e) =>
+              patch({ brandName: e.target.value, brandId: "" })
+            }
+            placeholder="نام برند جدید"
+          />
+        ) : null}
       </WizardField>
 
-      <WizardField label="دسته‌بندی">
-        <input
+      <WizardField
+        label="دسته‌بندی"
+        hint={
+          lookupsLoading
+            ? "در حال بارگذاری دسته‌ها…"
+            : `${categories.length} دسته ثبت‌شده در کاتالوگ`
+        }
+      >
+        <select
           className={wizardInputClass}
-          list="seller-category-suggestions"
-          value={form.categoryName}
+          value={categorySelectValue}
+          disabled={lookupsLoading}
           onChange={(e) => {
-            const name = e.target.value;
-            const match = CATEGORY_SUGGESTIONS.find((c) => c.name === name);
-            patch({ categoryName: name, categoryId: match?.id ?? "" });
+            const v = e.target.value;
+            if (v === CUSTOM) {
+              setCategoryMode("custom");
+              patch({ categoryId: "", categoryName: form.categoryName || "" });
+              return;
+            }
+            setCategoryMode("pick");
+            const match = categories.find((c) => c.id === v);
+            patch({
+              categoryId: match?.id ?? "",
+              categoryName: match?.name ?? "",
+            });
           }}
-          placeholder="مثلاً لوازم خانگی"
-        />
-        <datalist id="seller-category-suggestions">
-          {CATEGORY_SUGGESTIONS.map((c) => (
-            <option key={c.id} value={c.name} />
+        >
+          <option value="">انتخاب دسته‌بندی…</option>
+          {categories.map((c) => (
+            <option key={c.id} value={c.id}>
+              {c.name}
+            </option>
           ))}
-        </datalist>
+          <option value={CUSTOM}>سایر (ورود دستی)</option>
+        </select>
+        {categoryMode === "custom" ? (
+          <input
+            className={`${wizardInputClass} mt-2`}
+            value={form.categoryName}
+            onChange={(e) =>
+              patch({ categoryName: e.target.value, categoryId: "" })
+            }
+            placeholder="نام دسته جدید — مثلاً فر توکار"
+          />
+        ) : null}
       </WizardField>
 
       <div className="grid gap-3 sm:grid-cols-3">

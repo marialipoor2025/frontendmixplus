@@ -137,6 +137,9 @@ export function RequireSeller({ children }: { children: ReactNode }) {
               value={shopName}
               onChange={(e) => setShopName(e.target.value)}
               disabled={registering}
+              dir="rtl"
+              lang="fa"
+              autoComplete="organization"
               className="mt-1 w-full rounded-lg border border-[var(--color-neutral-200)] px-3 py-2.5 text-sm"
               placeholder="مثلاً فروشگاه لوازم خانگی آریا"
               autoFocus

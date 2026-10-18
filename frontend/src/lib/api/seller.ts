@@ -6,6 +6,7 @@ import type { PagedResult } from "@/types/paging";
 export type SellerMe = {
   id: string;
   name: string;
+  slug?: string;
   status: string;
   isActive: boolean;
 };
@@ -79,6 +80,20 @@ export async function getSellerMe(): Promise<SellerMe> {
   return apiClient<SellerMe>("/api/seller/me", { auth: true });
 }
 
+export async function updateSellerProfile(input: {
+  name: string;
+  slug?: string;
+}): Promise<SellerMe> {
+  return apiClient<SellerMe>("/api/seller/me", {
+    method: "PUT",
+    auth: true,
+    body: JSON.stringify({
+      name: input.name,
+      slug: input.slug || null,
+    }),
+  });
+}
+
 /**
  * Soft lookup for portal gate: null = not registered yet; throws on inactive/auth errors.
  */
@@ -134,6 +149,18 @@ export async function listSellerProducts(
     totalCount: result.totalCount,
     totalPages: result.totalPages,
   };
+}
+
+/** Quick publish / unpublish from seller dashboard. */
+export async function setSellerProductPublished(
+  id: string,
+  isPublished: boolean,
+): Promise<void> {
+  await apiClient(`/api/seller/products/${encodeURIComponent(id)}/publish`, {
+    method: "PUT",
+    auth: true,
+    body: JSON.stringify({ isPublished }),
+  });
 }
 
 export async function getSellerProduct(id: string): Promise<SellerProduct> {

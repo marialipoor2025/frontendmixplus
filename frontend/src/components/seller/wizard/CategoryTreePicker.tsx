@@ -2,7 +2,10 @@
 
 import { useMemo, useState } from "react";
 import type { CatalogCategoryOption } from "@/lib/api/catalog-lookups";
-import { createSellerCategory } from "@/lib/api/catalog-lookups";
+import {
+  createSellerCategory,
+  setSellerCategoryActive,
+} from "@/lib/api/catalog-lookups";
 import { childrenOf, pathToCategory } from "@/lib/category-tree";
 import { wizardInputClass } from "./WizardStepChrome";
 
@@ -128,6 +131,37 @@ export function CategoryTreePicker({
             {path.map((p) => p.name).join(" › ") || selectedName}
           </span>
         </p>
+      ) : null}
+
+      {selectedId.startsWith("cat-s-") ? (
+        <button
+          type="button"
+          disabled={disabled || busy}
+          onClick={() => {
+            void (async () => {
+              setBusy(true);
+              setError(null);
+              const ok = await setSellerCategoryActive(selectedId, false);
+              setBusy(false);
+              if (!ok) {
+                setError("غیرفعال‌سازی دسته ناموفق بود");
+                return;
+              }
+              onCategoriesChanged(
+                categories.filter((c) => c.id !== selectedId),
+              );
+              const parent = path.length > 1 ? path[path.length - 2]! : null;
+              onChange(
+                parent
+                  ? { id: parent.id, name: parent.name }
+                  : { id: "", name: "" },
+              );
+            })();
+          }}
+          className="text-xs font-medium text-[var(--color-hint-object-error)]"
+        >
+          غیرفعال کردن این دسته (ساخته‌شده توسط فروشنده)
+        </button>
       ) : null}
 
       {!adding ? (

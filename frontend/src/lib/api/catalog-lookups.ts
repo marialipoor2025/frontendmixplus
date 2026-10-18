@@ -100,3 +100,21 @@ export async function createSellerCategory(
     return null;
   }
 }
+
+/** Activate/deactivate a seller-created category (`cat-s-*`). */
+export async function setSellerCategoryActive(
+  id: string,
+  isActive: boolean,
+): Promise<boolean> {
+  if (!enabled()) return false;
+  try {
+    await apiClient(`/api/seller/categories/${encodeURIComponent(id)}/active`, {
+      method: "PUT",
+      auth: true,
+      body: JSON.stringify({ isActive }),
+    });
+    return true;
+  } catch {
+    return false;
+  }
+}

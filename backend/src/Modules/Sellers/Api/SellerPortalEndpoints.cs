@@ -21,13 +21,13 @@ internal static class SellerPortalEndpoints
         var group = endpoints.MapGroup("/api/seller").WithTags("SellerPortal");
 
         group.MapGet("/me", GetMe).WithName("SellerPortalMe");
+        group.MapPut("/me", UpdateMe).WithName("SellerPortalUpdateMe");
         group.MapPost("/register", Register).WithName("SellerPortalRegister");
     }
 
     private static async Task<IResult> GetMe(
         HttpRequest request,
         ICurrentUserAccessor users,
-        ISellerAccountReadPort sellers,
         SellersDbContext db,
         CancellationToken ct)
     {
@@ -37,10 +37,11 @@ internal static class SellerPortalEndpoints
             return Results.Unauthorized();
         }
 
-        var seller = await sellers.GetByOwnerUserIdAsync(userId.Value, ct);
-        if (seller is not null)
+        var owned = await db.Sellers.AsNoTracking()
+            .FirstOrDefaultAsync(x => x.OwnerUserId == userId.Value && x.IsActive, ct);
+        if (owned is not null)
         {
-            return Results.Ok(ToMeDto(seller));
+            return Results.Ok(ToMeDto(owned));
         }
 
         // Distinguish suspended shops from "not registered yet".
@@ -135,11 +136,66 @@ internal static class SellerPortalEndpoints
             ToMeDto(seller));
     }
 
-    private static SellerMeDto ToMeDto(Seller seller) =>
-        new(seller.ExternalKey, seller.Name, seller.Status, seller.IsActive);
+    private static async Task<IResult> UpdateMe(
+        UpdateSellerProfileRequest body,
+        HttpRequest request,
+        ICurrentUserAccessor users,
+        SellersDbContext db,
+        CancellationToken ct)
+    {
+        var userId = await users.GetUserIdAsync(ReadBearer(request), ct);
+        if (userId is null)
+        {
+            return Results.Unauthorized();
+        }
 
-    private static SellerMeDto ToMeDto(SellerAccountModel seller) =>
-        new(seller.ExternalKey, seller.Name, seller.Status, seller.IsActive);
+        var seller = await db.Sellers
+            .FirstOrDefaultAsync(x => x.OwnerUserId == userId.Value, ct);
+        if (seller is null)
+        {
+            return Results.NotFound(new { error = "حساب فروشنده یافت نشد", code = "seller_not_registered" });
+        }
+
+        if (!seller.IsActive)
+        {
+            return Results.Json(
+                new
+                {
+                    error = "حساب فروشنده شما غیرفعال یا در انتظار تأیید است",
+                    code = "seller_inactive",
+                    status = seller.Status,
+                },
+                statusCode: StatusCodes.Status403Forbidden);
+        }
+
+        var shopName = (body.Name ?? string.Empty).Trim();
+        if (shopName.Length < 2)
+        {
+            return Results.BadRequest(new { error = "نام فروشگاه الزامی است" });
+        }
+
+        if (shopName.Length > 120)
+        {
+            return Results.BadRequest(new { error = "نام فروشگاه بیش از حد طولانی است" });
+        }
+
+        string? slug = null;
+        if (!string.IsNullOrWhiteSpace(body.Slug))
+        {
+            slug = body.Slug.Trim().ToLowerInvariant();
+            if (await db.Sellers.AnyAsync(x => x.Slug == slug && x.Id != seller.Id, ct))
+            {
+                return Results.Conflict(new { error = "اسلاگ تکراری است" });
+            }
+        }
+
+        seller.Update(shopName, slug);
+        await db.SaveChangesAsync(ct);
+        return Results.Ok(ToMeDto(seller));
+    }
+
+    private static SellerMeDto ToMeDto(Seller seller) =>
+        new(seller.ExternalKey, seller.Name, seller.Slug, seller.Status, seller.IsActive);
 
     private static string BuildSlug(string shopName, string fallback)
     {
@@ -191,9 +247,12 @@ internal static class SellerPortalEndpoints
 
     private sealed record RegisterSellerRequest(string? ShopName);
 
+    private sealed record UpdateSellerProfileRequest(string? Name, string? Slug);
+
     private sealed record SellerMeDto(
         string Id,
         string Name,
+        string Slug,
         string Status,
         bool IsActive);
 }

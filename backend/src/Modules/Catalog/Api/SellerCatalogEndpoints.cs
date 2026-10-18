@@ -47,6 +47,7 @@ internal static class SellerCatalogEndpoints
         group.MapPut("/products/{id}/amazing-offer", NominateAmazingOffer).WithName("SellerNominateAmazingOffer");
         group.MapDelete("/products/{id}/amazing-offer", WithdrawAmazingOffer).WithName("SellerWithdrawAmazingOffer");
         group.MapPost("/categories", CreateSellerCategory).WithName("SellerCreateCategory");
+        group.MapPut("/categories/{id}/active", SetSellerCategoryActive).WithName("SellerSetCategoryActive");
     }
 
     private static async Task<IResult> ListProducts(
@@ -674,7 +675,44 @@ internal static class SellerCatalogEndpoints
                 href = category.Href,
                 parentId = parentKey,
                 sortOrder = category.SortOrder,
+                isActive = category.IsActive,
             });
+    }
+
+    /// <summary>
+    /// Seller can activate/deactivate categories they created (<c>cat-s-*</c>).
+    /// </summary>
+    private static async Task<IResult> SetSellerCategoryActive(
+        string id,
+        SetSellerCategoryActiveRequest body,
+        HttpRequest request,
+        CatalogDbContext db,
+        ICurrentUserAccessor users,
+        ISellerAccountReadPort sellers,
+        CancellationToken ct)
+    {
+        var (seller, error) = await ResolveSellerAsync(request, users, sellers, ct);
+        if (error is not null) return error;
+        _ = seller;
+
+        var category = await db.Categories.FirstOrDefaultAsync(x => x.ExternalKey == id, ct);
+        if (category is null) return Results.NotFound(new { error = "دسته یافت نشد" });
+
+        if (!category.ExternalKey.StartsWith("cat-s-", StringComparison.OrdinalIgnoreCase))
+        {
+            return Results.Json(new { error = "فقط دسته‌های ساخته‌شده توسط فروشنده قابل تغییر وضعیت هستند" }, statusCode: StatusCodes.Status403Forbidden);
+        }
+
+        category.SetActive(body.IsActive);
+        await db.SaveChangesAsync(ct);
+
+        return Results.Ok(new
+        {
+            id = category.ExternalKey,
+            title = category.Title,
+            slug = category.Slug,
+            isActive = category.IsActive,
+        });
     }
 
     private static string Slugify(string value)
@@ -1153,6 +1191,8 @@ internal static class SellerCatalogEndpoints
     private sealed record NominateAmazingOfferRequest(DateTime? StartsAtUtc, DateTime? EndsAtUtc);
 
     private sealed record CreateSellerCategoryRequest(string Title, string? Slug, string? ParentId);
+
+    private sealed record SetSellerCategoryActiveRequest(bool IsActive);
 
     private sealed record CreateSellerProductRequest(
         string Title,

@@ -12,6 +12,7 @@ import {
 import {
   getSellerMe,
   listSellerProducts,
+  setSellerProductPublished,
   type SellerProductListItem,
   type SellerProductSortBy,
 } from "@/lib/api/seller";
@@ -268,16 +269,37 @@ export default function SellerDashboardPage() {
     {
       key: "actions",
       header: "عملیات",
-      widthClass: "w-[11%]",
+      widthClass: "w-[18%]",
       cell: (r) => (
-        <Link
-          href={`/seller/products/${encodeURIComponent(r.id)}/manage`}
-          className="block"
-        >
-          <AdminOutlineButton type="button" className="w-full">
-            مدیریت
+        <div className="flex flex-col gap-1">
+          <AdminOutlineButton
+            type="button"
+            className="w-full"
+            disabled={refreshing}
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              void (async () => {
+                try {
+                  await setSellerProductPublished(r.id, !r.isPublished);
+                  await load({ soft: true });
+                } catch {
+                  setError("تغییر وضعیت انتشار ناموفق بود");
+                }
+              })();
+            }}
+          >
+            {r.isPublished ? "لغو انتشار" : "انتشار"}
           </AdminOutlineButton>
-        </Link>
+          <Link
+            href={`/seller/products/${encodeURIComponent(r.id)}/manage`}
+            className="block"
+          >
+            <AdminOutlineButton type="button" className="w-full">
+              مدیریت
+            </AdminOutlineButton>
+          </Link>
+        </div>
       ),
     },
   ];

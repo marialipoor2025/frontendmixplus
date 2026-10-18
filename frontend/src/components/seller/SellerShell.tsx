@@ -8,6 +8,7 @@ import { useAuth } from "@/lib/auth/useAuth";
 const NAV = [
   { id: "dashboard", title: "مدیریت محصولات", href: "/seller/dashboard" },
   { id: "new-product", title: "افزودن محصول", href: "/seller/products/new" },
+  { id: "settings", title: "تنظیمات فروشگاه", href: "/seller/settings" },
 ] as const;
 
 export function SellerShell({ children }: { children: ReactNode }) {

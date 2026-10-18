@@ -156,7 +156,7 @@ export function ProductPage({ data, nav }: ProductPageProps) {
                       discountPercent: data.buyBox.discountPercent,
                       currency: "IRT",
                       quantity: 1,
-                      stockAvailable: 5,
+                      stockAvailable: 99,
                     }}
                   />
                 </div>

@@ -71,7 +71,7 @@ export function ProductPurchasePanel({ data }: ProductPurchasePanelProps) {
     discountPercent: buyBox.discountPercent,
     currency: "IRT",
     quantity: 1,
-    stockAvailable: inStock ? 5 : 0,
+    stockAvailable: inStock ? 99 : 0,
   };
 
   return (

@@ -25,6 +25,7 @@ import {
   NAV_ACTION_LINKS,
   NAV_ICON_CLASS,
 } from "@/components/layout/navMenuShared";
+import { subscribeCartCount } from "@/lib/api/cart";
 
 type NavId = "chat" | "categories" | "cart" | "profile" | "home";
 
@@ -56,11 +57,17 @@ export function MobileBottomNav() {
   const [categoriesExpanded, setCategoriesExpanded] = useState(false);
   const [selectedId, setSelectedId] = useState<NavId | null>(null);
   const [mounted, setMounted] = useState(false);
+  const [cartCount, setCartCount] = useState(0);
   const shellRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     setMounted(true);
   }, []);
+
+  useEffect(() => {
+    if (!mounted) return;
+    return subscribeCartCount(setCartCount);
+  }, [mounted]);
 
   useEffect(() => {
     setSelectedId(null);
@@ -211,10 +218,19 @@ export function MobileBottomNav() {
               href="/checkout/cart"
               onClick={onStubClick("cart")}
               className="relative flex h-11 w-11 items-center justify-center"
-              aria-label="سبد خرید"
+              aria-label={
+                cartCount > 0
+                  ? `سبد خرید، ${cartCount} کالا`
+                  : "سبد خرید"
+              }
               aria-current={activeId === "cart" ? "page" : undefined}
             >
               <BottomNavCartIcon className={iconClass("cart")} />
+              {cartCount > 0 ? (
+                <span className="absolute end-0 top-0 flex min-w-[18px] items-center justify-center rounded-full bg-[var(--color-primary)] px-1 text-[10px] font-bold leading-[18px] text-white">
+                  {cartCount > 99 ? "99+" : cartCount}
+                </span>
+              ) : null}
             </Link>
           </li>
 

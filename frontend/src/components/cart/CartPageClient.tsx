@@ -2,8 +2,8 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
+import { CartQtyStepper } from "@/components/cart/CartQtyStepper";
 import { TomanIcon } from "@/components/layout/icons";
 import {
   applyCartCoupon,
@@ -20,7 +20,6 @@ import { useAuth } from "@/lib/auth/useAuth";
 import type { CartDto } from "@/types/cart";
 
 export function CartPageClient() {
-  const router = useRouter();
   const { ready, isAuthenticated } = useAuth();
   const [cart, setCart] = useState<CartDto | null>(null);
   const [loading, setLoading] = useState(true);
@@ -31,11 +30,6 @@ export function CartPageClient() {
   const [busy, setBusy] = useState(false);
 
   const refresh = useCallback(async () => {
-    if (!isAuthenticated) {
-      setCart(null);
-      setLoading(false);
-      return;
-    }
     setLoading(true);
     setError(null);
     try {
@@ -51,18 +45,12 @@ export function CartPageClient() {
     } finally {
       setLoading(false);
     }
-  }, [isAuthenticated]);
+  }, []);
 
   useEffect(() => {
     if (!ready) return;
-    if (!isAuthenticated) {
-      router.replace(
-        `/users/login?returnUrl=${encodeURIComponent("/checkout/cart")}`,
-      );
-      return;
-    }
     void refresh();
-  }, [ready, isAuthenticated, refresh, router]);
+  }, [ready, refresh]);
 
   async function run(action: () => Promise<CartDto>) {
     setBusy(true);
@@ -148,39 +136,28 @@ export function CartPageClient() {
                   </p>
                 ) : null}
                 <div className="mt-3 flex flex-wrap items-center gap-3">
-                  <div className="flex items-center rounded-md border border-[var(--color-neutral-200)]">
-                    <button
-                      type="button"
-                      disabled={busy || line.quantity <= 1}
-                      onClick={() =>
+                  <CartQtyStepper
+                    quantity={line.quantity}
+                    max={Math.max(line.stockAvailable || 0, line.quantity, 99)}
+                    disabled={busy || !line.inStock}
+                    onDecrease={() => {
+                      if (line.quantity <= 1) {
+                        void run(() => removeCartItem(line.id));
+                      } else {
                         void run(() =>
                           updateCartItemQty(line.id, line.quantity - 1),
-                        )
+                        );
                       }
-                      className="px-2.5 py-1 text-sm disabled:opacity-40"
-                      aria-label="کاهش"
-                    >
-                      −
-                    </button>
-                    <span className="min-w-8 text-center text-sm font-medium">
-                      {new Intl.NumberFormat("fa-IR").format(line.quantity)}
-                    </span>
-                    <button
-                      type="button"
-                      disabled={
-                        busy || line.quantity >= Math.max(line.stockAvailable, 1)
-                      }
-                      onClick={() =>
-                        void run(() =>
-                          updateCartItemQty(line.id, line.quantity + 1),
-                        )
-                      }
-                      className="px-2.5 py-1 text-sm disabled:opacity-40"
-                      aria-label="افزایش"
-                    >
-                      +
-                    </button>
-                  </div>
+                    }}
+                    onIncrease={() =>
+                      void run(() =>
+                        updateCartItemQty(line.id, line.quantity + 1),
+                      )
+                    }
+                    onSetQuantity={(qty) =>
+                      void run(() => updateCartItemQty(line.id, qty))
+                    }
+                  />
                   <button
                     type="button"
                     disabled={busy}
@@ -279,32 +256,38 @@ export function CartPageClient() {
           </div>
         </label>
 
-        <label className="block space-y-1.5">
-          <span className="text-xs text-[var(--color-neutral-500)]">
-            کیف پول (موجودی: {formatPrice(cart.walletBalance)})
-          </span>
-          <div className="flex gap-2">
-            <input
-              value={walletInput}
-              onChange={(e) => setWalletInput(e.target.value.replace(/[^\d]/g, ""))}
-              className="min-w-0 flex-1 rounded-md border border-[var(--color-neutral-200)] px-2 py-2 text-sm"
-              placeholder="مبلغ"
-              inputMode="numeric"
-            />
-            <button
-              type="button"
-              disabled={busy}
-              onClick={() =>
-                void run(() =>
-                  applyCartWallet(Number(walletInput || "0")),
-                )
-              }
-              className="rounded-md bg-[var(--color-primary)] px-3 text-xs text-white disabled:opacity-40"
-            >
-              اعمال
-            </button>
-          </div>
-        </label>
+        {isAuthenticated ? (
+          <label className="block space-y-1.5">
+            <span className="text-xs text-[var(--color-neutral-500)]">
+              کیف پول (موجودی: {formatPrice(cart.walletBalance)})
+            </span>
+            <div className="flex gap-2">
+              <input
+                value={walletInput}
+                onChange={(e) =>
+                  setWalletInput(e.target.value.replace(/[^\d]/g, ""))
+                }
+                className="min-w-0 flex-1 rounded-md border border-[var(--color-neutral-200)] px-2 py-2 text-sm"
+                placeholder="مبلغ"
+                inputMode="numeric"
+              />
+              <button
+                type="button"
+                disabled={busy}
+                onClick={() =>
+                  void run(() => applyCartWallet(Number(walletInput || "0")))
+                }
+                className="rounded-md bg-[var(--color-primary)] px-3 text-xs text-white disabled:opacity-40"
+              >
+                اعمال
+              </button>
+            </div>
+          </label>
+        ) : (
+          <p className="rounded-lg bg-[var(--color-neutral-50)] px-3 py-2 text-xs text-[var(--color-muted)]">
+            برای استفاده از کیف پول و پرداخت نهایی وارد شوید.
+          </p>
+        )}
 
         <dl className="space-y-2 border-t border-[var(--color-neutral-100)] pt-3 text-sm">
           <div className="flex justify-between text-[var(--color-neutral-600)]">
@@ -342,14 +325,20 @@ export function CartPageClient() {
         </dl>
 
         <Link
-          href="/checkout/shipping"
+          href={
+            isAuthenticated
+              ? "/checkout/shipping"
+              : `/users/login?returnUrl=${encodeURIComponent("/checkout/shipping")}`
+          }
           className={`flex h-12 w-full items-center justify-center rounded-[var(--medium-radius)] text-sm font-medium text-white ${
             cart.hasStockIssues
               ? "pointer-events-none bg-[var(--color-button-disable)] text-[var(--color-neutral-500)]"
               : "bg-[var(--color-primary-500)] hover:bg-[var(--color-primary-700)]"
           }`}
         >
-          ادامه و انتخاب ارسال
+          {isAuthenticated
+            ? "ادامه و انتخاب ارسال"
+            : "ورود و ادامه پرداخت"}
         </Link>
       </aside>
     </div>

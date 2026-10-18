@@ -116,7 +116,7 @@ function SellerRow({
     discountPercent: offer.discountPercent,
     currency: "IRT",
     quantity: 1,
-    stockAvailable: 5,
+    stockAvailable: 99,
   };
 
   const nameNode = (

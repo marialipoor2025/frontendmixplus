@@ -11,6 +11,7 @@ import {
 import { ProductMobileMoreSheet } from "@/components/product/ProductMobileMoreSheet";
 import { ProductMobileSearchSheet } from "@/components/product/ProductMobileSearchSheet";
 import { ProductShareSheet } from "@/components/product/ProductShareSheet";
+import { subscribeCartCount } from "@/lib/api/cart";
 import {
   addToWishlist,
   isInWishlist,
@@ -73,10 +74,13 @@ export function ProductMobileStickyHeader({
   const [moreOpen, setMoreOpen] = useState(false);
   const [shareOpen, setShareOpen] = useState(false);
   const [wished, setWished] = useState(false);
+  const [cartCount, setCartCount] = useState(0);
   const shareUrl =
     typeof window !== "undefined"
       ? `${window.location.origin}/product/${slug}`
       : `/product/${slug}`;
+
+  useEffect(() => subscribeCartCount(setCartCount), []);
 
   useEffect(() => {
     const sentinel = document.getElementById("pdp-mobile-sticky-sentinel");
@@ -196,10 +200,19 @@ export function ProductMobileStickyHeader({
             </button>
             <Link
               href="/checkout/cart"
-              className={`${iconBtn} ${covered ? "" : "rounded-full bg-white/95 shadow-sm"}`}
-              aria-label="سبد خرید"
+              className={`relative ${iconBtn} ${covered ? "" : "rounded-full bg-white/95 shadow-sm"}`}
+              aria-label={
+                cartCount > 0
+                  ? `سبد خرید، ${cartCount} کالا`
+                  : "سبد خرید"
+              }
             >
               <CartIcon className="size-6" />
+              {cartCount > 0 ? (
+                <span className="absolute end-0.5 top-0.5 flex min-w-[16px] items-center justify-center rounded-full bg-[var(--color-primary)] px-0.5 text-[9px] font-bold leading-[16px] text-white">
+                  {cartCount > 99 ? "99+" : cartCount}
+                </span>
+              ) : null}
             </Link>
             <button
               type="button"

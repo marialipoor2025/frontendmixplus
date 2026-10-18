@@ -66,6 +66,19 @@ public sealed class User : AggregateRoot
 
     public void ClearPassword() => PasswordHash = null;
 
+    /// <summary>Update display name (UTF-8 Persian OK). Empty/whitespace rejected.</summary>
+    public void UpdateDisplayName(string displayName)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(displayName);
+        var trimmed = displayName.Trim();
+        if (trimmed.Length > 200)
+        {
+            throw new ArgumentException("Display name is too long.", nameof(displayName));
+        }
+
+        DisplayName = trimmed;
+    }
+
     private static string MaskPhone(string phone)
     {
         if (phone.Length < 7)

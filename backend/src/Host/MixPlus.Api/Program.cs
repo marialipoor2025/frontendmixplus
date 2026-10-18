@@ -1,3 +1,5 @@
+using System.Text;
+using System.Text.Encodings.Web;
 using System.Text.Json.Serialization;
 using MixPlus.Api;
 using MixPlus.Api.Seed;
@@ -13,6 +15,10 @@ using MixPlus.Modules.Search.Api;
 using MixPlus.Modules.Sellers.Api;
 using MixPlus.Modules.Support.Api;
 
+// Ensure Persian/UTF-8 is the process default for console I/O.
+Console.OutputEncoding = Encoding.UTF8;
+Console.InputEncoding = Encoding.UTF8;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Optional local secrets (gitignored): Sms credentials, staff phones, etc.
@@ -22,6 +28,8 @@ builder.Services.ConfigureHttpJsonOptions(options =>
 {
     options.SerializerOptions.PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.CamelCase;
     options.SerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
+    // Keep Persian readable in JSON (still valid UTF-8).
+    options.SerializerOptions.Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping;
 });
 
 builder.Services.AddEndpointsApiExplorer();

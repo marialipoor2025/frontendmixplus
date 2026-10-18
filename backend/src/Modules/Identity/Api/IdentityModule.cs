@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using MixPlus.BuildingBlocks.Application;
@@ -158,6 +159,72 @@ public sealed class IdentityModule : IModule
             })
             .WithName("AuthMe");
 
+        group.MapPut("/profile", async (
+                HttpRequest request,
+                UpdateProfileRequest body,
+                IdentityDbContext db,
+                ISessionAuthService sessions,
+                CancellationToken ct) =>
+            {
+                var me = await sessions.GetMeAsync(ReadBearer(request), ct);
+                if (!me.IsSuccess)
+                {
+                    return Results.Unauthorized();
+                }
+
+                if (!Guid.TryParse(me.Value.Id, out var userId))
+                {
+                    return Results.Unauthorized();
+                }
+
+                var first = (body.FirstName ?? string.Empty).Trim();
+                var last = (body.LastName ?? string.Empty).Trim();
+                var display = string.Join(" ", new[] { first, last }.Where(s => s.Length > 0));
+                if (string.IsNullOrWhiteSpace(display) && !string.IsNullOrWhiteSpace(body.DisplayName))
+                {
+                    display = body.DisplayName.Trim();
+                }
+
+                if (string.IsNullOrWhiteSpace(display))
+                {
+                    return Results.BadRequest(new { error = "نام نمایشی الزامی است" });
+                }
+
+                if (display.Length > 200)
+                {
+                    return Results.BadRequest(new { error = "نام بیش از حد طولانی است" });
+                }
+
+                // Reject Unicode replacement chars from wrong encodings.
+                if (display.Contains('\uFFFD'))
+                {
+                    return Results.BadRequest(new { error = "\u06A9\u062F\u06AF\u0630\u0627\u0631\u06CC \u0646\u0627\u0645 \u0646\u0627\u0645\u0639\u062A\u0628\u0631 \u0627\u0633\u062A" });
+                }
+
+                var user = await db.Users.FirstOrDefaultAsync(x => x.Id == userId, ct);
+                if (user is null)
+                {
+                    return Results.Unauthorized();
+                }
+
+                try
+                {
+                    user.UpdateDisplayName(display);
+                }
+                catch (ArgumentException ex)
+                {
+                    return Results.BadRequest(new { error = ex.Message });
+                }
+
+                await db.SaveChangesAsync(ct);
+                return Results.Ok(new AuthUserDto(
+                    user.Id.ToString("D"),
+                    user.DisplayName,
+                    user.Phone,
+                    user.Email));
+            })
+            .WithName("UpdateAuthProfile");
+
         group.MapPost("/logout", async (HttpRequest request, ISessionAuthService sessions, CancellationToken ct) =>
             {
                 await sessions.LogoutAsync(ReadBearer(request), ct);
@@ -185,4 +252,9 @@ public sealed class IdentityModule : IModule
             ? header[prefix.Length..].Trim()
             : header.Trim();
     }
+
+    private sealed record UpdateProfileRequest(
+        string? FirstName,
+        string? LastName,
+        string? DisplayName);
 }

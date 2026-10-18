@@ -59,6 +59,22 @@ export async function getMe(): Promise<AuthUser> {
   return apiClient<AuthUser>("/api/auth/me", { auth: true });
 }
 
+export async function updateAuthProfile(input: {
+  firstName?: string;
+  lastName?: string;
+  displayName?: string;
+}): Promise<AuthUser> {
+  return apiClient<AuthUser>("/api/auth/profile", {
+    method: "PUT",
+    auth: true,
+    body: JSON.stringify({
+      firstName: input.firstName ?? null,
+      lastName: input.lastName ?? null,
+      displayName: input.displayName ?? null,
+    }),
+  });
+}
+
 export async function logoutSession(): Promise<void> {
   await apiClient<void>("/api/auth/logout", {
     method: "POST",

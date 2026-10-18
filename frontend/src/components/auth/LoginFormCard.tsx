@@ -14,6 +14,7 @@ import {
   startOtp,
   verifyOtp,
 } from "@/lib/api/auth";
+import { mergeGuestCart } from "@/lib/api/cart";
 import { saveAdminSession } from "@/lib/admin/session";
 import { saveSession } from "@/lib/auth/session";
 import type { VerifyOtpResponse } from "@/types/auth";
@@ -102,7 +103,13 @@ export function LoginFormCard({
       const staff = await getAdminStaffMe(result.accessToken);
       saveAdminSession(result.accessToken, staff);
       router.replace(returnUrl ?? "/admin");
-    } else if (mode === "seller") {
+      return;
+    }
+
+    // Bring anonymous ATC lines into the shopper cart before leaving login.
+    await mergeGuestCart().catch(() => null);
+
+    if (mode === "seller") {
       router.replace(returnUrl ?? "/seller/dashboard");
     } else {
       router.replace(returnUrl ?? "/profile");

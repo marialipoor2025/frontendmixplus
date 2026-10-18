@@ -21,6 +21,7 @@ internal static class CartEndpoints
         group.MapPatch("/items/{lineId:guid}", UpdateItem).WithName("UpdateCartItem");
         group.MapDelete("/items/{lineId:guid}", RemoveItem).WithName("RemoveCartItem");
         group.MapPost("/revalidate", Revalidate).WithName("RevalidateCart");
+        group.MapPost("/merge", MergeGuestCart).WithName("MergeGuestCart");
         group.MapPost("/coupon", ApplyCoupon).WithName("ApplyCartCoupon");
         group.MapDelete("/coupon", ClearCoupon).WithName("ClearCartCoupon");
         group.MapPost("/gift-card", ApplyGiftCard).WithName("ApplyCartGiftCard");
@@ -35,10 +36,10 @@ internal static class CartEndpoints
         CartDbContext db,
         CancellationToken ct)
     {
-        var user = await CartAuth.RequireUser(request, sessions, ct);
-        if (user is null) return Results.Unauthorized();
+        var owner = await CartAuth.ResolveCartOwner(request, sessions, ct);
+        if (owner is null) return Results.Unauthorized();
 
-        var cart = await GetOrCreateCartAsync(db, Guid.Parse(user.Id), ct);
+        var cart = await GetOrCreateCartAsync(db, owner.CartUserId, ct);
         return Results.Ok(await ToCartDto(db, coupons, cart, ct));
     }
 
@@ -48,12 +49,11 @@ internal static class CartEndpoints
         CartDbContext db,
         CancellationToken ct)
     {
-        var user = await CartAuth.RequireUser(request, sessions, ct);
-        if (user is null) return Results.Unauthorized();
+        var owner = await CartAuth.ResolveCartOwner(request, sessions, ct);
+        if (owner is null) return Results.Ok(new { count = 0 });
 
-        var userId = Guid.Parse(user.Id);
         var cartId = await db.Carts.AsNoTracking()
-            .Where(x => x.UserId == userId)
+            .Where(x => x.UserId == owner.CartUserId)
             .Select(x => (Guid?)x.Id)
             .FirstOrDefaultAsync(ct);
         if (cartId is null) return Results.Ok(new { count = 0 });
@@ -73,14 +73,14 @@ internal static class CartEndpoints
         CartDbContext db,
         CancellationToken ct)
     {
-        var user = await CartAuth.RequireUser(request, sessions, ct);
-        if (user is null) return Results.Unauthorized();
+        var owner = await CartAuth.ResolveCartOwner(request, sessions, ct);
+        if (owner is null) return Results.Unauthorized();
         if (string.IsNullOrWhiteSpace(body.ProductSlug) || string.IsNullOrWhiteSpace(body.OfferExternalKey))
         {
             return Results.BadRequest(new { error = "محصول و فروشنده الزامی است" });
         }
 
-        var cart = await GetOrCreateCartAsync(db, Guid.Parse(user.Id), ct);
+        var cart = await GetOrCreateCartAsync(db, owner.CartUserId, ct);
         var live = await TryLiveSnapshot(catalog, body.ProductSlug, ct);
 
         var unitPrice = body.UnitPrice > 0 ? body.UnitPrice : live?.Price.Amount ?? 0;
@@ -152,10 +152,10 @@ internal static class CartEndpoints
         CartDbContext db,
         CancellationToken ct)
     {
-        var user = await CartAuth.RequireUser(request, sessions, ct);
-        if (user is null) return Results.Unauthorized();
+        var owner = await CartAuth.ResolveCartOwner(request, sessions, ct);
+        if (owner is null) return Results.Unauthorized();
 
-        var cart = await GetOrCreateCartAsync(db, Guid.Parse(user.Id), ct);
+        var cart = await GetOrCreateCartAsync(db, owner.CartUserId, ct);
         var line = cart.FindLine(lineId);
         if (line is null) return Results.NotFound(new { error = "آیتم سبد یافت نشد" });
 
@@ -178,10 +178,10 @@ internal static class CartEndpoints
         CartDbContext db,
         CancellationToken ct)
     {
-        var user = await CartAuth.RequireUser(request, sessions, ct);
-        if (user is null) return Results.Unauthorized();
+        var owner = await CartAuth.ResolveCartOwner(request, sessions, ct);
+        if (owner is null) return Results.Unauthorized();
 
-        var cart = await GetOrCreateCartAsync(db, Guid.Parse(user.Id), ct);
+        var cart = await GetOrCreateCartAsync(db, owner.CartUserId, ct);
         var line = cart.FindLine(lineId);
         if (line is null)
         {
@@ -202,10 +202,10 @@ internal static class CartEndpoints
         CartDbContext db,
         CancellationToken ct)
     {
-        var user = await CartAuth.RequireUser(request, sessions, ct);
-        if (user is null) return Results.Unauthorized();
+        var owner = await CartAuth.ResolveCartOwner(request, sessions, ct);
+        if (owner is null) return Results.Unauthorized();
 
-        var cart = await GetOrCreateCartAsync(db, Guid.Parse(user.Id), ct);
+        var cart = await GetOrCreateCartAsync(db, owner.CartUserId, ct);
         var changed = false;
         foreach (var line in cart.Lines.ToList())
         {
@@ -243,10 +243,10 @@ internal static class CartEndpoints
         CartDbContext db,
         CancellationToken ct)
     {
-        var user = await CartAuth.RequireUser(request, sessions, ct);
-        if (user is null) return Results.Unauthorized();
+        var owner = await CartAuth.ResolveCartOwner(request, sessions, ct);
+        if (owner is null) return Results.Unauthorized();
 
-        var cart = await GetOrCreateCartAsync(db, Guid.Parse(user.Id), ct);
+        var cart = await GetOrCreateCartAsync(db, owner.CartUserId, ct);
         var subtotal = cart.Lines.Sum(x => x.UnitPrice * x.Quantity);
         var quote = await coupons.ValidateAsync(body.Code ?? "", subtotal, ct);
         if (!quote.IsValid)
@@ -266,9 +266,9 @@ internal static class CartEndpoints
         CartDbContext db,
         CancellationToken ct)
     {
-        var user = await CartAuth.RequireUser(request, sessions, ct);
-        if (user is null) return Results.Unauthorized();
-        var cart = await GetOrCreateCartAsync(db, Guid.Parse(user.Id), ct);
+        var owner = await CartAuth.ResolveCartOwner(request, sessions, ct);
+        if (owner is null) return Results.Unauthorized();
+        var cart = await GetOrCreateCartAsync(db, owner.CartUserId, ct);
         cart.SetCoupon(null);
         await db.SaveChangesAsync(ct);
         return Results.Ok(await ToCartDto(db, coupons, cart, ct));
@@ -282,8 +282,8 @@ internal static class CartEndpoints
         CartDbContext db,
         CancellationToken ct)
     {
-        var user = await CartAuth.RequireUser(request, sessions, ct);
-        if (user is null) return Results.Unauthorized();
+        var owner = await CartAuth.ResolveCartOwner(request, sessions, ct);
+        if (owner is null) return Results.Unauthorized();
 
         var code = (body.Code ?? "").Trim().ToUpperInvariant();
         var card = await db.GiftCards
@@ -308,8 +308,8 @@ internal static class CartEndpoints
             return Results.BadRequest(new { error = "کارت هدیه قابل استفاده نیست" });
         }
 
-        card.AssignTo(Guid.Parse(user.Id));
-        var cart = await GetOrCreateCartAsync(db, Guid.Parse(user.Id), ct);
+        card.AssignTo(owner.CartUserId);
+        var cart = await GetOrCreateCartAsync(db, owner.CartUserId, ct);
         cart.SetGiftCard(card.Code);
         await db.SaveChangesAsync(ct);
         return Results.Ok(await ToCartDto(db, coupons, cart, ct));
@@ -322,9 +322,9 @@ internal static class CartEndpoints
         CartDbContext db,
         CancellationToken ct)
     {
-        var user = await CartAuth.RequireUser(request, sessions, ct);
-        if (user is null) return Results.Unauthorized();
-        var cart = await GetOrCreateCartAsync(db, Guid.Parse(user.Id), ct);
+        var owner = await CartAuth.ResolveCartOwner(request, sessions, ct);
+        if (owner is null) return Results.Unauthorized();
+        var cart = await GetOrCreateCartAsync(db, owner.CartUserId, ct);
         cart.SetGiftCard(null);
         await db.SaveChangesAsync(ct);
         return Results.Ok(await ToCartDto(db, coupons, cart, ct));
@@ -338,6 +338,7 @@ internal static class CartEndpoints
         CartDbContext db,
         CancellationToken ct)
     {
+        // Wallet balance belongs to a real shopper account.
         var user = await CartAuth.RequireUser(request, sessions, ct);
         if (user is null) return Results.Unauthorized();
 
@@ -348,6 +349,99 @@ internal static class CartEndpoints
         cart.SetWalletAmount(amount);
         await db.SaveChangesAsync(ct);
         return Results.Ok(await ToCartDto(db, coupons, cart, ct));
+    }
+
+    /// <summary>
+    /// After login: move guest cart lines into the authenticated shopper cart.
+    /// </summary>
+    private static async Task<IResult> MergeGuestCart(
+        HttpRequest request,
+        IShopperSessionPort sessions,
+        ICouponValidationPort coupons,
+        CartDbContext db,
+        CancellationToken ct)
+    {
+        var user = await CartAuth.RequireUser(request, sessions, ct);
+        if (user is null || !Guid.TryParse(user.Id, out var userId))
+        {
+            return Results.Unauthorized();
+        }
+
+        var guestToken = CartAuth.ReadGuestToken(request);
+        if (string.IsNullOrWhiteSpace(guestToken))
+        {
+            var cartOnly = await GetOrCreateCartAsync(db, userId, ct);
+            return Results.Ok(await ToCartDto(db, coupons, cartOnly, ct));
+        }
+
+        var guestUserId = MixPlus.BuildingBlocks.Domain.StableGuid.From("guest-cart:" + guestToken);
+        if (guestUserId == userId)
+        {
+            var same = await GetOrCreateCartAsync(db, userId, ct);
+            return Results.Ok(await ToCartDto(db, coupons, same, ct));
+        }
+
+        var userCart = await GetOrCreateCartAsync(db, userId, ct);
+        var guestCart = await db.Carts
+            .Include("_lines")
+            .FirstOrDefaultAsync(x => x.UserId == guestUserId, ct);
+
+        if (guestCart is null || guestCart.Lines.Count == 0)
+        {
+            return Results.Ok(await ToCartDto(db, coupons, userCart, ct));
+        }
+
+        foreach (var guestLine in guestCart.Lines.ToList())
+        {
+            var existing = userCart.Lines.FirstOrDefault(x =>
+                x.ProductSlug == guestLine.ProductSlug
+                && x.OfferExternalKey == guestLine.OfferExternalKey
+                && x.SkuExternalKey == guestLine.SkuExternalKey);
+
+            if (existing is not null)
+            {
+                existing.SetQuantity(existing.Quantity + guestLine.Quantity);
+                db.CartLines.Remove(guestLine);
+            }
+            else
+            {
+                guestCart.RemoveLine(guestLine.Id);
+                var moved = CartLine.Create(
+                    userCart.Id,
+                    guestLine.ProductSlug,
+                    guestLine.OfferExternalKey,
+                    guestLine.SkuExternalKey,
+                    guestLine.SellerExternalKey,
+                    guestLine.SellerName,
+                    guestLine.Title,
+                    guestLine.ImageUrl,
+                    guestLine.VariantLabel,
+                    guestLine.UnitPrice,
+                    guestLine.OriginalPrice,
+                    guestLine.DiscountPercent,
+                    guestLine.Currency,
+                    guestLine.Quantity,
+                    guestLine.StockAvailable);
+                userCart.AddOrIncrement(moved);
+                db.CartLines.Add(moved);
+                db.CartLines.Remove(guestLine);
+            }
+        }
+
+        if (string.IsNullOrWhiteSpace(userCart.CouponCode) && !string.IsNullOrWhiteSpace(guestCart.CouponCode))
+        {
+            userCart.SetCoupon(guestCart.CouponCode);
+        }
+
+        if (string.IsNullOrWhiteSpace(userCart.GiftCardCode) && !string.IsNullOrWhiteSpace(guestCart.GiftCardCode))
+        {
+            userCart.SetGiftCard(guestCart.GiftCardCode);
+        }
+
+        db.Carts.Remove(guestCart);
+        userCart.Touch();
+        await db.SaveChangesAsync(ct);
+        return Results.Ok(await ToCartDto(db, coupons, userCart, ct));
     }
 
     internal static async Task<ShoppingCart> GetOrCreateCartAsync(

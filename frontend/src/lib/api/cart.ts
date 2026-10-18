@@ -1,5 +1,6 @@
 import { apiClient } from "@/lib/api/client";
 import { siteConfig } from "@/config/site";
+import { AUTH_CHANGED_EVENT } from "@/lib/auth/session";
 import type {
   AddCartItemInput,
   CartDto,
@@ -14,6 +15,9 @@ import type {
 
 export const CART_CHANGED_EVENT = "mixplus:cart-changed";
 
+/** Cart APIs accept guest token when logged out. */
+const cartAuth = { auth: true, guestCart: true } as const;
+
 function enabled() {
   return !siteConfig.useMocks && Boolean(siteConfig.apiBaseUrl);
 }
@@ -23,17 +27,45 @@ export function notifyCartChanged() {
   window.dispatchEvent(new Event(CART_CHANGED_EVENT));
 }
 
+/**
+ * Live cart quantity total for badges (header / bottom nav / PDP chrome).
+ * Refreshes on CART_CHANGED_EVENT and AUTH_CHANGED_EVENT.
+ */
+export function subscribeCartCount(onChange: (count: number) => void): () => void {
+  let cancelled = false;
+  const refresh = () => {
+    void getCartCount().then((count) => {
+      if (!cancelled) onChange(count);
+    });
+  };
+  refresh();
+  if (typeof window === "undefined") {
+    return () => {
+      cancelled = true;
+    };
+  }
+  window.addEventListener(CART_CHANGED_EVENT, refresh);
+  window.addEventListener(AUTH_CHANGED_EVENT, refresh);
+  return () => {
+    cancelled = true;
+    window.removeEventListener(CART_CHANGED_EVENT, refresh);
+    window.removeEventListener(AUTH_CHANGED_EVENT, refresh);
+  };
+}
+
 export async function getCart(): Promise<CartDto | null> {
   if (!enabled()) return null;
-  return apiClient<CartDto>("/api/cart", { auth: true });
+  try {
+    return await apiClient<CartDto>("/api/cart", cartAuth);
+  } catch {
+    return null;
+  }
 }
 
 export async function getCartCount(): Promise<number> {
   if (!enabled()) return 0;
   try {
-    const res = await apiClient<{ count: number }>("/api/cart/count", {
-      auth: true,
-    });
+    const res = await apiClient<{ count: number }>("/api/cart/count", cartAuth);
     return res.count ?? 0;
   } catch {
     return 0;
@@ -43,7 +75,7 @@ export async function getCartCount(): Promise<number> {
 export async function addCartItem(input: AddCartItemInput): Promise<CartDto> {
   const cart = await apiClient<CartDto>("/api/cart/items", {
     method: "POST",
-    auth: true,
+    ...cartAuth,
     body: JSON.stringify({
       productSlug: input.productSlug,
       offerExternalKey: input.offerExternalKey,
@@ -73,7 +105,7 @@ export async function updateCartItemQty(
     `/api/cart/items/${encodeURIComponent(lineId)}`,
     {
       method: "PATCH",
-      auth: true,
+      ...cartAuth,
       body: JSON.stringify({ quantity }),
     },
   );
@@ -84,7 +116,7 @@ export async function updateCartItemQty(
 export async function removeCartItem(lineId: string): Promise<CartDto> {
   const cart = await apiClient<CartDto>(
     `/api/cart/items/${encodeURIComponent(lineId)}`,
-    { method: "DELETE", auth: true },
+    { method: "DELETE", ...cartAuth },
   );
   notifyCartChanged();
   return cart;
@@ -93,16 +125,31 @@ export async function removeCartItem(lineId: string): Promise<CartDto> {
 export async function revalidateCart(): Promise<CartDto> {
   const cart = await apiClient<CartDto>("/api/cart/revalidate", {
     method: "POST",
-    auth: true,
+    ...cartAuth,
   });
   notifyCartChanged();
   return cart;
 }
 
+/** Call after login to move guest cart lines into the shopper cart. */
+export async function mergeGuestCart(): Promise<CartDto | null> {
+  if (!enabled()) return null;
+  try {
+    const cart = await apiClient<CartDto>("/api/cart/merge", {
+      method: "POST",
+      ...cartAuth,
+    });
+    notifyCartChanged();
+    return cart;
+  } catch {
+    return null;
+  }
+}
+
 export async function applyCartCoupon(code: string): Promise<CartDto> {
   const cart = await apiClient<CartDto>("/api/cart/coupon", {
     method: "POST",
-    auth: true,
+    ...cartAuth,
     body: JSON.stringify({ code }),
   });
   notifyCartChanged();
@@ -112,7 +159,7 @@ export async function applyCartCoupon(code: string): Promise<CartDto> {
 export async function clearCartCoupon(): Promise<CartDto> {
   const cart = await apiClient<CartDto>("/api/cart/coupon", {
     method: "DELETE",
-    auth: true,
+    ...cartAuth,
   });
   notifyCartChanged();
   return cart;
@@ -121,7 +168,7 @@ export async function clearCartCoupon(): Promise<CartDto> {
 export async function applyCartGiftCard(code: string): Promise<CartDto> {
   const cart = await apiClient<CartDto>("/api/cart/gift-card", {
     method: "POST",
-    auth: true,
+    ...cartAuth,
     body: JSON.stringify({ code }),
   });
   notifyCartChanged();

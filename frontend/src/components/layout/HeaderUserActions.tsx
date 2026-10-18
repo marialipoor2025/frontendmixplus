@@ -54,15 +54,14 @@ export function HeaderUserActions({
     : `${loginHref}?returnUrl=${encodeURIComponent(wishlistHref)}`;
 
   useEffect(() => {
-    if (!ready || !isAuthenticated) {
-      setHasFavorites(false);
-      setCartCount(0);
-      setCartSubtotal(0);
-      return;
-    }
+    if (!ready) return;
 
     let cancelled = false;
     const refreshWishlist = () => {
+      if (!isAuthenticated) {
+        if (!cancelled) setHasFavorites(false);
+        return;
+      }
       void getWishlistCount().then((count) => {
         if (!cancelled) setHasFavorites(count > 0);
       });

@@ -1,17 +1,15 @@
 import Image from "next/image";
 import Link from "next/link";
+import { ProductCardBasketButton } from "@/components/home/ProductCardBasketButton";
 import { TomanIcon } from "@/components/layout/icons";
-import { CategoryProductPlaceholder } from "@/components/product/CategoryProductPlaceholder";
+import { ProductCardImage } from "@/components/product/ProductCardImage";
 import { resolveBrandLogoUrl } from "@/lib/brand-logos";
 import {
   formatDiscountPercent,
   formatPrice,
   formatReviewCount,
 } from "@/lib/format";
-import {
-  isMissingProductImage,
-  productPlaceholderSeed,
-} from "@/lib/product-image-placeholder";
+import { productPlaceholderSeed } from "@/lib/product-image-placeholder";
 import type { Product, ProductBadge } from "@/types/product";
 
 type ProductCardProps = {
@@ -19,12 +17,13 @@ type ProductCardProps = {
   className?: string;
   /** When true, show «کارکرده» only for used products. */
   showUsedLabel?: boolean;
+  /** Show star rating + review count (rail/admin controlled). */
+  showReviewScore?: boolean;
+  /** Show merchandising badges (choice / opportunity). */
+  showCardLabels?: boolean;
+  /** beside = column next to image; top = chips above image row. */
+  labelPosition?: "beside" | "top";
 };
-
-/**
- * Flip to `true` later to restore merchandising / stock / used labels on cards.
- */
-const SHOW_PRODUCT_LABELS = true;
 
 /** Two-line labels (Coolblue Choice style). */
 const BADGE_LINES: Record<ProductBadge, [string, string?]> = {
@@ -126,6 +125,9 @@ export function ProductCard({
   product,
   className = "",
   showUsedLabel = false,
+  showReviewScore = true,
+  showCardLabels = false,
+  labelPosition = "beside",
 }: ProductCardProps) {
   const hasDiscount =
     Boolean(product.discountPercent) &&
@@ -137,11 +139,16 @@ export function ProductCard({
   );
   const badges = product.badges ?? [];
   const hasReviews =
+    showReviewScore &&
     typeof product.rating === "number" &&
     typeof product.reviewCount === "number";
-  const showBadgeColumn = SHOW_PRODUCT_LABELS && badges.length > 0;
-  const isUsed =
-    SHOW_PRODUCT_LABELS && showUsedLabel && product.condition === "used";
+  const showBadgeColumn =
+    showCardLabels && labelPosition === "beside" && badges.length > 0;
+  const showTopBadges =
+    showCardLabels && labelPosition === "top" && badges.length > 0;
+  const isUsed = showCardLabels && showUsedLabel && product.condition === "used";
+  const showSpecialSale =
+    hasDiscount || badges.includes("opportunity");
 
   return (
     <Link
@@ -150,12 +157,18 @@ export function ProductCard({
       className={`box-content flex w-[160px] min-w-[140px] shrink-0 flex-col justify-between overflow-hidden rounded-md border border-[var(--color-neutral-200)] bg-[var(--color-neutral-000)] lg:min-w-[164px] ${className}`}
     >
       <div className="flex items-center justify-end gap-1 px-2 pt-2">
-        {SHOW_PRODUCT_LABELS ? (
+        {showSpecialSale ? (
+          <span className="me-auto text-[10px] font-bold text-[var(--color-primary-500,#ef4056)] sm:text-[11px]">
+            فروش ویژه
+          </span>
+        ) : showCardLabels ? (
           <span className="me-auto flex min-w-0 flex-wrap items-center gap-1">
             {isUsed ? <UsedLabel /> : null}
             <StockLabel inStock={product.inStock} />
           </span>
-        ) : null}
+        ) : (
+          <span className="me-auto" />
+        )}
         <span className="flex min-w-0 max-w-full items-center justify-end gap-1">
           {brandLogoUrl ? (
             <Image
@@ -171,6 +184,18 @@ export function ProductCard({
           </span>
         </span>
       </div>
+
+      {showTopBadges ? (
+        <div className="flex flex-wrap gap-1 px-2 pt-1">
+          {badges.map((badge) => (
+            <ArrowBadge
+              key={badge}
+              lines={BADGE_LINES[badge]}
+              tone={badge === "mixplus-choice" ? "choice" : "opportunity"}
+            />
+          ))}
+        </div>
+      ) : null}
 
       <div
         dir="ltr"
@@ -193,17 +218,12 @@ export function ProductCard({
             showBadgeColumn ? "" : "w-full"
           } ${product.inStock ? "" : "opacity-60"}`}
         >
-          {isMissingProductImage(product.imageUrl) ? (
-            <CategoryProductPlaceholder seed={productPlaceholderSeed(product)} />
-          ) : (
-            <Image
-              src={product.imageUrl}
-              alt={product.title}
-              fill
-              sizes={PRODUCT_IMAGE_SIZES}
-              className="object-contain p-1 sm:p-1.5"
-            />
-          )}
+          <ProductCardImage
+            src={product.imageUrl}
+            alt={product.title}
+            seed={productPlaceholderSeed(product)}
+            sizes={PRODUCT_IMAGE_SIZES}
+          />
         </div>
       </div>
 
@@ -221,10 +241,11 @@ export function ProductCard({
           </div>
         ) : null}
 
-        <div className="flex w-full items-end justify-end lg:h-11">
+        <div className="flex w-full items-end justify-between gap-1 lg:h-11">
+          <ProductCardBasketButton product={product} />
           {hasDiscount && product.originalPrice ? (
-            <div className="flex flex-col items-start pt-0.5">
-              <div className="flex items-center justify-start gap-1">
+            <div className="flex flex-col items-end pt-0.5">
+              <div className="flex items-center justify-end gap-1">
                 <span className="flex h-4 shrink-0 items-center justify-center rounded-full bg-[var(--color-hint-object-error)] px-1 text-[11px] font-bold leading-none text-white">
                   {formatDiscountPercent(product.discountPercent!)}
                 </span>
@@ -242,8 +263,8 @@ export function ProductCard({
               </div>
             </div>
           ) : (
-            <div className="flex flex-row items-center justify-start">
-              <div className="flex items-center justify-start gap-1">
+            <div className="flex flex-row items-center justify-end">
+              <div className="flex items-center justify-end gap-1">
                 <span className="me-1 text-base font-bold leading-6 text-[var(--color-neutral-800)]">
                   {formatPrice(product.price.amount)}
                 </span>

@@ -2,19 +2,49 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useEffect } from "react";
+import { useEffect, useRef, useState } from "react";
 import { siteConfig } from "@/config/site";
+import { getFooterSettings } from "@/lib/api/footer";
+import {
+  attachmentDisplayUrl,
+  createChatSession,
+  getChatSession,
+  isVisitorSender,
+  pollChatMessages,
+  readStoredSessionId,
+  sendVisitorMessage,
+  storeSessionId,
+  uploadChatAttachment,
+  type ChatMessage,
+  type ChatSession,
+} from "@/lib/api/support-chat";
 
 type MobileSupportChatProps = {
   open: boolean;
   onClose: () => void;
 };
 
+type View = "home" | "chat";
+
 /**
- * Barghchi-style support chat panel.
- * Mobile: full-screen. Desktop: floating card (bottom-right).
+ * RTL support chat: landing cards + live conversation (poll-based realtime).
  */
 export function MobileSupportChat({ open, onClose }: MobileSupportChatProps) {
+  const [view, setView] = useState<View>("home");
+  const [session, setSession] = useState<ChatSession | null>(null);
+  const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const [draft, setDraft] = useState("");
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [hours, setHours] = useState(
+    "از ساعت ۹ تا ۱۷ در روزهای کاری پاسخگوی شما هستیم",
+  );
+  const [phone, setPhone] = useState("۰۲۱-۶۱۹۳۰۰۰۰");
+  const [phoneTel, setPhoneTel] = useState("+982161930000");
+  const bottomRef = useRef<HTMLDivElement | null>(null);
+  const fileRef = useRef<HTMLInputElement | null>(null);
+  const lastStampRef = useRef<string | undefined>(undefined);
+
   useEffect(() => {
     if (!open) return;
 
@@ -32,10 +62,110 @@ export function MobileSupportChat({ open, onClose }: MobileSupportChatProps) {
     };
   }, [open, onClose]);
 
+  useEffect(() => {
+    if (!open) return;
+    void getFooterSettings().then((settings) => {
+      if (settings.headerHours) setHours(settings.headerHours);
+      if (settings.headerPhone) setPhone(settings.headerPhone);
+      if (settings.headerPhoneTel) setPhoneTel(settings.headerPhoneTel);
+    });
+  }, [open]);
+
+  useEffect(() => {
+    if (!open) return;
+    const existing = readStoredSessionId();
+    if (!existing) return;
+    void (async () => {
+      const live = await getChatSession(existing);
+      if (!live || String(live.status) === "Closed" || live.status === 2) {
+        storeSessionId(null);
+        return;
+      }
+      setSession(live);
+      setMessages(live.messages ?? []);
+      setView("chat");
+      const last = live.messages?.[live.messages.length - 1];
+      lastStampRef.current = last?.createdAtUtc;
+    })();
+  }, [open]);
+
+  useEffect(() => {
+    if (!open || view !== "chat" || !session) return;
+    const timer = window.setInterval(() => {
+      void (async () => {
+        const poll = await pollChatMessages(session.id, lastStampRef.current);
+        if (!poll?.messages?.length) return;
+        setMessages((prev) => {
+          const ids = new Set(prev.map((m) => m.id));
+          const next = [...prev];
+          for (const msg of poll.messages) {
+            if (!ids.has(msg.id)) next.push(msg);
+          }
+          return next;
+        });
+        const last = poll.messages[poll.messages.length - 1];
+        if (last) lastStampRef.current = last.createdAtUtc;
+        if (poll.agentName) {
+          setSession((s) => (s ? { ...s, agentName: poll.agentName } : s));
+        }
+      })();
+    }, 1500);
+    return () => window.clearInterval(timer);
+  }, [open, view, session]);
+
+  useEffect(() => {
+    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages, view]);
+
+  async function startChat() {
+    setBusy(true);
+    setError(null);
+    try {
+      const created = await createChatSession();
+      if (!created) {
+        setError("گفتگو در حالت آزمایشی در دسترس نیست");
+        return;
+      }
+      setSession(created);
+      setMessages(created.messages ?? []);
+      lastStampRef.current =
+        created.messages?.[created.messages.length - 1]?.createdAtUtc;
+      setView("chat");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "شروع گفتگو ناموفق بود");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function handleSend(attachment?: Awaited<
+    ReturnType<typeof uploadChatAttachment>
+  > | null) {
+    if (!session) return;
+    const text = draft.trim();
+    if (!text && !attachment) return;
+    setBusy(true);
+    setError(null);
+    try {
+      const updated = await sendVisitorMessage(session.id, text, attachment);
+      if (updated) {
+        setSession(updated);
+        setMessages(updated.messages ?? []);
+        const last = updated.messages?.[updated.messages.length - 1];
+        if (last) lastStampRef.current = last.createdAtUtc;
+      }
+      setDraft("");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "ارسال ناموفق بود");
+    } finally {
+      setBusy(false);
+    }
+  }
+
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 z-50" role="dialog" aria-modal="true">
+    <div className="fixed inset-0 z-50" role="dialog" aria-modal="true" dir="rtl">
       <button
         type="button"
         aria-label="بستن"
@@ -43,115 +173,255 @@ export function MobileSupportChat({ open, onClose }: MobileSupportChatProps) {
         onClick={onClose}
       />
 
-      <div className="absolute inset-x-0 bottom-0 top-0 flex h-full max-h-full w-full flex-col overflow-y-auto bg-white shadow-sm transition-all duration-200 lg:inset-auto lg:bottom-7 lg:right-7 lg:top-auto lg:h-[39.5rem] lg:max-h-[calc(100vh-3.5rem)] lg:w-[360px] lg:rounded-2xl">
-        <div className="w-full rounded-b-2xl bg-gradient-to-l from-[#5eb8f0] to-[var(--color-primary)]">
-          <div className="flex items-center justify-between p-5">
+      <div className="absolute inset-x-0 bottom-0 top-0 flex h-full max-h-full w-full flex-col overflow-hidden bg-white shadow-sm transition-all duration-200 lg:inset-auto lg:bottom-7 lg:end-7 lg:start-auto lg:top-auto lg:h-[39.5rem] lg:max-h-[calc(100vh-3.5rem)] lg:w-[360px] lg:rounded-2xl">
+        <div className="shrink-0 bg-gradient-to-l from-[#5eb8f0] to-[var(--color-primary)] text-white">
+          <div className="flex items-center justify-between gap-3 p-4">
             <button
               type="button"
-              onClick={onClose}
-              className="cursor-pointer rounded-full p-1 text-white transition-all duration-200 hover:bg-blue-700"
-              aria-label="بستن گفتگو"
+              onClick={() => {
+                if (view === "chat") setView("home");
+                else onClose();
+              }}
+              className="cursor-pointer rounded-full p-1 transition hover:bg-blue-700/40"
+              aria-label={view === "chat" ? "بازگشت" : "بستن گفتگو"}
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
-                width="25"
-                height="25"
+                width="22"
+                height="22"
                 fill="none"
                 stroke="currentColor"
                 strokeWidth="2"
                 viewBox="0 0 24 24"
               >
-                <path strokeLinecap="round" strokeLinejoin="round" d="M6 18 18 6M6 6l12 12" />
+                {view === "chat" ? (
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M9 5l7 7-7 7"
+                  />
+                ) : (
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M6 18 18 6M6 6l12 12"
+                  />
+                )}
               </svg>
             </button>
-            <span className="w-1/3">
-              <Image
-                src="/brand/mixplus-logo.svg"
-                alt={siteConfig.nameFa}
-                width={107}
-                height={34}
-                className="brightness-0 invert"
-              />
-            </span>
+            <Image
+              src="/brand/mixplus-logo.svg"
+              alt={siteConfig.nameFa}
+              width={96}
+              height={30}
+              className="brightness-0 invert"
+            />
+            <span className="w-6" />
           </div>
-
-          <div className="space-y-2 p-7 text-sm font-medium text-white">
-            <p>از ساعت ۹ تا ۱۷ در روزهای کاری پاسخگوی شما هستیم</p>
+          <div className="space-y-1 px-5 pb-4 text-xs font-medium sm:text-sm">
+            <p>{hours}</p>
             <p>
-              <span>شماره تماس : </span>
-              <a href="tel:+982161930000" className="underline-offset-2 hover:underline">
-                ۰۲۱-۶۱۹۳۰۰۰۰
+              <span>شماره تماس: </span>
+              <a
+                href={`tel:${phoneTel}`}
+                className="underline-offset-2 hover:underline"
+                dir="ltr"
+              >
+                {phone}
               </a>
             </p>
           </div>
-
-          <div className="-mt-8">
-            <div className="flex flex-col items-center justify-center gap-3 p-7">
-              <div className="flex w-full flex-col items-start justify-start rounded-lg bg-white px-4 py-5 text-sm shadow-sm">
-                <h4 className="my-1 font-bold">استعلام قیمت برای شرکت و همکاران</h4>
-                <p className="mb-5 font-medium text-[var(--color-muted)]">
-                  ارسال لیست کالاها جهت اعلام قیمت
-                </p>
-                <Link
-                  href="/page/enquiry/"
-                  className="mr-auto inline-flex items-center justify-center gap-1 self-end rounded-3xl border-2 border-[var(--color-primary)] px-3 py-2 text-xs font-semibold text-[var(--color-primary)] transition hover:bg-[var(--color-primary)] hover:text-white"
-                  onClick={onClose}
-                >
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="20"
-                    height="20"
-                    fill="none"
-                    viewBox="0 0 20 20"
-                  >
-                    <path
-                      stroke="currentColor"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth="1.5"
-                      d="M3.333 3.333 17.5 9.167l-5.833 2.5M3.333 3.333 9.167 17.5l2.5-5.833M3.333 3.333l8.334 8.334"
-                    />
-                  </svg>
-                  <span>درخواست پیش فاکتور</span>
-                </Link>
-              </div>
-
-              <div className="flex w-full flex-col items-start justify-start rounded-lg bg-white px-4 py-5 text-sm shadow-sm">
-                <h4 className="my-1 font-bold">ارتباط با کارشناسان {siteConfig.nameFa}</h4>
-                <p className="mb-3 font-medium text-[var(--color-muted)]">
-                  پاسخگوی سوالات شما هستیم
-                </p>
-                <div className="flex gap-2">
-                  <span className="flex h-10 w-10 items-center justify-center rounded-full bg-[#e8f4fc] text-sm font-bold text-[#1672dd]">
-                    م
-                  </span>
-                  <span className="flex h-10 w-10 items-center justify-center rounded-full bg-[#fde8ee] text-sm font-bold text-[var(--color-primary)]">
-                    پ
-                  </span>
-                </div>
-                <a
-                  href="tel:+982161930000"
-                  className="mt-2 inline-flex items-center justify-center gap-2 self-end rounded-3xl bg-[var(--color-primary)] px-3 py-2 text-xs font-semibold text-white"
-                >
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="56"
-                    height="54"
-                    fill="none"
-                    viewBox="0 0 56 54"
-                    className="h-5 w-5"
-                  >
-                    <path
-                      fill="#fff"
-                      d="M23.692 0C10.608 0 0 9.67 0 21.6c0 6.127 2.818 11.638 7.316 15.563-.646 2.119-1.991 4.226-4.464 6.105l-.004.004a1.08 1.08 0 0 0-.694 1.008 1.08 1.08 0 0 0 1.077 1.08q.11-.001.219-.025c4.178-.013 7.743-1.803 10.58-4.046a25 25 0 0 0 4.215 1.316 17.7 17.7 0 0 1-1.014-5.885c0-10.72 9.662-19.44 21.538-19.44 2.977 0 5.814.548 8.397 1.54C45.666 8.206 35.74 0 23.692 0M38.77 21.6c-4.57 0-8.952 1.593-12.184 4.429-3.231 2.835-5.047 6.68-5.047 10.691 0 4.01 1.816 7.856 5.047 10.691 3.232 2.836 7.614 4.429 12.184 4.429a19.4 19.4 0 0 0 6.428-1.101c2.642 1.85 5.838 3.223 9.499 3.236A1.072 1.072 0 0 0 56 52.92a1.08 1.08 0 0 0-.707-1.013c-1.97-1.5-3.234-3.152-3.992-4.834 3.011-2.8 4.692-6.503 4.699-10.353 0-4.01-1.815-7.856-5.047-10.691S43.34 21.6 38.77 21.6"
-                    />
-                  </svg>
-                  <span>گفتگو با کارشناسان</span>
-                </a>
-              </div>
-            </div>
-          </div>
         </div>
+
+        {view === "home" ? (
+          <div className="flex flex-1 flex-col gap-3 overflow-y-auto bg-[var(--color-neutral-50)] p-4">
+            <div className="rounded-xl bg-white p-4 text-sm shadow-sm">
+              <h4 className="mb-1 font-bold text-[var(--color-neutral-900)]">
+                استعلام قیمت برای شرکت و همکاران
+              </h4>
+              <p className="mb-4 text-[var(--color-muted)]">
+                ارسال لیست کالاها جهت اعلام قیمت
+              </p>
+              <Link
+                href="/enquiry"
+                className="ms-auto inline-flex items-center justify-center gap-1 rounded-3xl border-2 border-[var(--color-primary)] px-3 py-2 text-xs font-semibold text-[var(--color-primary)] transition hover:bg-[var(--color-primary)] hover:text-white"
+                onClick={onClose}
+              >
+                درخواست پیش فاکتور
+              </Link>
+            </div>
+
+            <div className="rounded-xl bg-white p-4 text-sm shadow-sm">
+              <h4 className="mb-1 font-bold text-[var(--color-neutral-900)]">
+                ارتباط با کارشناسان {siteConfig.nameFa}
+              </h4>
+              <p className="mb-3 text-[var(--color-muted)]">
+                گفتگوی زنده با پشتیبانی — پیام و فایل بفرستید
+              </p>
+              <div className="mb-3 flex gap-2">
+                <span className="flex h-10 w-10 items-center justify-center rounded-full bg-[#e8f4fc] text-sm font-bold text-[#1672dd]">
+                  م
+                </span>
+                <span className="flex h-10 w-10 items-center justify-center rounded-full bg-[#fde8ee] text-sm font-bold text-[var(--color-primary)]">
+                  پ
+                </span>
+              </div>
+              <button
+                type="button"
+                disabled={busy}
+                onClick={() => void startChat()}
+                className="ms-auto inline-flex items-center justify-center gap-2 rounded-3xl bg-[var(--color-primary)] px-3 py-2 text-xs font-semibold text-white disabled:opacity-60"
+              >
+                {busy ? "…" : "شروع گفتگو"}
+              </button>
+            </div>
+            {error ? (
+              <p className="text-xs text-[var(--dk-text-error)]">{error}</p>
+            ) : null}
+          </div>
+        ) : (
+          <>
+            <div className="flex items-center justify-between border-b border-[var(--color-neutral-100)] px-4 py-2 text-xs text-[var(--color-muted)]">
+              <span>
+                {session?.agentName
+                  ? `کارشناس: ${session.agentName}`
+                  : "در انتظار کارشناس / پاسخ خودکار"}
+              </span>
+            </div>
+            <div className="flex flex-1 flex-col gap-2 overflow-y-auto bg-[var(--color-neutral-50)] px-3 py-3">
+              {messages.map((msg) => {
+                const mine = isVisitorSender(msg.sender);
+                return (
+                  <div
+                    key={msg.id}
+                    className={`flex max-w-[85%] flex-col gap-1 rounded-2xl px-3 py-2 text-sm leading-6 shadow-sm ${
+                      mine
+                        ? "self-end rounded-be-md bg-[var(--color-primary)] text-white"
+                        : "self-start rounded-bs-md bg-white text-[var(--color-neutral-800)]"
+                    }`}
+                  >
+                    {!mine ? (
+                      <span className="text-[10px] font-bold opacity-70">
+                        {msg.senderName}
+                      </span>
+                    ) : null}
+                    {msg.text ? <p className="whitespace-pre-wrap">{msg.text}</p> : null}
+                    {msg.attachment ? (
+                      <a
+                        href={attachmentDisplayUrl(msg.attachment)}
+                        target="_blank"
+                        rel="noreferrer"
+                        className={`text-xs underline ${mine ? "text-white" : "text-[var(--color-secondary-700)]"}`}
+                      >
+                        {msg.attachment.fileName}
+                      </a>
+                    ) : null}
+                  </div>
+                );
+              })}
+              <div ref={bottomRef} />
+            </div>
+
+            <form
+              className="flex shrink-0 items-end gap-2 border-t border-[var(--color-neutral-100)] bg-white p-3"
+              onSubmit={(e) => {
+                e.preventDefault();
+                void handleSend();
+              }}
+            >
+              <input
+                ref={fileRef}
+                type="file"
+                accept="image/*,.pdf,.txt"
+                className="hidden"
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  e.target.value = "";
+                  if (!file || !session) return;
+                  void (async () => {
+                    setBusy(true);
+                    setError(null);
+                    try {
+                      const uploaded = await uploadChatAttachment(
+                        session.id,
+                        file,
+                      );
+                      await handleSend(uploaded);
+                    } catch (err) {
+                      setError(
+                        err instanceof Error ? err.message : "آپلود ناموفق",
+                      );
+                      setBusy(false);
+                    }
+                  })();
+                }}
+              />
+              <button
+                type="button"
+                disabled={busy || !session}
+                onClick={() => fileRef.current?.click()}
+                className="flex size-10 shrink-0 items-center justify-center rounded-full border border-[var(--color-neutral-200)] text-[var(--color-neutral-600)] disabled:opacity-50"
+                aria-label="پیوست"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="18"
+                  height="18"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  strokeWidth="1.8"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M21.44 11.05l-8.49 8.49a5.5 5.5 0 01-7.78-7.78l8.49-8.49a3.5 3.5 0 014.95 4.95l-8.49 8.49a1.5 1.5 0 01-2.12-2.12l7.78-7.78"
+                  />
+                </svg>
+              </button>
+              <textarea
+                rows={1}
+                value={draft}
+                onChange={(e) => setDraft(e.target.value)}
+                placeholder="پیام خود را بنویسید…"
+                className="max-h-28 min-h-10 flex-1 resize-none rounded-xl border border-[var(--color-neutral-200)] px-3 py-2 text-sm outline-none focus:border-[var(--color-primary)]"
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" && !e.shiftKey) {
+                    e.preventDefault();
+                    void handleSend();
+                  }
+                }}
+              />
+              <button
+                type="submit"
+                disabled={busy || !draft.trim()}
+                className="flex size-10 shrink-0 items-center justify-center rounded-full bg-[var(--color-primary)] text-white disabled:opacity-50"
+                aria-label="ارسال"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="18"
+                  height="18"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M22 2 11 13M22 2l-7 20-4-9-9-4 20-7z"
+                  />
+                </svg>
+              </button>
+            </form>
+            {error ? (
+              <p className="px-3 pb-2 text-xs text-[var(--dk-text-error)]">
+                {error}
+              </p>
+            ) : null}
+          </>
+        )}
       </div>
     </div>
   );

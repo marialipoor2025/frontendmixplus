@@ -24,6 +24,12 @@ export type ProductRailSection = {
   href?: string;
   /** Show «کارکرده» badge on used products (only for the used/new rail). */
   showUsedLabel?: boolean;
+  /** Show rating stars on cards in this rail (default true). */
+  showReviewScore?: boolean;
+  /** Show merchandising badges on cards. */
+  showCardLabels?: boolean;
+  /** Badge placement when labels are on. */
+  labelPosition?: "beside" | "top";
   products: Product[];
 };
 

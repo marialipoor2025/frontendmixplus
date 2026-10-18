@@ -1,12 +1,34 @@
-import { BottomNavChatIcon } from "@/components/layout/icons";
+"use client";
 
-const SUPPORT_HOURS = "از ساعت ۹ تا ۱۷ در روزهای کاری پاسخگوی شما هستیم";
-const SUPPORT_PHONE = "۰۲۱-۶۱۹۳۰۰۰۰";
-const SUPPORT_PHONE_TEL = "+982161930000";
+import { useEffect, useState } from "react";
+import { BottomNavChatIcon } from "@/components/layout/icons";
+import { getFooterSettings } from "@/lib/api/footer";
+
+const DEFAULT_HOURS = "از ساعت ۹ تا ۱۷ در روزهای کاری پاسخگوی شما هستیم";
+const DEFAULT_PHONE = "۰۲۱-۶۱۹۳۰۰۰۰";
+const DEFAULT_PHONE_TEL = "+982161930000";
+
 /**
  * Top utility strip (desktop only) — white, same as the search row.
  */
 export function HeaderTopBar() {
+  const [hours, setHours] = useState(DEFAULT_HOURS);
+  const [phone, setPhone] = useState(DEFAULT_PHONE);
+  const [phoneTel, setPhoneTel] = useState(DEFAULT_PHONE_TEL);
+
+  useEffect(() => {
+    let cancelled = false;
+    void getFooterSettings().then((settings) => {
+      if (cancelled) return;
+      if (settings.headerHours) setHours(settings.headerHours);
+      if (settings.headerPhone) setPhone(settings.headerPhone);
+      if (settings.headerPhoneTel) setPhoneTel(settings.headerPhoneTel);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
   return (
     <div className="hidden w-full bg-[var(--color-neutral-000)] lg:block">
       <div className="site-container flex items-center justify-between gap-4 py-2.5 text-xs text-[var(--color-neutral-600)]">
@@ -34,12 +56,12 @@ export function HeaderTopBar() {
               strokeWidth="1.5"
             />
           </svg>
-          <span>{SUPPORT_HOURS}</span>
+          <span>{hours}</span>
         </p>
 
         <div className="flex items-center gap-5">
           <a
-            href={`tel:${SUPPORT_PHONE_TEL}`}
+            href={`tel:${phoneTel}`}
             className="flex items-center gap-1.5 transition hover:text-[var(--color-neutral-800)]"
           >
             <svg
@@ -59,7 +81,7 @@ export function HeaderTopBar() {
                 d="M22 16.92v3a2 2 0 0 1-2.18 2 19.8 19.8 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.12 4.18 2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.91.34 1.85.57 2.81.7A2 2 0 0 1 22 16.92Z"
               />
             </svg>
-            <span dir="ltr">{SUPPORT_PHONE}</span>
+            <span dir="ltr">{phone}</span>
           </a>
 
           <a

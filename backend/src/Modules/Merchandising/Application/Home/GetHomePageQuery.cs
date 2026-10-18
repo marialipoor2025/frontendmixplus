@@ -95,7 +95,10 @@ public sealed class GetHomePageQuery(
                     .Select(MapProduct)
                     .Where(p => p is not null)
                     .Cast<HomeProductDto>()
-                    .ToList())).ToList(),
+                    .ToList(),
+                rail.ShowReviewScore,
+                rail.ShowCardLabels,
+                rail.LabelPosition)).ToList(),
             BottomBanners: banners.Where(b => b.Slot == BannerSlot.Bottom).Select(MapBanner).ToList());
 
         return Result.Success(dto);

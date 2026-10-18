@@ -53,6 +53,9 @@ public sealed class MerchandisingDbContext : DbContext
             entity.Property(x => x.Title).HasMaxLength(300).IsRequired();
             entity.Property(x => x.Subtitle).HasMaxLength(500);
             entity.Property(x => x.Href).HasMaxLength(1000);
+            entity.Property(x => x.LabelPosition).HasMaxLength(32).HasDefaultValue("beside");
+            entity.Property(x => x.ShowReviewScore).HasDefaultValue(true);
+            entity.Property(x => x.ShowCardLabels).HasDefaultValue(false);
             entity.Property(x => x.ProductKeysJson).HasColumnType("jsonb").IsRequired();
         });
     }

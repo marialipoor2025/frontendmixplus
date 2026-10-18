@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { AdminFooterSettings } from "@/components/admin/AdminFooterSettings";
 import {
   AdminButton,
   AdminOutlineButton,
@@ -344,6 +345,10 @@ export default function AdminCmsPage() {
           },
         }}
       />
+
+      <div className="mt-6">
+        <AdminFooterSettings />
+      </div>
     </RequireAdmin>
   );
 }

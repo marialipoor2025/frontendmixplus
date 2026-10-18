@@ -60,4 +60,7 @@ public sealed record HomeProductRailDto(
     string? Subtitle,
     string? Href,
     bool? ShowUsedLabel,
-    IReadOnlyList<HomeProductDto> Products);
+    IReadOnlyList<HomeProductDto> Products,
+    bool ShowReviewScore = true,
+    bool ShowCardLabels = false,
+    string LabelPosition = "beside");

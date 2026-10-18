@@ -4,9 +4,11 @@ using Microsoft.AspNetCore.Routing;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using MixPlus.BuildingBlocks.Application;
 using MixPlus.BuildingBlocks.Infrastructure;
 using MixPlus.Modules.Merchandising.Application.Home;
+using MixPlus.Modules.Merchandising.Infrastructure;
 using MixPlus.Modules.Merchandising.Infrastructure.Persistence;
 
 namespace MixPlus.Modules.Merchandising.Api;
@@ -24,6 +26,8 @@ public sealed class MerchandisingModule : IModule
                 typeof(MerchandisingDbContext).Assembly.GetName().Name));
 
         services.AddScoped<IGetHomePageQuery, GetHomePageQuery>();
+        services.AddSingleton<IFooterSettingsStore, FooterSettingsStore>();
+        services.AddSingleton<ICmsPagesStore, CmsPagesStore>();
     }
 
     public void MapEndpoints(IEndpointRouteBuilder endpoints)
@@ -43,6 +47,51 @@ public sealed class MerchandisingModule : IModule
             .WithTags("Merchandising")
             .WithName("MerchandisingHealth");
 
+        endpoints.MapGet("/api/merchandising/footer", async (IFooterSettingsStore store, CancellationToken ct) =>
+                Results.Ok(await store.GetAsync(ct)))
+            .WithTags("Merchandising")
+            .WithName("GetFooterSettings");
+
+        endpoints.MapPost("/api/merchandising/newsletter", async (
+                NewsletterRequest body,
+                IHostEnvironment env,
+                CancellationToken ct) =>
+            {
+                var email = body.Email?.Trim() ?? "";
+                if (email.Length < 5 || !email.Contains('@'))
+                {
+                    return Results.BadRequest(new { error = "ایمیل نامعتبر است" });
+                }
+
+                var dir = Path.Combine(env.ContentRootPath, "storage");
+                Directory.CreateDirectory(dir);
+                var path = Path.Combine(dir, "newsletter-emails.txt");
+                await File.AppendAllTextAsync(path, email + Environment.NewLine, ct);
+                return Results.Ok(new { ok = true });
+            })
+            .WithTags("Merchandising")
+            .WithName("SubscribeNewsletter");
+
+        endpoints.MapGet("/api/admin/merchandising/footer", async (IFooterSettingsStore store, CancellationToken ct) =>
+                Results.Ok(await store.GetAsync(ct)))
+            .WithTags("AdminCms")
+            .WithName("AdminGetFooterSettings");
+
+        endpoints.MapPut("/api/admin/merchandising/footer", async (
+                FooterSettingsDto body,
+                IFooterSettingsStore store,
+                CancellationToken ct) =>
+            {
+                await store.SaveAsync(body, ct);
+                return Results.Ok(await store.GetAsync(ct));
+            })
+            .WithTags("AdminCms")
+            .WithName("AdminSaveFooterSettings");
+
         endpoints.MapAdminCmsEndpoints();
+        endpoints.MapAdminRailsEndpoints();
+        endpoints.MapAdminCmsPagesEndpoints();
     }
+
+    private sealed record NewsletterRequest(string? Email);
 }

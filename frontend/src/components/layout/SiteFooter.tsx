@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   AparatIcon,
   ChevronLeftIcon,
@@ -12,6 +12,12 @@ import {
   TwitterIcon,
 } from "@/components/layout/icons";
 import { siteConfig } from "@/config/site";
+import {
+  getFooterSettings,
+  subscribeFooterEmail,
+  type FooterPartner,
+  type FooterTrustSeal,
+} from "@/lib/api/footer";
 
 const WITH_MIXPLUS = [
   { label: "اتاق خبر میکپلاس", href: "/newsroom" },
@@ -59,114 +65,23 @@ const SOCIAL = [
   },
 ] as const;
 
-const TRUST_SEALS = [
+const FALLBACK_TRUST: FooterTrustSeal[] = [
   {
     label: "نماد کسب و کارهای مجازی",
     src: "/images/footer/nemads/kasbokar.webp",
+    visible: true,
   },
   {
     label: "نشان ملی ثبت",
     src: "/images/footer/nemads/rezi.webp",
+    visible: true,
   },
   {
     label: "سامانه پایش",
     src: "/images/footer/nemads/sapra.webp",
+    visible: true,
   },
-] as const;
-
-/** Digikala-style sister-brand / partner strip (footer bottom). */
-const PARTNERS = [
-  {
-    label: "مجله اینترنتی دیجی‌کالا مگ",
-    href: "https://www.digikala.com/mag/",
-    icon: "/images/footer/partners/mag.svg",
-  },
-  {
-    label: "بهترین راهکارهای پرداخت آنلاین",
-    href: "https://www.mydigipay.com/",
-    icon: "/images/footer/partners/digipay.svg",
-  },
-  {
-    label: "دیجی‌استایل",
-    href: "https://www.digistyle.com/",
-    icon: "/images/footer/partners/digistyle.svg",
-  },
-  {
-    label: "دیجی‌کالا پلاس",
-    href: "/plus/landing",
-    icon: "/images/footer/partners/digiplus.svg",
-  },
-  {
-    label: "دیجی کلاب",
-    href: "/digiclub",
-    icon: "/images/footer/partners/digiclub.svg",
-  },
-  {
-    label: "دیجی‌کالا جت",
-    href: "https://digikalajet.com/",
-    icon: "/images/footer/partners/jet.svg",
-  },
-  {
-    label: "دیجی‌کالا ادز",
-    href: "https://www.digikalaads.com/",
-    icon: "/images/footer/partners/digikala-ads.svg",
-  },
-  {
-    label: "دیجی‌کالا مهر",
-    href: "https://mehr.digikala.com/",
-    icon: "/images/footer/partners/digimehr.svg",
-  },
-  {
-    label: "دیجی‌نکست",
-    href: "https://diginext.ir/",
-    icon: "/images/footer/partners/diginext.svg",
-  },
-  {
-    label: "دیجی‌اکسپرس",
-    href: "https://digiexpress.ir/",
-    icon: "/images/footer/partners/digiexpress.svg",
-  },
-  {
-    label: "گنجه",
-    href: "https://ganje.net/?utm_source=Digikala_web&utm_medium=Footer",
-    icon: "/images/footer/partners/ganjeh.svg",
-  },
-  {
-    label: "دیجی‌فای",
-    href: "https://digify.shop/",
-    icon: "/images/footer/partners/digify.svg",
-  },
-  {
-    label: "اسمارتک",
-    href: "https://smartech.ir/",
-    icon: "/images/footer/partners/smartech.svg",
-  },
-  {
-    label: "دیجی‌کالا بیزینس",
-    href: "https://b2b.digikala.com/?utm_source=DK&utm_medium=FooterBadge&utm_campaign=DKtraffic",
-    icon: "/images/footer/partners/digikala-business.svg",
-  },
-  {
-    label: "دیجی‌کالا سرویس",
-    href: "https://service.digikala.com/",
-    icon: "/images/footer/partners/digikala-service.svg",
-  },
-  {
-    label: "میاره",
-    href: "https://www.miare.ir/",
-    icon: "/images/footer/partners/miare.svg",
-  },
-  {
-    label: "ویدومارت",
-    href: "https://www.vidomart.shop",
-    icon: "/images/footer/partners/vidomart.svg",
-  },
-  {
-    label: "طلای دیجیتال",
-    href: "https://www.digikala.com/wealth/my-assets/",
-    icon: "/images/footer/partners/digital-gold.svg",
-  },
-] as const;
+];
 
 function FooterLinkColumn({
   title,
@@ -200,7 +115,40 @@ function FooterLinkColumn({
  */
 export function SiteFooter() {
   const [email, setEmail] = useState("");
+  const [subscribeMsg, setSubscribeMsg] = useState<string | null>(null);
+  const [subscribing, setSubscribing] = useState(false);
   const [aboutOpen, setAboutOpen] = useState(false);
+  const [showTrust, setShowTrust] = useState(true);
+  const [showPartners, setShowPartners] = useState(true);
+  const [trustSeals, setTrustSeals] = useState<FooterTrustSeal[]>(FALLBACK_TRUST);
+  const [partners, setPartners] = useState<FooterPartner[]>([]);
+  const [phonePrimary, setPhonePrimary] = useState(
+    "تلفن پشتیبانی ۶۱۹۳۰۰۰۰ - ۰۲۱",
+  );
+  const [phoneSecondary, setPhoneSecondary] = useState("۰۲۱-۹۱۰۰۰۱۰۰");
+  const [hoursLine, setHoursLine] = useState(
+    "۷ روز هفته، ۲۴ ساعته پاسخگوی شما هستیم",
+  );
+
+  useEffect(() => {
+    let cancelled = false;
+    void getFooterSettings().then((settings) => {
+      if (cancelled) return;
+      setShowTrust(settings.showTrustSeals);
+      setShowPartners(settings.showPartners);
+      if (settings.trustSeals?.length) setTrustSeals(settings.trustSeals);
+      if (settings.partners?.length) setPartners(settings.partners);
+      if (settings.phonePrimary) setPhonePrimary(settings.phonePrimary);
+      if (settings.phoneSecondary) setPhoneSecondary(settings.phoneSecondary);
+      if (settings.hoursLine) setHoursLine(settings.hoursLine);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const visibleTrust = trustSeals.filter((s) => s.visible);
+  const visiblePartners = partners.filter((p) => p.visible);
 
   return (
     <footer className="mt-12 w-full border-t border-[var(--color-neutral-200)] bg-[var(--color-neutral-000)] pt-8">
@@ -238,25 +186,28 @@ export function SiteFooter() {
 
           {/* Support phones */}
           <div className="mt-4 flex flex-wrap items-center text-sm text-[var(--color-neutral-700)] md:mt-3">
-            <p className="shrink-0">تلفن پشتیبانی ۶۱۹۳۰۰۰۰ - ۰۲۱</p>
+            <p className="shrink-0">{phonePrimary}</p>
             <div className="hidden px-5 text-[var(--color-neutral-400)] md:block">
               |
             </div>
-            <p className="shrink-0">۰۲۱-۹۱۰۰۰۱۰۰</p>
+            <p className="shrink-0">{phoneSecondary}</p>
             <div className="hidden px-5 text-[var(--color-neutral-400)] md:block">
               |
             </div>
-            <p className="mt-1 w-full md:mt-0 md:w-auto">
-              ۷ روز هفته، ۲۴ ساعته پاسخگوی شما هستیم
-            </p>
+            <p className="mt-1 w-full md:mt-0 md:w-auto">{hoursLine}</p>
           </div>
 
           {/* App download — directly below first footer row */}
           <div className="mb-8 mt-6 flex flex-col items-center justify-between rounded-[var(--medium-radius)] bg-[var(--color-brand-primary)] px-4 py-3 text-white select-none lg:flex-row lg:px-5">
             <div className="mb-4 flex items-center text-white lg:mb-0">
-              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-md bg-[#3c4b6e] text-sm font-extrabold text-white">
-                M+
-              </div>
+              <Image
+                src="/brand/mixplus-logo.svg"
+                alt=""
+                width={40}
+                height={40}
+                className="h-10 w-10 shrink-0 rounded-md bg-white object-contain p-1"
+                unoptimized
+              />
               <div className="me-0 ms-4 shrink-0 text-lg font-bold">
                 دانلود اپلیکیشن میکپلاس
               </div>
@@ -348,31 +299,55 @@ export function SiteFooter() {
                   با ثبت ایمیل، از جدید‌ترین تخفیف‌ها با‌خبر شوید
                 </h4>
                 <form
-                  className="flex w-full items-center"
+                  className="flex w-full flex-col items-stretch gap-1"
                   onSubmit={(e) => {
                     e.preventDefault();
+                    void (async () => {
+                      setSubscribing(true);
+                      setSubscribeMsg(null);
+                      try {
+                        await subscribeFooterEmail(email);
+                        setSubscribeMsg("ایمیل شما ثبت شد");
+                        setEmail("");
+                      } catch (err) {
+                        setSubscribeMsg(
+                          err instanceof Error
+                            ? err.message
+                            : "ثبت ایمیل ناموفق بود",
+                        );
+                      } finally {
+                        setSubscribing(false);
+                      }
+                    })();
                   }}
                 >
-                  <label className="grow">
-                    <span className="sr-only">ایمیل شما</span>
-                    <div className="flex items-center rounded-[var(--medium-radius)] bg-[var(--color-neutral-100)] px-2">
-                      <input
-                        type="email"
-                        name="email"
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                        placeholder="ایمیل شما"
-                        className="w-full bg-transparent px-2 py-3 text-sm text-[var(--color-text)] outline-none placeholder:text-[var(--color-neutral-400)]"
-                      />
-                    </div>
-                  </label>
-                  <button
-                    type="submit"
-                    disabled={!email.trim()}
-                    className="me-0 ms-2 rounded-[var(--medium-radius)] bg-[var(--color-primary)] px-5 py-3 text-sm font-medium text-white disabled:pointer-events-none disabled:bg-[var(--color-neutral-200)] disabled:text-[var(--color-neutral-000)]"
-                  >
-                    ثبت
-                  </button>
+                  <div className="flex w-full items-center">
+                    <label className="grow">
+                      <span className="sr-only">ایمیل شما</span>
+                      <div className="flex items-center rounded-[var(--medium-radius)] bg-[var(--color-neutral-100)] px-2">
+                        <input
+                          type="email"
+                          name="email"
+                          value={email}
+                          onChange={(e) => setEmail(e.target.value)}
+                          placeholder="ایمیل شما"
+                          className="w-full bg-transparent px-2 py-3 text-sm text-[var(--color-text)] outline-none placeholder:text-[var(--color-neutral-400)]"
+                        />
+                      </div>
+                    </label>
+                    <button
+                      type="submit"
+                      disabled={!email.trim() || subscribing}
+                      className="me-0 ms-2 rounded-[var(--medium-radius)] bg-[var(--color-primary)] px-5 py-3 text-sm font-medium text-white disabled:pointer-events-none disabled:bg-[var(--color-neutral-200)] disabled:text-[var(--color-neutral-000)]"
+                    >
+                      {subscribing ? "…" : "ثبت"}
+                    </button>
+                  </div>
+                  {subscribeMsg ? (
+                    <p className="text-xs text-[var(--color-success)]">
+                      {subscribeMsg}
+                    </p>
+                  ) : null}
                 </form>
               </div>
             </div>
@@ -417,24 +392,26 @@ export function SiteFooter() {
               </button>
             </div>
 
-            <div className="mt-4 flex w-full flex-wrap items-center justify-center lg:mt-0 lg:w-auto lg:justify-end">
-              {TRUST_SEALS.map((seal) => (
-                <div
-                  key={seal.src}
-                  className="me-2 flex cursor-default items-center justify-center rounded border border-[var(--color-neutral-200)] p-2 lg:p-4"
-                  title={seal.label}
-                >
-                  <Image
-                    src={seal.src}
-                    alt={seal.label}
-                    width={75}
-                    height={75}
-                    className="h-[75px] w-[75px] object-contain"
-                    unoptimized
-                  />
-                </div>
-              ))}
-            </div>
+            {showTrust && visibleTrust.length > 0 ? (
+              <div className="mt-4 flex w-full flex-wrap items-center justify-center lg:mt-0 lg:w-auto lg:justify-end">
+                {visibleTrust.map((seal) => (
+                  <div
+                    key={seal.src}
+                    className="me-2 flex cursor-default items-center justify-center rounded border border-[var(--color-neutral-200)] p-2 lg:p-4"
+                    title={seal.label}
+                  >
+                    <Image
+                      src={seal.src}
+                      alt={seal.label}
+                      width={75}
+                      height={75}
+                      className="h-[75px] w-[75px] object-contain"
+                      unoptimized
+                    />
+                  </div>
+                ))}
+              </div>
+            ) : null}
           </div>
 
           {/* Copyright */}
@@ -444,30 +421,31 @@ export function SiteFooter() {
           </div>
       </div>
 
-      {/* Partners / sister brands strip */}
-      <div className="relative z-[3] w-full bg-[var(--color-neutral-100)]">
-        <div className="site-container flex flex-wrap items-stretch justify-end">
-          {PARTNERS.map((partner) => (
-            <a
-              key={partner.icon}
-              href={partner.href}
-              target="_blank"
-              rel="noopener noreferrer"
-              aria-label={partner.label}
-              className="flex min-h-20 grow basis-1/3 flex-col items-center justify-center border-b border-e border-[var(--color-neutral-200)] px-5 sm:basis-1/6 lg:basis-[11.11%]"
-            >
-              <Image
-                src={partner.icon}
-                alt={partner.label}
-                width={120}
-                height={20}
-                className="inline-block h-5 w-auto max-w-full object-contain"
-                unoptimized
-              />
-            </a>
-          ))}
+      {showPartners && visiblePartners.length > 0 ? (
+        <div className="relative z-[3] w-full bg-[var(--color-neutral-100)]">
+          <div className="site-container flex flex-wrap items-stretch justify-end">
+            {visiblePartners.map((partner) => (
+              <a
+                key={partner.icon + partner.label}
+                href={partner.href}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label={partner.label}
+                className="flex min-h-20 grow basis-1/3 flex-col items-center justify-center border-b border-e border-[var(--color-neutral-200)] px-5 sm:basis-1/6 lg:basis-[11.11%]"
+              >
+                <Image
+                  src={partner.icon}
+                  alt={partner.label}
+                  width={120}
+                  height={20}
+                  className="inline-block h-5 w-auto max-w-full object-contain"
+                  unoptimized
+                />
+              </a>
+            ))}
+          </div>
         </div>
-      </div>
+      ) : null}
     </footer>
   );
 }

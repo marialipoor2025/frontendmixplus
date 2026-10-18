@@ -1,13 +1,9 @@
-import Image from "next/image";
 import Link from "next/link";
 import { ProductCard } from "@/components/home/ProductCard";
 import { ScrollHorizontalWrapper } from "@/components/home/ScrollHorizontalWrapper";
 import { ChevronLeftIcon } from "@/components/layout/icons";
-import { CategoryProductPlaceholder } from "@/components/product/CategoryProductPlaceholder";
-import {
-  isMissingProductImage,
-  productPlaceholderSeed,
-} from "@/lib/product-image-placeholder";
+import { ProductCardImage } from "@/components/product/ProductCardImage";
+import { productPlaceholderSeed } from "@/lib/product-image-placeholder";
 import type { ProductRailSection } from "@/types/home";
 import type { Product } from "@/types/product";
 
@@ -42,19 +38,15 @@ function SeeAllCard({
               zIndex: index,
             }}
           >
-            {isMissingProductImage(product.imageUrl) ? (
-              <CategoryProductPlaceholder
-                seed={productPlaceholderSeed(product) || railSeed}
-              />
-            ) : (
-              <Image
-                src={product.imageUrl}
-                alt=""
-                width={56}
-                height={56}
-                className="h-full w-full object-contain"
-              />
-            )}
+            <ProductCardImage
+              src={product.imageUrl}
+              alt=""
+              seed={productPlaceholderSeed(product) || railSeed}
+              fill={false}
+              width={56}
+              height={56}
+              className="h-full w-full object-contain"
+            />
           </span>
         ))}
       </span>
@@ -112,6 +104,9 @@ export function ProductRail({ rail }: ProductRailProps) {
                   key={product.id}
                   product={withCategory}
                   showUsedLabel={rail.showUsedLabel}
+                  showReviewScore={rail.showReviewScore !== false}
+                  showCardLabels={Boolean(rail.showCardLabels)}
+                  labelPosition={rail.labelPosition === "top" ? "top" : "beside"}
                 />
               );
             })}

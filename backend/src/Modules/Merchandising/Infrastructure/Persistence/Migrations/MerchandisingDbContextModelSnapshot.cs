@@ -115,9 +115,26 @@ namespace MixPlus.Modules.Merchandising.Infrastructure.Persistence.Migrations
                     b.Property<bool>("IsActive")
                         .HasColumnType("boolean");
 
+                    b.Property<string>("LabelPosition")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(32)
+                        .HasColumnType("character varying(32)")
+                        .HasDefaultValue("beside");
+
                     b.Property<string>("ProductKeysJson")
                         .IsRequired()
                         .HasColumnType("jsonb");
+
+                    b.Property<bool>("ShowCardLabels")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("boolean")
+                        .HasDefaultValue(false);
+
+                    b.Property<bool>("ShowReviewScore")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("boolean")
+                        .HasDefaultValue(true);
 
                     b.Property<bool>("ShowUsedLabel")
                         .HasColumnType("boolean");

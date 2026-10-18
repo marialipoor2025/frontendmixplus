@@ -9,14 +9,42 @@ type StaticInfoPageProps = {
   nav: MainNavData;
   title: string;
   description?: string;
+  /** Plain-text body; blank lines separate paragraphs. */
+  body?: string;
   children?: ReactNode;
 };
+
+function BodyParagraphs({ body }: { body: string }) {
+  const paragraphs = body
+    .split(/\n\s*\n/)
+    .map((p) => p.trim())
+    .filter(Boolean);
+
+  if (!paragraphs.length) {
+    return (
+      <p className="rounded-xl border border-dashed border-[var(--color-border)] px-4 py-10 text-center text-sm text-[var(--color-muted)]">
+        محتوای این صفحه به‌زودی تکمیل می‌شود.
+      </p>
+    );
+  }
+
+  return (
+    <div className="space-y-4 text-sm leading-8 text-[var(--color-neutral-700)] lg:text-base">
+      {paragraphs.map((paragraph, index) => (
+        <p key={index} className="whitespace-pre-wrap">
+          {paragraph}
+        </p>
+      ))}
+    </div>
+  );
+}
 
 /** Shared shell for footer / CMS-style informational pages. */
 export function StaticInfoPage({
   nav,
   title,
   description,
+  body,
   children,
 }: StaticInfoPageProps) {
   return (
@@ -36,11 +64,7 @@ export function StaticInfoPage({
               {description}
             </p>
           ) : null}
-          {children ?? (
-            <p className="rounded-xl border border-dashed border-[var(--color-border)] px-4 py-10 text-center text-sm text-[var(--color-muted)]">
-              محتوای این صفحه به‌زودی تکمیل می‌شود.
-            </p>
-          )}
+          {children ?? <BodyParagraphs body={body ?? ""} />}
         </article>
       </div>
 

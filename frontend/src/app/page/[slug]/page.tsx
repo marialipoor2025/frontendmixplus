@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 import { StaticInfoPage } from "@/components/content/StaticInfoPage";
 import { getMainNavData } from "@/lib/api/nav";
-import { STATIC_PAGES } from "@/lib/static-pages";
+import { getCmsPage } from "@/lib/api/pages";
 
 type PageProps = {
   params: Promise<{ slug: string }>;
@@ -9,13 +9,13 @@ type PageProps = {
 
 export async function generateMetadata({ params }: PageProps) {
   const { slug } = await params;
-  const page = STATIC_PAGES[`page/${slug}`];
+  const page = await getCmsPage(`page/${slug}`);
   return { title: page?.title ?? "صفحه" };
 }
 
 export default async function CmsPage({ params }: PageProps) {
   const { slug } = await params;
-  const page = STATIC_PAGES[`page/${slug}`];
+  const page = await getCmsPage(`page/${slug}`);
   if (!page) notFound();
 
   const nav = await getMainNavData();
@@ -24,6 +24,7 @@ export default async function CmsPage({ params }: PageProps) {
       nav={nav}
       title={page.title}
       description={page.description}
+      body={page.body}
     />
   );
 }

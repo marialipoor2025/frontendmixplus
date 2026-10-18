@@ -72,7 +72,7 @@ export function ProductListingToolbar({
 
       <div className="ms-auto hidden shrink-0 xl:block">
         <span className="whitespace-nowrap text-sm text-[var(--color-neutral-500)]">
-          {total.toLocaleString("fa-IR")} کالا
+          {`${new Intl.NumberFormat("fa-IR").format(total)} کالا`}
         </span>
       </div>
     </div>

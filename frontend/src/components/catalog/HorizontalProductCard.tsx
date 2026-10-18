@@ -1,22 +1,19 @@
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
+import { ProductCardBasketButton } from "@/components/home/ProductCardBasketButton";
 import {
   ProductAvailableIcon,
   RatingStarIcon,
   TomanIcon,
 } from "@/components/layout/icons";
-import { CategoryProductPlaceholder } from "@/components/product/CategoryProductPlaceholder";
+import { ProductCardImage } from "@/components/product/ProductCardImage";
 import { siteConfig } from "@/config/site";
 import {
   formatDiscountPercent,
   formatPrice,
 } from "@/lib/format";
-import {
-  isMissingProductImage,
-  productPlaceholderSeed,
-} from "@/lib/product-image-placeholder";
+import { productPlaceholderSeed } from "@/lib/product-image-placeholder";
 import type { Product } from "@/types/product";
 
 type HorizontalProductCardProps = {
@@ -60,19 +57,15 @@ export function HorizontalProductCard({
               product.inStock ? "" : "opacity-60"
             }`}
           >
-            {isMissingProductImage(product.imageUrl) ? (
-              <CategoryProductPlaceholder
-                seed={productPlaceholderSeed(product)}
-              />
-            ) : (
-              <Image
-                src={product.imageUrl}
-                alt={product.title}
-                width={118}
-                height={118}
-                className="size-full object-contain"
-              />
-            )}
+            <ProductCardImage
+              src={product.imageUrl}
+              alt={product.title}
+              seed={productPlaceholderSeed(product)}
+              fill={false}
+              width={118}
+              height={118}
+              className="size-full object-contain"
+            />
           </div>
         </div>
 
@@ -115,6 +108,7 @@ export function HorizontalProductCard({
 
           <div className="flex flex-col items-stretch justify-between pt-1">
             <div className="flex items-center justify-between gap-2">
+              <ProductCardBasketButton product={product} />
               {hasDiscount ? (
                 <div className="flex items-center justify-center rounded-lg bg-[var(--color-hint-object-error)] px-1 text-white">
                   <span className="text-xs font-bold">

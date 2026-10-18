@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import { BrandPlpPage } from "@/components/brand/BrandPlpPage";
 import { getBrandBySlug, getProductsByBrandSlug } from "@/lib/api/catalog";
 import { getMainNavData } from "@/lib/api/nav";
+import { parseListingSearchParams } from "@/lib/product-listing";
 
 type PageProps = {
   params: Promise<{ slug: string }>;
@@ -20,14 +21,11 @@ export default async function BrandSlugPage({ params, searchParams }: PageProps)
   const brand = await getBrandBySlug(slug);
   if (!brand) notFound();
 
-  const qRaw = sp.q;
-  const q = Array.isArray(qRaw) ? qRaw[0] : qRaw;
-  const sortRaw = sp.sort;
-  const sort = Array.isArray(sortRaw) ? sortRaw[0] : sortRaw;
+  const listingQuery = parseListingSearchParams(sp);
 
   const [nav, products] = await Promise.all([
     getMainNavData(),
-    getProductsByBrandSlug(slug, q, sort),
+    getProductsByBrandSlug(slug, listingQuery.q, listingQuery.sort, listingQuery),
   ]);
 
   return (

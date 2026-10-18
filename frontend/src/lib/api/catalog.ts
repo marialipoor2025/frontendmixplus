@@ -10,7 +10,23 @@ import {
 } from "@/lib/media-url";
 import type { Brand } from "@/types/brand";
 import type { Product, ProductBadge } from "@/types/product";
+import type { ProductListingQuery } from "@/types/product-listing";
 import { apiClient } from "./client";
+
+export type CatalogListQuery = {
+  brandSlug?: string;
+  categorySlug?: string;
+  condition?: string;
+  q?: string;
+  sort?: string;
+  /** Comma-joined brand display names (matches facet values). */
+  brand?: string;
+  inStock?: boolean;
+  minPrice?: number;
+  maxPrice?: number;
+  page?: number;
+  pageSize?: number;
+};
 
 type CatalogBrandDto = {
   id: string;
@@ -44,6 +60,40 @@ type CatalogProductDto = {
   skuCode?: string | null;
   imageAlt?: string | null;
 };
+
+type CatalogProductsPageDto = {
+  items?: CatalogProductDto[];
+  products?: CatalogProductDto[];
+  total?: number;
+  page?: number;
+  pageSize?: number;
+};
+
+function listingToCatalogQuery(
+  partial: CatalogListQuery,
+  listing?: ProductListingQuery,
+): CatalogListQuery {
+  if (!listing) return partial;
+  return {
+    ...partial,
+    q: listing.q ?? partial.q,
+    sort: listing.sort !== "relevance" ? listing.sort : partial.sort,
+    brand: listing.filters.brands.length
+      ? listing.filters.brands.join(",")
+      : partial.brand,
+    inStock: listing.filters.inStockOnly ? true : partial.inStock,
+    minPrice: listing.filters.minPrice ?? partial.minPrice,
+    maxPrice: listing.filters.maxPrice ?? partial.maxPrice,
+    condition: listing.filters.condition ?? partial.condition,
+  };
+}
+
+function normalizeProductRows(
+  payload: CatalogProductDto[] | CatalogProductsPageDto,
+): CatalogProductDto[] {
+  if (Array.isArray(payload)) return payload;
+  return payload.items ?? payload.products ?? [];
+}
 
 function mapBrand(dto: CatalogBrandDto): Brand {
   return {
@@ -113,31 +163,54 @@ export async function getBrandBySlug(slug: string): Promise<Brand | null> {
   return rows[0] ? mapBrand(rows[0]) : null;
 }
 
+async function fetchCatalogProducts(
+  query: CatalogListQuery,
+): Promise<Product[]> {
+  const payload = await apiClient<
+    CatalogProductDto[] | CatalogProductsPageDto
+  >("/api/catalog/products", {
+    query: {
+      brandSlug: query.brandSlug,
+      categorySlug: query.categorySlug,
+      condition: query.condition,
+      q: query.q?.trim() || undefined,
+      sort: query.sort || undefined,
+      brand: query.brand || undefined,
+      inStock: query.inStock ? true : undefined,
+      minPrice: query.minPrice,
+      maxPrice: query.maxPrice,
+      page: query.page,
+      pageSize: query.pageSize,
+    },
+  });
+  return normalizeProductRows(payload).map(mapProduct);
+}
+
 export async function getProductsByBrandSlug(
   slug: string,
   q?: string,
   sort?: string,
+  listing?: ProductListingQuery,
 ): Promise<Product[]> {
   if (siteConfig.useMocks || !siteConfig.apiBaseUrl) {
     const brand = resolveMockBrand(slug);
     return brand ? getMockBrandProducts(brand) : [];
   }
 
-  const rows = await apiClient<CatalogProductDto[]>("/api/catalog/products", {
-    query: {
-      brandSlug: slug,
-      q: q?.trim() || undefined,
-      sort: sort || undefined,
-    },
-  });
-  return rows.map(mapProduct);
+  return fetchCatalogProducts(
+    listingToCatalogQuery(
+      { brandSlug: slug, q, sort },
+      listing,
+    ),
+  );
 }
 
-/** Category PLP products — live Catalog filter by categorySlug, mock fallback. */
+/** Category PLP products — live Catalog filter by categorySlug. */
 export async function getProductsByCategorySlug(
   slugParts: string[],
   q?: string,
   sort?: string,
+  listing?: ProductListingQuery,
 ): Promise<Product[]> {
   const leaf = slugParts[slugParts.length - 1] ?? slugParts.join("-");
 
@@ -147,49 +220,32 @@ export async function getProductsByCategorySlug(
   }
 
   try {
-    const rows = await apiClient<CatalogProductDto[]>("/api/catalog/products", {
-      query: {
-        categorySlug: leaf,
-        q: q?.trim() || undefined,
-        sort: sort || undefined,
-      },
-    });
-    if (rows.length > 0) return rows.map(mapProduct);
+    const base = listingToCatalogQuery(
+      { categorySlug: leaf, q, sort },
+      listing,
+    );
+    const rows = await fetchCatalogProducts(base);
+    if (rows.length > 0) return rows;
 
     if (slugParts.length > 1) {
-      // Try each ancestor leaf → root so nested paths still resolve.
       for (let i = slugParts.length - 2; i >= 0; i -= 1) {
-        const ancestor = await apiClient<CatalogProductDto[]>(
-          "/api/catalog/products",
-          {
-            query: {
-              categorySlug: slugParts[i],
-              q: q?.trim() || undefined,
-              sort: sort || undefined,
-            },
-          },
-        );
-        if (ancestor.length > 0) return ancestor.map(mapProduct);
+        const ancestor = await fetchCatalogProducts({
+          ...base,
+          categorySlug: slugParts[i],
+        });
+        if (ancestor.length > 0) return ancestor;
       }
 
-      const joined = await apiClient<CatalogProductDto[]>(
-        "/api/catalog/products",
-        {
-          query: {
-            categorySlug: slugParts.join("-"),
-            q: q?.trim() || undefined,
-            sort: sort || undefined,
-          },
-        },
-      );
-      if (joined.length > 0) return joined.map(mapProduct);
+      const joined = await fetchCatalogProducts({
+        ...base,
+        categorySlug: slugParts.join("-"),
+      });
+      if (joined.length > 0) return joined;
     }
 
-    const { getMockCategoryProducts } = await import("@/lib/mocks/category-plp");
-    return getMockCategoryProducts(slugParts);
+    return [];
   } catch {
-    const { getMockCategoryProducts } = await import("@/lib/mocks/category-plp");
-    return getMockCategoryProducts(slugParts);
+    return [];
   }
 }
 
@@ -197,6 +253,7 @@ export async function getProductsByCategorySlug(
 export async function getStockProducts(
   q?: string,
   sort?: string,
+  listing?: ProductListingQuery,
 ): Promise<Product[]> {
   if (siteConfig.useMocks || !siteConfig.apiBaseUrl) {
     const { mockHomePageData } = await import("@/lib/mocks/home");
@@ -209,7 +266,7 @@ export async function getStockProducts(
       if (p.condition === "used") map.set(p.id, p);
     }
     let rows = [...map.values()];
-    const needle = q?.trim().toLowerCase();
+    const needle = (listing?.q ?? q)?.trim().toLowerCase();
     if (needle) {
       rows = rows.filter((p) =>
         `${p.title} ${p.brandName} ${p.slug}`.toLowerCase().includes(needle),
@@ -219,14 +276,12 @@ export async function getStockProducts(
   }
 
   try {
-    const rows = await apiClient<CatalogProductDto[]>("/api/catalog/products", {
-      query: {
-        condition: "used",
-        q: q?.trim() || undefined,
-        sort: sort || undefined,
-      },
-    });
-    return rows.map(mapProduct);
+    return await fetchCatalogProducts(
+      listingToCatalogQuery(
+        { condition: "used", q, sort },
+        listing,
+      ),
+    );
   } catch {
     return [];
   }

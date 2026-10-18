@@ -2,6 +2,7 @@ import { CategoryPlpPage } from "@/components/categories/CategoryPlpPage";
 import { getProductsByCategorySlug } from "@/lib/api/catalog";
 import { getMainNavData } from "@/lib/api/nav";
 import { resolveCategoryPath } from "@/lib/category-path";
+import { parseListingSearchParams } from "@/lib/product-listing";
 
 type PageProps = {
   params: Promise<{ slug: string[] }>;
@@ -23,11 +24,13 @@ export default async function CategorySlugPage({
   const sp = await searchParams;
   const nav = await getMainNavData();
   const category = resolveCategoryPath(slug, nav);
-  const qRaw = sp.q;
-  const q = Array.isArray(qRaw) ? qRaw[0] : qRaw;
-  const sortRaw = sp.sort;
-  const sort = Array.isArray(sortRaw) ? sortRaw[0] : sortRaw;
-  const products = await getProductsByCategorySlug(slug, q, sort);
+  const listingQuery = parseListingSearchParams(sp);
+  const products = await getProductsByCategorySlug(
+    slug,
+    listingQuery.q,
+    listingQuery.sort,
+    listingQuery,
+  );
 
   return (
     <CategoryPlpPage

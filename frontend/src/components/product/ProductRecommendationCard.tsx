@@ -1,12 +1,8 @@
-import Image from "next/image";
 import Link from "next/link";
 import { TomanIcon } from "@/components/layout/icons";
-import { CategoryProductPlaceholder } from "@/components/product/CategoryProductPlaceholder";
+import { ProductCardImage } from "@/components/product/ProductCardImage";
 import { formatDiscountPercent, formatPrice } from "@/lib/format";
-import {
-  isMissingProductImage,
-  productPlaceholderSeed,
-} from "@/lib/product-image-placeholder";
+import { productPlaceholderSeed } from "@/lib/product-image-placeholder";
 import type { Product } from "@/types/product";
 
 type ProductRecommendationCardProps = {
@@ -36,17 +32,13 @@ export function ProductRecommendationCard({
           role="img"
           aria-label={product.title}
         >
-          {isMissingProductImage(product.imageUrl) ? (
-            <CategoryProductPlaceholder seed={productPlaceholderSeed(product)} />
-          ) : (
-            <Image
-              src={product.imageUrl}
-              alt={product.title}
-              fill
-              sizes="(min-width: 1024px) 164px, 140px"
-              className="object-contain"
-            />
-          )}
+          <ProductCardImage
+            src={product.imageUrl}
+            alt={product.title}
+            seed={productPlaceholderSeed(product)}
+            sizes="(min-width: 1024px) 164px, 140px"
+            className="object-contain"
+          />
         </div>
       </div>
 

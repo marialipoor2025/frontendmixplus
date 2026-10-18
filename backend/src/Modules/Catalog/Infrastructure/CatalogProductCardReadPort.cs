@@ -1,6 +1,7 @@
 using System.Text.Json;
 using Microsoft.EntityFrameworkCore;
 using MixPlus.BuildingBlocks.Application.Contracts;
+using MixPlus.Modules.Catalog.Domain.Categories;
 using MixPlus.Modules.Catalog.Domain.Products;
 using MixPlus.Modules.Catalog.Infrastructure.Persistence;
 
@@ -23,6 +24,7 @@ public sealed class CatalogProductCardReadPort(CatalogDbContext db) : IProductCa
         }
 
         var rows = await db.Products.AsNoTracking()
+            .Include(x => x.MediaItems)
             .Where(x => x.IsPublished && keys.Contains(x.ExternalKey))
             .ToListAsync(cancellationToken);
 
@@ -47,11 +49,134 @@ public sealed class CatalogProductCardReadPort(CatalogDbContext db) : IProductCa
     public async Task<IReadOnlyList<HomeCategoryModel>> GetHomeCategoriesAsync(
         CancellationToken cancellationToken = default)
     {
-        return await db.Categories.AsNoTracking()
+        // Homepage circles: active categories that have published products (direct or subtree).
+        // Prefer Digikala L2 under root when they have stock; otherwise surface product-bearing
+        // MixPlus categories (often root-level) so the rail is never empty.
+        const string rootKey = "cat-home-appliances";
+        const int maxCircles = 16;
+
+        var allCats = await db.Categories.AsNoTracking()
             .Where(x => x.IsActive)
             .OrderBy(x => x.SortOrder)
-            .Select(x => new HomeCategoryModel(x.ExternalKey, x.Title, x.Href, x.ImageUrl ?? string.Empty))
+            .ThenBy(x => x.Title)
             .ToListAsync(cancellationToken);
+
+        var childrenByParent = allCats
+            .GroupBy(x => x.ParentId ?? Guid.Empty)
+            .ToDictionary(g => g.Key, g => g.Select(c => c.Id).ToList());
+
+        HashSet<Guid> CollectDescendants(Guid id)
+        {
+            var set = new HashSet<Guid> { id };
+            var stack = new Stack<Guid>();
+            stack.Push(id);
+            while (stack.Count > 0)
+            {
+                var current = stack.Pop();
+                if (!childrenByParent.TryGetValue(current, out var kids)) continue;
+                foreach (var kid in kids)
+                {
+                    if (set.Add(kid)) stack.Push(kid);
+                }
+            }
+
+            return set;
+        }
+
+        var published = await db.Products.AsNoTracking()
+            .Include(x => x.MediaItems)
+            .Where(x => x.IsPublished && x.CategoryId != null)
+            .ToListAsync(cancellationToken);
+
+        var productsByCategory = published
+            .GroupBy(x => x.CategoryId!.Value)
+            .ToDictionary(g => g.Key, g => g.ToList());
+
+        string ResolveCategoryImage(Category cat, List<Product> productsInSubtree)
+        {
+            if (!string.IsNullOrWhiteSpace(cat.ImageUrl))
+            {
+                return cat.ImageUrl!;
+            }
+
+            var fromProduct = productsInSubtree
+                .Select(ResolveCardImageUrl)
+                .FirstOrDefault(url =>
+                    !string.IsNullOrWhiteSpace(url)
+                    && !url.Equals(CatalogCardImages.DefaultPlaceholder, StringComparison.OrdinalIgnoreCase));
+            if (!string.IsNullOrWhiteSpace(fromProduct))
+            {
+                return fromProduct;
+            }
+
+            return HomeCategoryImageFallback(cat.ExternalKey);
+        }
+
+        HomeCategoryModel? TryBuild(Category cat)
+        {
+            var subtree = CollectDescendants(cat.Id);
+            var productsInSubtree = subtree
+                .Where(productsByCategory.ContainsKey)
+                .SelectMany(id => productsByCategory[id])
+                .ToList();
+            if (productsInSubtree.Count == 0)
+            {
+                return null;
+            }
+
+            var image = ResolveCategoryImage(cat, productsInSubtree);
+            if (string.IsNullOrWhiteSpace(image))
+            {
+                return null;
+            }
+
+            return new HomeCategoryModel(cat.ExternalKey, cat.Title, cat.Href, image);
+        }
+
+        var rootId = allCats.FirstOrDefault(x => x.ExternalKey == rootKey)?.Id;
+        var result = new List<HomeCategoryModel>();
+        var seen = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
+        void Add(HomeCategoryModel? model)
+        {
+            if (model is null || !seen.Add(model.Id) || result.Count >= maxCircles) return;
+            result.Add(model);
+        }
+
+        if (rootId is Guid rid)
+        {
+            foreach (var cat in allCats.Where(x => x.ParentId == rid))
+            {
+                Add(TryBuild(cat));
+            }
+        }
+
+        // Supplement with product-bearing categories (MixPlus roots / deep leaves).
+        if (result.Count < maxCircles)
+        {
+            var extras = allCats
+                .Where(x =>
+                    !string.Equals(x.ExternalKey, rootKey, StringComparison.OrdinalIgnoreCase)
+                    && productsByCategory.ContainsKey(x.Id))
+                .Select(x => new
+                {
+                    Cat = x,
+                    Count = productsByCategory[x.Id].Count,
+                    Model = TryBuild(x),
+                })
+                .Where(x => x.Model is not null)
+                .OrderByDescending(x => x.Count)
+                .ThenBy(x => x.Cat.SortOrder)
+                .ThenBy(x => x.Cat.Title);
+
+            foreach (var row in extras)
+            {
+                Add(row.Model);
+                if (result.Count >= maxCircles) break;
+            }
+        }
+
+        return result;
     }
 
     public async Task<IReadOnlyList<ProductCardModel>> SearchProductsAsync(
@@ -69,6 +194,7 @@ public sealed class CatalogProductCardReadPort(CatalogDbContext db) : IProductCa
         var pattern = $"%{q}%";
 
         var rows = await db.Products.AsNoTracking()
+            .Include(x => x.MediaItems)
             .Where(x => x.IsPublished && (
                 EF.Functions.ILike(x.Title, pattern) ||
                 EF.Functions.ILike(x.BrandName, pattern) ||
@@ -82,6 +208,7 @@ public sealed class CatalogProductCardReadPort(CatalogDbContext db) : IProductCa
         if (rows.Count == 0 && q.Length >= 3)
         {
             var candidates = await db.Products.AsNoTracking()
+                .Include(x => x.MediaItems)
                 .Where(x => x.IsPublished)
                 .OrderBy(x => x.Title)
                 .Take(200)
@@ -160,6 +287,7 @@ public sealed class CatalogProductCardReadPort(CatalogDbContext db) : IProductCa
         limit = limit is < 1 or > 100 ? 48 : limit;
 
         var rows = await db.Products.AsNoTracking()
+            .Include(x => x.MediaItems)
             .Where(x => x.IsPublished && x.InStock)
             .OrderByDescending(x => (x.Rating ?? 0m) * (x.ReviewCount ?? 0))
             .ThenByDescending(x => x.DiscountPercent ?? 0)
@@ -205,24 +333,29 @@ public sealed class CatalogProductCardReadPort(CatalogDbContext db) : IProductCa
         return prev[m];
     }
 
-    private const string DefaultProductPlaceholder = "/placeholders/product-appliance.png";
+    private static string ResolveCardImageUrl(Product product) =>
+        CatalogCardImages.ResolveCardImageUrl(product);
 
-    private static string NormalizeCardImageUrl(string? imageUrl)
-    {
-        if (string.IsNullOrWhiteSpace(imageUrl))
+    private static string HomeCategoryImageFallback(string externalKey) =>
+        externalKey.Trim().ToLowerInvariant() switch
         {
-            return string.Empty;
-        }
-
-        var trimmed = imageUrl.Trim();
-        if (trimmed.Equals(DefaultProductPlaceholder, StringComparison.OrdinalIgnoreCase)
-            || trimmed.EndsWith(DefaultProductPlaceholder, StringComparison.OrdinalIgnoreCase))
-        {
-            return string.Empty;
-        }
-
-        return trimmed;
-    }
+            "cat-fridge" => "/images/categories/fridge.jpg",
+            "cat-washer" => "/images/categories/washer.jpg",
+            "cat-dishwasher" => "/images/categories/dishwasher.jpg",
+            "cat-vacuum" => "/images/categories/vacuum.jpg",
+            "cat-air" => "/images/categories/air.jpg",
+            "cat-tv" => "/images/categories/tv.jpg",
+            "cat-cooking" => "/images/categories/cooking.jpg",
+            "cat-drink" => "/images/categories/drink.jpg",
+            "cat-foodproc" => "/images/categories/foodproc.jpg",
+            "cat-iron" => "/images/categories/iron.jpg",
+            "cat-water" => "/images/categories/water.jpg",
+            "cat-steam" => "/images/categories/steam.jpg",
+            "cat-sewing" => "/images/categories/sewing.jpg",
+            "cat-builtin" => "/images/categories/builtin.jpg",
+            "cat-av" => "/images/categories/av.jpg",
+            _ => "/placeholders/cat-appliance.png",
+        };
 
     private static ProductCardModel ToModel(Product product)
     {
@@ -236,7 +369,7 @@ public sealed class CatalogProductCardReadPort(CatalogDbContext db) : IProductCa
             product.ExternalKey,
             product.Title,
             product.Slug,
-            NormalizeCardImageUrl(product.ImageUrl),
+            ResolveCardImageUrl(product),
             product.BrandExternalKey,
             product.BrandName,
             product.BrandLogoUrl,

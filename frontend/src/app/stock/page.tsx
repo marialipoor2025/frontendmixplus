@@ -22,14 +22,9 @@ export default async function StockPage({ searchParams }: PageProps) {
   // Stock page is always used/stock condition.
   query.filters.condition = "used";
 
-  const qRaw = sp.q;
-  const q = Array.isArray(qRaw) ? qRaw[0] : qRaw;
-  const sortRaw = sp.sort;
-  const sort = Array.isArray(sortRaw) ? sortRaw[0] : sortRaw;
-
   const [nav, products] = await Promise.all([
     getMainNavData(),
-    getStockProducts(q, sort),
+    getStockProducts(query.q, query.sort, query),
   ]);
 
   const listing = applyProductListing(products, query);

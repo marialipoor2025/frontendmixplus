@@ -47,9 +47,17 @@ public sealed class CatalogModule : IModule
                 string? condition,
                 string? q,
                 string? sort,
+                string? brand,
+                bool? inStock,
+                decimal? minPrice,
+                decimal? maxPrice,
+                int? page,
+                int? pageSize,
                 CancellationToken ct) =>
             {
-                var query = db.Products.AsNoTracking().Where(x => x.IsPublished);
+                var query = db.Products.AsNoTracking()
+                    .Include(x => x.MediaItems)
+                    .Where(x => x.IsPublished);
 
                 if (!string.IsNullOrWhiteSpace(condition))
                 {
@@ -137,6 +145,32 @@ public sealed class CatalogModule : IModule
                         EF.Functions.ILike(x.Slug, pattern));
                 }
 
+                if (!string.IsNullOrWhiteSpace(brand))
+                {
+                    var brandNames = brand.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+                        .Where(b => b.Length > 0)
+                        .ToArray();
+                    if (brandNames.Length > 0)
+                    {
+                        query = query.Where(x => brandNames.Contains(x.BrandName));
+                    }
+                }
+
+                if (inStock == true)
+                {
+                    query = query.Where(x => x.InStock);
+                }
+
+                if (minPrice is > 0)
+                {
+                    query = query.Where(x => x.Price.Amount >= minPrice.Value);
+                }
+
+                if (maxPrice is > 0)
+                {
+                    query = query.Where(x => x.Price.Amount <= maxPrice.Value);
+                }
+
                 query = (sort?.Trim().ToLowerInvariant()) switch
                 {
                     "price-asc" => query.OrderBy(x => x.Price.Amount),
@@ -148,8 +182,35 @@ public sealed class CatalogModule : IModule
                     _ => query.OrderBy(x => x.Title),
                 };
 
-                var rows = await query.ToListAsync(ct);
-                return Results.Ok(rows.Select(p => ToDto(p)).ToList());
+                var total = await query.CountAsync(ct);
+                var size = Math.Clamp(pageSize ?? 0, 0, 60);
+                var pageNumber = Math.Max(1, page ?? 1);
+                // pageSize omitted / 0 → return full list (legacy clients).
+                List<Product> rows;
+                if (size <= 0)
+                {
+                    rows = await query.ToListAsync(ct);
+                    size = Math.Max(total, 1);
+                    pageNumber = 1;
+                }
+                else
+                {
+                    rows = await query
+                        .Skip((pageNumber - 1) * size)
+                        .Take(size)
+                        .ToListAsync(ct);
+                }
+
+                var items = rows.Select(p => ToDto(p)).ToList();
+                return Results.Ok(new
+                {
+                    items,
+                    total,
+                    page = pageNumber,
+                    pageSize = size,
+                    // Legacy flat array alias for older clients that still map the root.
+                    products = items,
+                });
             })
             .WithName("ListCatalogProducts");
 
@@ -159,6 +220,7 @@ public sealed class CatalogModule : IModule
                 CancellationToken ct) =>
             {
                 var product = await db.Products.AsNoTracking()
+                    .Include(x => x.MediaItems)
                     .FirstOrDefaultAsync(
                         x => x.IsPublished &&
                              (x.ExternalKey == productKey || x.Slug == productKey),
@@ -224,7 +286,10 @@ public sealed class CatalogModule : IModule
             .WithName("ListCatalogCategories");
 
         // Nested Digikala-style tree (unlimited depth).
-        group.MapGet("/categories/tree", async (CatalogDbContext db, CancellationToken ct) =>
+        group.MapGet("/categories/tree", async (
+                CatalogDbContext db,
+                bool? withProductsOnly,
+                CancellationToken ct) =>
             {
                 var rows = await db.Categories.AsNoTracking()
                     .Where(x => x.IsActive)
@@ -236,17 +301,68 @@ public sealed class CatalogModule : IModule
                     .GroupBy(x => x.ParentId)
                     .ToDictionary(g => g.Key ?? Guid.Empty, g => g.ToList());
 
+                var productImages = await db.Products.AsNoTracking()
+                    .Where(x => x.IsPublished && x.CategoryId != null && x.ImageUrl != "")
+                    .GroupBy(x => x.CategoryId!.Value)
+                    .Select(g => new { CategoryId = g.Key, ImageUrl = g.Min(p => p.ImageUrl)! })
+                    .ToDictionaryAsync(x => x.CategoryId, x => x.ImageUrl, ct);
+
+                var productCategoryIds = productImages.Keys.ToHashSet();
+                // Also count products without image for withProductsOnly filter.
+                var catsWithProducts = await db.Products.AsNoTracking()
+                    .Where(x => x.IsPublished && x.CategoryId != null)
+                    .Select(x => x.CategoryId!.Value)
+                    .Distinct()
+                    .ToListAsync(ct);
+                foreach (var id in catsWithProducts) productCategoryIds.Add(id);
+
+                bool SubtreeHasProducts(Guid id)
+                {
+                    var stack = new Stack<Guid>();
+                    stack.Push(id);
+                    while (stack.Count > 0)
+                    {
+                        var current = stack.Pop();
+                        if (productCategoryIds.Contains(current)) return true;
+                        if (!children.TryGetValue(current, out var kids)) continue;
+                        foreach (var kid in kids) stack.Push(kid.Id);
+                    }
+
+                    return false;
+                }
+
+                string? ResolveImage(Category c)
+                {
+                    if (!string.IsNullOrWhiteSpace(c.ImageUrl)) return c.ImageUrl;
+                    // Prefer a product photo from this node, then walk children (BFS).
+                    if (productImages.TryGetValue(c.Id, out var direct)) return direct;
+                    var queue = new Queue<Guid>();
+                    queue.Enqueue(c.Id);
+                    while (queue.Count > 0)
+                    {
+                        var current = queue.Dequeue();
+                        if (productImages.TryGetValue(current, out var img)) return img;
+                        if (!children.TryGetValue(current, out var kids)) continue;
+                        foreach (var kid in kids) queue.Enqueue(kid.Id);
+                    }
+
+                    return c.ImageUrl;
+                }
+
                 List<object> Build(Guid? parentId)
                 {
                     var key = parentId ?? Guid.Empty;
                     if (!children.TryGetValue(key, out var list)) return [];
-                    return list.Select(c => (object)new
+                    var filtered = withProductsOnly == true
+                        ? list.Where(c => SubtreeHasProducts(c.Id)).ToList()
+                        : list;
+                    return filtered.Select(c => (object)new
                     {
                         id = c.ExternalKey,
                         title = c.Title,
                         slug = c.Slug,
                         href = c.Href,
-                        imageUrl = c.ImageUrl,
+                        imageUrl = ResolveImage(c),
                         parentId = c.ParentId is Guid pid && byId.TryGetValue(pid, out var p)
                             ? p.ExternalKey
                             : null,
@@ -289,12 +405,7 @@ public sealed class CatalogModule : IModule
                 ? null
                 : $"/categories/{categorySlug}");
 
-        var imageUrl = product.ImageUrl?.Trim() ?? string.Empty;
-        if (imageUrl.Equals("/placeholders/product-appliance.png", StringComparison.OrdinalIgnoreCase)
-            || imageUrl.EndsWith("/placeholders/product-appliance.png", StringComparison.OrdinalIgnoreCase))
-        {
-            imageUrl = string.Empty;
-        }
+        var imageUrl = CatalogCardImages.ResolveCardImageUrl(product);
 
         return new ProductCardDto(
             product.ExternalKey,

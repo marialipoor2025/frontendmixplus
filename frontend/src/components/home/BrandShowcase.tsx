@@ -65,7 +65,7 @@ export function BrandShowcase({ brands }: BrandShowcaseProps) {
       </div>
 
       <div className="px-2 lg:px-3">
-        <ScrollHorizontalWrapper>
+        <ScrollHorizontalWrapper autoScrollMs={3200}>
           <div className="flex w-max flex-row items-stretch gap-3 px-2 pb-1">
             {brands.map((brand) => (
               <BrandCard key={brand.id} brand={brand} />

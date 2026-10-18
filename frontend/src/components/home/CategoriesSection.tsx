@@ -22,7 +22,11 @@ function CategoryItem({ category }: { category: HomeCategory }) {
       >
         <div className="flex size-[67px] items-center justify-center overflow-hidden rounded-full bg-[#f0f0f1] sm:size-[82px] lg:size-[94px]">
           <Image
-            src={category.imageUrl}
+            src={
+              category.imageUrl?.trim()
+                ? category.imageUrl
+                : "/placeholders/cat-appliance.png"
+            }
             alt=""
             width={100}
             height={100}

@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="160" viewBox="0 0 1600 160" role="img" aria-label="MixPlus banner">
+  <defs>
+    <linearGradient id="g" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#1672dd"/>
+      <stop offset="100%" stop-color="#ed1944"/>
+    </linearGradient>
+  </defs>
+  <rect width="1600" height="160" fill="url(#g)"/>
+  <text x="800" y="92" text-anchor="middle" fill="#ffffff" font-family="Tahoma, Arial, sans-serif" font-size="36" font-weight="700">MixPlus</text>
+</svg>

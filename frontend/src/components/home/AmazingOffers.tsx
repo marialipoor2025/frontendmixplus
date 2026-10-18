@@ -7,7 +7,7 @@ import { ScrollHorizontalWrapper } from "@/components/home/ScrollHorizontalWrapp
 import { ChevronLeftIcon } from "@/components/layout/icons";
 import type { Product } from "@/types/product";
 
-const SEE_ALL_HREF = "/incredible-offers/";
+const SEE_ALL_HREF = "/incredible-offers";
 const COUNTDOWN_MS = 4 * 60 * 60 * 1000;
 
 type AmazingOffersProps = {

@@ -17,6 +17,8 @@ type ScrollHorizontalWrapperProps = {
   className?: string;
   /** Distance scrolled per click as a fraction of the viewport width. */
   scrollRatio?: number;
+  /** When set, auto-advances the rail; pauses on hover/focus. */
+  autoScrollMs?: number;
 };
 
 function scrollMetrics(el: HTMLElement) {
@@ -49,10 +51,12 @@ export function ScrollHorizontalWrapper({
   children,
   className = "",
   scrollRatio = 0.75,
+  autoScrollMs,
 }: ScrollHorizontalWrapperProps) {
   const scrollerRef = useRef<HTMLDivElement>(null);
   const [canPrev, setCanPrev] = useState(false);
   const [canNext, setCanNext] = useState(false);
+  const [paused, setPaused] = useState(false);
 
   const updateButtons = useCallback(() => {
     const el = scrollerRef.current;
@@ -77,25 +81,53 @@ export function ScrollHorizontalWrapper({
     };
   }, [updateButtons, children]);
 
-  const scrollByDir = (dir: "next" | "prev") => {
-    const el = scrollerRef.current;
-    if (!el) return;
+  const scrollByDir = useCallback(
+    (dir: "next" | "prev") => {
+      const el = scrollerRef.current;
+      if (!el) return;
 
-    // Prefer stepping by one card (~172px) like Digikala rails; fallback to viewport ratio.
-    const firstCard = el.querySelector<HTMLElement>("a, [data-rail-item]");
-    const cardStep = firstCard
-      ? firstCard.offsetWidth + 12
-      : el.clientWidth * scrollRatio;
-    const rtl = getComputedStyle(el).direction === "rtl";
-    const nextDelta = rtl ? -cardStep : cardStep;
-    el.scrollBy({
-      left: dir === "next" ? nextDelta : -nextDelta,
-      behavior: "smooth",
-    });
-  };
+      // Prefer stepping by one card (~172px) like Digikala rails; fallback to viewport ratio.
+      const firstCard = el.querySelector<HTMLElement>("a, [data-rail-item]");
+      const cardStep = firstCard
+        ? firstCard.offsetWidth + 12
+        : el.clientWidth * scrollRatio;
+      const rtl = getComputedStyle(el).direction === "rtl";
+      const nextDelta = rtl ? -cardStep : cardStep;
+      el.scrollBy({
+        left: dir === "next" ? nextDelta : -nextDelta,
+        behavior: "smooth",
+      });
+    },
+    [scrollRatio],
+  );
+
+  useEffect(() => {
+    if (!autoScrollMs || autoScrollMs <= 0 || paused) return;
+    const id = window.setInterval(() => {
+      const el = scrollerRef.current;
+      if (!el) return;
+      const { canNext: next } = scrollMetrics(el);
+      if (next) {
+        scrollByDir("next");
+      } else {
+        el.scrollTo({ left: 0, behavior: "smooth" });
+      }
+    }, autoScrollMs);
+    return () => window.clearInterval(id);
+  }, [autoScrollMs, paused, scrollByDir]);
 
   return (
-    <div className={`relative w-full ${className}`}>
+    <div
+      className={`relative w-full ${className}`}
+      onMouseEnter={() => setPaused(true)}
+      onMouseLeave={() => setPaused(false)}
+      onFocusCapture={() => setPaused(true)}
+      onBlurCapture={(e) => {
+        if (!e.currentTarget.contains(e.relatedTarget as Node | null)) {
+          setPaused(false);
+        }
+      }}
+    >
       <div
         ref={scrollerRef}
         className="w-full touch-pan-x overflow-x-auto scroll-smooth [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"

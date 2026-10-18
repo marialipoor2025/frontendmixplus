@@ -30,6 +30,10 @@ internal static class AdminReportEndpoints
         var pendingReviews = await catalog.Reviews.AsNoTracking()
             .CountAsync(x => x.Status == "pending", ct);
 
+        var fa = System.Globalization.CultureInfo.GetCultureInfo("fa-IR");
+        string Fa(int n) => n.ToString("N0", fa);
+        string FaD(decimal n) => n.ToString("N0", fa);
+
         var rows = new[]
         {
             new
@@ -37,15 +41,15 @@ internal static class AdminReportEndpoints
                 id = "products-published",
                 metric = "محصولات منتشر",
                 period = "اکنون",
-                value = published.ToString("N0"),
-                change = $"{totalProducts} کل",
+                value = Fa(published),
+                change = $"{Fa(totalProducts)} محصول کل",
             },
             new
             {
                 id = "customers",
                 metric = "مشتریان",
                 period = "اکنون",
-                value = customers.ToString("N0"),
+                value = Fa(customers),
                 change = "Identity",
             },
             new
@@ -53,7 +57,7 @@ internal static class AdminReportEndpoints
                 id = "sellers",
                 metric = "فروشندگان",
                 period = "اکنون",
-                value = sellersCount.ToString("N0"),
+                value = Fa(sellersCount),
                 change = "بازارگاه",
             },
             new
@@ -61,15 +65,15 @@ internal static class AdminReportEndpoints
                 id = "orders",
                 metric = "سفارش‌ها",
                 period = "اکنون",
-                value = orders.ToString("N0"),
-                change = $"GMV {gmv:N0}",
+                value = Fa(orders),
+                change = $"GMV {FaD(gmv)}",
             },
             new
             {
                 id = "reviews-pending",
                 metric = "نظرات در انتظار",
                 period = "اکنون",
-                value = pendingReviews.ToString("N0"),
+                value = Fa(pendingReviews),
                 change = "نیازمند بررسی",
             },
         };

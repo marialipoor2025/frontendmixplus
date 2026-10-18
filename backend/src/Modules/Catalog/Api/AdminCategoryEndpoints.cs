@@ -26,8 +26,14 @@ internal static class AdminCategoryEndpoints
             .ThenBy(x => x.Title)
             .ToListAsync(ct);
 
+        var counts = await db.Products.AsNoTracking()
+            .Where(x => x.IsPublished && x.CategoryId != null)
+            .GroupBy(x => x.CategoryId!.Value)
+            .Select(g => new { CategoryId = g.Key, Count = g.Count() })
+            .ToDictionaryAsync(x => x.CategoryId, x => x.Count, ct);
+
         var byId = rows.ToDictionary(x => x.Id);
-        var items = rows.Select(c => ToDto(c, byId)).ToList();
+        var items = rows.Select(c => ToDto(c, byId, counts.GetValueOrDefault(c.Id))).ToList();
         return Results.Ok(items);
     }
 
@@ -80,7 +86,7 @@ internal static class AdminCategoryEndpoints
         var all = await db.Categories.AsNoTracking().ToDictionaryAsync(x => x.Id, ct);
         return Results.Created(
             $"/api/admin/catalog/categories/{category.ExternalKey}",
-            ToDto(category, all));
+            ToDto(category, all, 0));
     }
 
     private static async Task<IResult> UpdateCategory(
@@ -127,7 +133,9 @@ internal static class AdminCategoryEndpoints
         await db.SaveChangesAsync(ct);
 
         var all = await db.Categories.AsNoTracking().ToDictionaryAsync(x => x.Id, ct);
-        return Results.Ok(ToDto(category, all));
+        var count = await db.Products.AsNoTracking()
+            .CountAsync(x => x.IsPublished && x.CategoryId == category.Id, ct);
+        return Results.Ok(ToDto(category, all, count));
     }
 
     private static async Task<IResult> DeleteCategory(
@@ -193,7 +201,8 @@ internal static class AdminCategoryEndpoints
 
     private static AdminCategoryDto ToDto(
         Category category,
-        IReadOnlyDictionary<Guid, Category> byId)
+        IReadOnlyDictionary<Guid, Category> byId,
+        int productCount)
     {
         string? parentKey = null;
         string? parentTitle = null;
@@ -213,6 +222,6 @@ internal static class AdminCategoryEndpoints
             parentTitle,
             category.SortOrder,
             category.IsActive,
-            0);
+            productCount);
     }
 }

@@ -17,6 +17,7 @@ import {
   listAdminCategories,
   upsertAdminCategory,
 } from "@/lib/api/categories";
+import { formatProductCount } from "@/lib/format";
 import { mockAdminCategories } from "@/lib/mocks/admin";
 import type { AdminCategory } from "@/types/admin";
 import { paginateLocal } from "@/types/paging";
@@ -57,7 +58,11 @@ export default function AdminCategoriesPage() {
       header: "اسلاگ",
       cell: (r) => <span dir="ltr">{r.slug}</span>,
     },
-    { key: "count", header: "تعداد محصول", cell: (r) => r.productCount },
+    {
+      key: "count",
+      header: "تعداد محصول",
+      cell: (r) => formatProductCount(r.productCount ?? 0),
+    },
     {
       key: "status",
       header: "وضعیت",

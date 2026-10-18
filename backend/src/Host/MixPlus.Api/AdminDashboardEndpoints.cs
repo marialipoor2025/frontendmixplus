@@ -45,35 +45,38 @@ internal static class AdminDashboardEndpoints
             })
             .ToListAsync(ct);
 
+        var fa = System.Globalization.CultureInfo.GetCultureInfo("fa-IR");
+        string Fa(int n) => n.ToString("N0", fa);
+
         var stats = new[]
         {
             new
             {
                 id = "products",
                 label = "محصولات منتشر",
-                value = publishedCount.ToString("N0"),
-                hint = $"{productCount} کل در کاتالوگ",
+                value = Fa(publishedCount),
+                hint = $"{Fa(productCount)} محصول در کاتالوگ",
             },
             new
             {
                 id = "customers",
                 label = "مشتریان",
-                value = customerCount.ToString("N0"),
+                value = Fa(customerCount),
                 hint = "کاربران Identity",
             },
             new
             {
                 id = "sellers",
                 label = "فروشندگان",
-                value = sellerCount.ToString("N0"),
+                value = Fa(sellerCount),
                 hint = "بازارگاه",
             },
             new
             {
                 id = "pending",
                 label = "در انتظار اقدام",
-                value = pendingReviews.ToString("N0"),
-                hint = $"{activeCampaigns} کمپین فعال",
+                value = Fa(pendingReviews),
+                hint = $"{Fa(activeCampaigns)} کمپین فعال",
             },
         };
 

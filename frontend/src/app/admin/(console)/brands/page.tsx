@@ -18,6 +18,7 @@ import {
   upsertAdminBrand,
 } from "@/lib/api/brands";
 import { siteConfig } from "@/config/site";
+import { formatProductCount } from "@/lib/format";
 import { mockAdminBrands } from "@/lib/mocks/admin";
 import type { AdminBrand } from "@/types/admin";
 import { paginateLocal } from "@/types/paging";
@@ -61,7 +62,11 @@ export default function AdminBrandsPage() {
       header: "اسلاگ",
       cell: (r) => <span dir="ltr">{r.slug}</span>,
     },
-    { key: "count", header: "تعداد محصول", cell: (r) => r.productCount },
+    {
+      key: "count",
+      header: "تعداد محصول",
+      cell: (r) => formatProductCount(r.productCount ?? 0),
+    },
     {
       key: "status",
       header: "وضعیت",

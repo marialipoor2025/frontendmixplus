@@ -50,7 +50,16 @@ public static class DigikalaCategoryTreeSeeder
 
         foreach (var (key, title, slug, href, order) in l2)
         {
-            await EnsureAsync(catalog, key, title, slug, href, RootKey, order, cancellationToken);
+            await EnsureAsync(
+                catalog,
+                key,
+                title,
+                slug,
+                href,
+                RootKey,
+                order,
+                cancellationToken,
+                imageUrl: L2Image(key));
         }
 
         // L3 under توکار / پخت‌وپز (MixPlus + Digikala leaves).
@@ -86,6 +95,26 @@ public static class DigikalaCategoryTreeSeeder
             await catalog.Categories.CountAsync(cancellationToken));
     }
 
+    private static string? L2Image(string key) =>
+        key switch
+        {
+            "cat-fridge" => "/images/categories/fridge.jpg",
+            "cat-washer" => "/images/categories/washer.jpg",
+            "cat-dishwasher" => "/images/categories/dishwasher.jpg",
+            "cat-vacuum" => "/images/categories/vacuum.jpg",
+            "cat-air" => "/images/categories/air.jpg",
+            "cat-tv" => "/images/categories/tv.jpg",
+            "cat-cooking" => "/images/categories/cooking.jpg",
+            "cat-drink" => "/images/categories/drink.jpg",
+            "cat-foodproc" => "/images/categories/foodproc.jpg",
+            "cat-iron" => "/images/categories/iron.jpg",
+            "cat-water" => "/images/categories/water.jpg",
+            "cat-steam" => "/images/categories/steam.jpg",
+            "cat-sewing" => "/images/categories/sewing.jpg",
+            "cat-builtin" => "/images/categories/builtin.jpg",
+            _ => null,
+        };
+
     private static async Task<Category> EnsureAsync(
         CatalogDbContext catalog,
         string key,
@@ -94,7 +123,8 @@ public static class DigikalaCategoryTreeSeeder
         string href,
         string? parentKey,
         int sortOrder,
-        CancellationToken ct)
+        CancellationToken ct,
+        string? imageUrl = null)
     {
         Guid? parentId = null;
         if (!string.IsNullOrWhiteSpace(parentKey))
@@ -113,12 +143,13 @@ public static class DigikalaCategoryTreeSeeder
                 finalSlug = $"{slug}-{key[^4..]}".ToLowerInvariant();
             }
 
-            existing = Category.Create(key, title, finalSlug, href, null, parentId, sortOrder);
+            existing = Category.Create(key, title, finalSlug, href, imageUrl, parentId, sortOrder);
             catalog.Categories.Add(existing);
             return existing;
         }
 
-        existing.Update(title, existing.Slug, href, existing.ImageUrl, sortOrder);
+        var nextImage = string.IsNullOrWhiteSpace(imageUrl) ? existing.ImageUrl : imageUrl;
+        existing.Update(title, existing.Slug, href, nextImage, sortOrder);
         existing.SetParent(parentId);
         existing.SetActive(true);
         return existing;

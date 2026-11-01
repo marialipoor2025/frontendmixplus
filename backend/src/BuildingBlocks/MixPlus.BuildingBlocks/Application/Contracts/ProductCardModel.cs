@@ -21,7 +21,9 @@ public sealed record ProductCardModel(
     IReadOnlyList<string>? Badges,
     string? Condition,
     bool InStock,
-    string? CategoryId = null);
+    string? CategoryId = null,
+    /// <summary>On-hand units (max across SKUs, or 15 when only boolean in-stock).</summary>
+    int StockQuantity = 0);
 
 public sealed record MoneyModel(decimal Amount, string Currency);
 
@@ -41,6 +43,11 @@ public interface IProductCardReadPort
     Task<IReadOnlyList<BrandModel>> GetBrandsAsync(CancellationToken cancellationToken = default);
 
     Task<IReadOnlyList<HomeCategoryModel>> GetHomeCategoriesAsync(CancellationToken cancellationToken = default);
+
+    /// <summary>Published product by exact slug (preferred for cart revalidation).</summary>
+    Task<ProductCardModel?> GetBySlugAsync(
+        string slug,
+        CancellationToken cancellationToken = default);
 
     /// <summary>Published products matching a search query (title/brand/slug).</summary>
     Task<IReadOnlyList<ProductCardModel>> SearchProductsAsync(

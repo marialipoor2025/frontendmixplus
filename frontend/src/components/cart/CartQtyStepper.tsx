@@ -1,5 +1,7 @@
 "use client";
 
+import { useEffect, useState } from "react";
+
 type CartQtyStepperProps = {
   quantity: number;
   max?: number;
@@ -14,6 +16,7 @@ type CartQtyStepperProps = {
 
 /**
  * Inline − / qty / + control for cart lines and PDP after ATC.
+ * Draft text while focused so users can erase and retype (1 → 2, not 12).
  */
 export function CartQtyStepper({
   quantity,
@@ -27,6 +30,28 @@ export function CartQtyStepper({
 }: CartQtyStepperProps) {
   const pad = size === "sm" ? "px-2 py-1 text-xs" : "px-2.5 py-1.5 text-sm";
   const minW = size === "sm" ? "min-w-7" : "min-w-9";
+  const [draft, setDraft] = useState(String(quantity));
+  const [focused, setFocused] = useState(false);
+
+  useEffect(() => {
+    if (!focused) setDraft(String(quantity));
+  }, [quantity, focused]);
+
+  function commitDraft(raw: string) {
+    const digits = raw.replace(/[^\d]/g, "");
+    if (!digits) {
+      setDraft(String(quantity));
+      return;
+    }
+    const n = Number(digits);
+    if (!Number.isFinite(n) || n < 1) {
+      setDraft(String(quantity));
+      return;
+    }
+    const next = Math.min(max, n);
+    setDraft(String(next));
+    if (next !== quantity) onSetQuantity?.(next);
+  }
 
   return (
     <div
@@ -43,16 +68,27 @@ export function CartQtyStepper({
       </button>
       {onSetQuantity ? (
         <input
-          type="number"
+          type="text"
           inputMode="numeric"
-          min={1}
-          max={max}
           disabled={disabled}
-          value={quantity}
+          value={focused ? draft : String(quantity)}
+          onFocus={(e) => {
+            setFocused(true);
+            setDraft(String(quantity));
+            e.currentTarget.select();
+          }}
+          onBlur={() => {
+            setFocused(false);
+            commitDraft(draft);
+          }}
           onChange={(e) => {
-            const n = Number(e.target.value.replace(/[^\d]/g, ""));
-            if (!Number.isFinite(n) || n < 1) return;
-            onSetQuantity(Math.min(max, n));
+            const raw = e.target.value.replace(/[^\d]/g, "");
+            setDraft(raw);
+          }}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") {
+              e.currentTarget.blur();
+            }
           }}
           className={`${minW} border-x border-[var(--color-neutral-200)] bg-transparent text-center font-medium outline-none disabled:opacity-40 ${pad}`}
           aria-label="تعداد"

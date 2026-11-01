@@ -84,8 +84,12 @@ internal static class CartEndpoints
         var live = await TryLiveSnapshot(catalog, body.ProductSlug, ct);
 
         var unitPrice = body.UnitPrice > 0 ? body.UnitPrice : live?.Price.Amount ?? 0;
-        var stock = body.StockAvailable ?? (live?.InStock == true ? 10 : 0);
-        if (stock <= 0 && live?.InStock == true) stock = 10;
+        var liveStock = live?.StockQuantity ?? 0;
+        if (liveStock <= 0 && live?.InStock == true) liveStock = 15;
+        var stock = body.StockAvailable is > 0
+            ? body.StockAvailable.Value
+            : liveStock;
+        if (stock <= 0 && live?.InStock == true) stock = 15;
 
         var qty = body.Quantity <= 0 ? 1 : body.Quantity;
         var skuKey = string.IsNullOrWhiteSpace(body.SkuExternalKey)
@@ -94,6 +98,11 @@ internal static class CartEndpoints
         var offerKey = body.OfferExternalKey.Trim();
         var slug = body.ProductSlug.Trim().ToLowerInvariant();
 
+        if (stock <= 0)
+        {
+            return Results.BadRequest(new { error = "این کالا در حال حاضر موجود نیست" });
+        }
+
         var existing = cart.Lines.FirstOrDefault(x =>
             x.ProductSlug == slug
             && x.OfferExternalKey == offerKey
@@ -101,16 +110,38 @@ internal static class CartEndpoints
 
         if (existing is not null)
         {
-            if (!existing.InStock)
+            if (!existing.InStock || existing.StockAvailable <= 0)
             {
                 return Results.BadRequest(new { error = "این کالا در حال حاضر موجود نیست" });
             }
 
+            var max = Math.Max(existing.StockAvailable, stock);
+            if (existing.Quantity + qty > max)
+            {
+                return Results.BadRequest(new
+                {
+                    error = $"حداکثر موجودی قابل سفارش {ToFa(max)} عدد",
+                });
+            }
+
+            existing.ApplyLivePricing(
+                existing.UnitPrice,
+                existing.OriginalPrice,
+                existing.DiscountPercent,
+                max);
             existing.SetQuantity(existing.Quantity + qty);
             cart.Touch();
         }
         else
         {
+            if (qty > stock)
+            {
+                return Results.BadRequest(new
+                {
+                    error = $"حداکثر موجودی قابل سفارش {ToFa(stock)} عدد",
+                });
+            }
+
             var line = CartLine.Create(
                 cart.Id,
                 body.ProductSlug,
@@ -159,9 +190,17 @@ internal static class CartEndpoints
         var line = cart.FindLine(lineId);
         if (line is null) return Results.NotFound(new { error = "آیتم سبد یافت نشد" });
 
-        if (!line.InStock)
+        if (!line.InStock || line.StockAvailable <= 0)
         {
             return Results.BadRequest(new { error = "این کالا ناموجود است" });
+        }
+
+        if (body.Quantity > line.StockAvailable)
+        {
+            return Results.BadRequest(new
+            {
+                error = $"حداکثر موجودی قابل سفارش {ToFa(line.StockAvailable)} عدد",
+            });
         }
 
         line.SetQuantity(body.Quantity);
@@ -212,12 +251,15 @@ internal static class CartEndpoints
             var live = await TryLiveSnapshot(catalog, line.ProductSlug, ct);
             if (live is null)
             {
-                line.ApplyLivePricing(line.UnitPrice, line.OriginalPrice, line.DiscountPercent, 0);
-                changed = true;
+                // Keep prior stock when catalog lookup fails — do not wipe cart lines.
                 continue;
             }
 
-            var stock = live.InStock ? Math.Max(line.StockAvailable, 1) : 0;
+            var stock = live.StockQuantity > 0
+                ? live.StockQuantity
+                : live.InStock
+                    ? Math.Max(line.StockAvailable, 1)
+                    : 0;
             line.ApplyLivePricing(
                 live.Price.Amount > 0 ? live.Price.Amount : line.UnitPrice,
                 live.OriginalPrice?.Amount ?? line.OriginalPrice,
@@ -478,11 +520,17 @@ internal static class CartEndpoints
         string productSlug,
         CancellationToken ct)
     {
-        // Cards are keyed by external key; slug search as fallback.
+        var exact = await catalog.GetBySlugAsync(productSlug, ct);
+        if (exact is not null) return exact;
+
+        // Fallback: fuzzy search (legacy callers / mistyped slugs).
         var bySearch = await catalog.SearchProductsAsync(productSlug, 5, ct);
         return bySearch.FirstOrDefault(x =>
             string.Equals(x.Slug, productSlug, StringComparison.OrdinalIgnoreCase));
     }
+
+    private static string ToFa(int n) =>
+        n.ToString("N0", System.Globalization.CultureInfo.GetCultureInfo("fa-IR"));
 
     internal static async Task<object> ToCartDto(
         CartDbContext db,

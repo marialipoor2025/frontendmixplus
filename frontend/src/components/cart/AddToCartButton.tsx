@@ -9,6 +9,9 @@ import {
   removeCartItem,
   updateCartItemQty,
 } from "@/lib/api/cart";
+import { addToWishlist } from "@/lib/api/wishlist";
+import { formatFaNumber } from "@/lib/format";
+import { useAuth } from "@/lib/auth/useAuth";
 import type { AddCartItemInput, CartLine } from "@/types/cart";
 
 type Props = {
@@ -35,6 +38,10 @@ function lineMatches(line: CartLine, input: AddCartItemInput) {
   );
 }
 
+function maxStockMessage(max: number) {
+  return `حداکثر موجودی قابل سفارش ${formatFaNumber(max)} عدد`;
+}
+
 /**
  * ATC control: stays on PDP by default; after add shows inline qty editor.
  */
@@ -48,9 +55,13 @@ export function AddToCartButton({
   testId = "add-to-cart",
   stayOnPage = true,
 }: Props) {
+  const { ready, isAuthenticated } = useAuth();
   const [pending, setPending] = useState(false);
+  const [notifyPending, setNotifyPending] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   const [line, setLine] = useState<CartLine | null>(null);
+  const stockCap = Math.max(0, input.stockAvailable ?? 0);
+  const outOfStock = disabled || stockCap <= 0;
 
   const matchKey = [
     input.productSlug.trim().toLowerCase(),
@@ -83,14 +94,14 @@ export function AddToCartButton({
   }, [syncFromCart]);
 
   async function handleAdd() {
-    if (disabled || pending) return;
+    if (outOfStock || pending) return;
     setPending(true);
     setMessage(null);
     try {
       const cart = await addCartItem({
         ...input,
         quantity: input.quantity ?? 1,
-        stockAvailable: Math.max(input.stockAvailable ?? 0, 99),
+        stockAvailable: stockCap,
       });
       const match =
         cart.items.find((item) => lineMatches(item, input)) ?? null;
@@ -107,30 +118,75 @@ export function AddToCartButton({
   }
 
   async function changeQty(next: number) {
-    if (!line || pending) return;
-    setPending(true);
+    if (!line) return;
+    const maxQty = Math.max(line.stockAvailable || 0, 1);
+    if (next > maxQty) {
+      setMessage(maxStockMessage(maxQty));
+      return;
+    }
+
+    const prev = line;
+    // Optimistic UI — no loading flash on +/-.
+    if (next <= 0) {
+      setLine(null);
+    } else {
+      setLine({ ...line, quantity: next });
+    }
     setMessage(null);
+
     try {
       if (next <= 0) {
-        const cart = await removeCartItem(line.id);
+        const cart = await removeCartItem(prev.id);
         const match =
           cart.items.find((item) => lineMatches(item, input)) ?? null;
         setLine(match);
       } else {
-        const cart = await updateCartItemQty(line.id, next);
+        const cart = await updateCartItemQty(prev.id, next);
         const match =
           cart.items.find((item) => lineMatches(item, input)) ?? null;
         setLine(match);
       }
     } catch (err) {
-      setMessage(err instanceof Error ? err.message : "به‌روزرسانی تعداد ناموفق بود");
+      setLine(prev);
+      setMessage(
+        err instanceof Error ? err.message : "به‌روزرسانی تعداد ناموفق بود",
+      );
       await syncFromCart();
-    } finally {
-      setPending(false);
     }
   }
 
-  const maxQty = Math.max(line?.stockAvailable ?? 99, line?.quantity ?? 1, 99);
+  async function handleNotifyMe() {
+    if (notifyPending || !ready) return;
+    if (!isAuthenticated) {
+      window.location.assign(
+        `/users/login?returnUrl=${encodeURIComponent(`/product/${input.productSlug}`)}`,
+      );
+      return;
+    }
+    setNotifyPending(true);
+    setMessage(null);
+    try {
+      await addToWishlist({
+        productSlug: input.productSlug,
+        title: input.title,
+        imageUrl: input.imageUrl,
+        priceAmount: input.unitPrice,
+      });
+      setMessage("به لیست انتظار اضافه شد — موجود شد خبرتان می‌کنیم");
+    } catch (err) {
+      setMessage(
+        err instanceof Error ? err.message : "افزودن به لیست انتظار ناموفق بود",
+      );
+    } finally {
+      setNotifyPending(false);
+    }
+  }
+
+  const maxQty = Math.max(
+    line?.stockAvailable ?? stockCap,
+    line?.quantity ?? 1,
+    1,
+  );
 
   if (line && line.quantity > 0) {
     return (
@@ -139,7 +195,7 @@ export function AddToCartButton({
           <CartQtyStepper
             quantity={line.quantity}
             max={maxQty}
-            disabled={pending || disabled}
+            disabled={false}
             onDecrease={() => void changeQty(line.quantity - 1)}
             onIncrease={() => void changeQty(line.quantity + 1)}
             onSetQuantity={(qty) => void changeQty(qty)}
@@ -156,16 +212,44 @@ export function AddToCartButton({
     );
   }
 
+  if (outOfStock) {
+    return (
+      <div className={wrapperClassName}>
+        <button
+          type="button"
+          data-testid={testId}
+          disabled={notifyPending}
+          onClick={() => void handleNotifyMe()}
+          className={
+            className ||
+            "flex h-12 w-full items-center justify-center rounded-[var(--medium-radius)] bg-[var(--color-secondary-500)] text-sm font-medium text-white"
+          }
+        >
+          {notifyPending ? "در حال ثبت…" : "موجود شد خبرم کن"}
+        </button>
+        {message ? (
+          <p className="mt-1 text-[11px] text-[var(--color-neutral-600)]">
+            {message}
+          </p>
+        ) : (
+          <p className="mt-1 text-[11px] text-[var(--color-neutral-500)]">
+            {disabledLabel}
+          </p>
+        )}
+      </div>
+    );
+  }
+
   return (
     <div className={wrapperClassName}>
       <button
         type="button"
         data-testid={testId}
-        disabled={disabled || pending}
+        disabled={pending}
         onClick={() => void handleAdd()}
         className={className}
       >
-        {disabled ? disabledLabel : pending ? "در حال افزودن…" : label}
+        {pending ? "در حال افزودن…" : label}
       </button>
       {message ? (
         <p className="mt-1 text-[11px] text-[var(--color-neutral-600)]">{message}</p>

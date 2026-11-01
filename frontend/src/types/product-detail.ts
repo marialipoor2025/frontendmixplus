@@ -63,6 +63,8 @@ export type ProductSkuVariant = {
   originalPrice?: number;
   discountPercent?: number;
   inStock: boolean;
+  /** On-hand units for this SKU (caps cart qty). */
+  stock?: number;
 };
 
 export type ProductVariantInfoData = {

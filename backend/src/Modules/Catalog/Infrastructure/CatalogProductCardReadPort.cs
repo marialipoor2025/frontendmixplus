@@ -179,6 +179,24 @@ public sealed class CatalogProductCardReadPort(CatalogDbContext db) : IProductCa
         return result;
     }
 
+    public async Task<ProductCardModel?> GetBySlugAsync(
+        string slug,
+        CancellationToken cancellationToken = default)
+    {
+        var key = slug.Trim();
+        if (key.Length == 0) return null;
+
+        var product = await db.Products.AsNoTracking()
+            .Include(x => x.MediaItems)
+            .FirstOrDefaultAsync(
+                x => x.IsPublished && x.Slug == key.ToLowerInvariant(),
+                cancellationToken);
+        if (product is null) return null;
+
+        var stock = await ResolveStockAsync(product.Id, product.InStock, cancellationToken);
+        return ToModel(product, stock);
+    }
+
     public async Task<IReadOnlyList<ProductCardModel>> SearchProductsAsync(
         string query,
         int limit = 48,
@@ -220,7 +238,7 @@ public sealed class CatalogProductCardReadPort(CatalogDbContext db) : IProductCa
                 .ToList();
         }
 
-        return rows.Select(ToModel).ToList();
+        return rows.Select(p => ToModel(p)).ToList();
     }
 
     public async Task<IReadOnlyList<SearchSuggestionModel>> SuggestAsync(
@@ -295,7 +313,7 @@ public sealed class CatalogProductCardReadPort(CatalogDbContext db) : IProductCa
             .Take(limit)
             .ToListAsync(cancellationToken);
 
-        return rows.Select(ToModel).ToList();
+        return rows.Select(p => ToModel(p)).ToList();
     }
 
     private static bool FuzzyMatch(string haystack, string needle)
@@ -357,13 +375,34 @@ public sealed class CatalogProductCardReadPort(CatalogDbContext db) : IProductCa
             _ => "/placeholders/cat-appliance.png",
         };
 
-    private static ProductCardModel ToModel(Product product)
+    private async Task<int> ResolveStockAsync(
+        Guid productId,
+        bool productInStock,
+        CancellationToken cancellationToken)
+    {
+        var skuStock = await db.Skus.AsNoTracking()
+            .Where(x => x.ProductId == productId)
+            .Select(x => x.Stock)
+            .ToListAsync(cancellationToken);
+        if (skuStock.Count > 0)
+        {
+            var max = skuStock.DefaultIfEmpty(0).Max();
+            return Math.Max(0, max);
+        }
+
+        return productInStock ? 15 : 0;
+    }
+
+    private static ProductCardModel ToModel(Product product, int? stockQuantity = null)
     {
         IReadOnlyList<string>? badges = null;
         if (!string.IsNullOrWhiteSpace(product.BadgesJson))
         {
             badges = JsonSerializer.Deserialize<List<string>>(product.BadgesJson);
         }
+
+        var stock = stockQuantity
+            ?? (product.InStock ? 15 : 0);
 
         return new ProductCardModel(
             product.ExternalKey,
@@ -384,7 +423,8 @@ public sealed class CatalogProductCardReadPort(CatalogDbContext db) : IProductCa
             product.ReviewCount,
             badges,
             product.Condition == ProductCondition.Used ? "used" : "new",
-            product.InStock,
-            product.CategoryExternalKey);
+            product.InStock && stock > 0,
+            product.CategoryExternalKey,
+            stock);
     }
 }

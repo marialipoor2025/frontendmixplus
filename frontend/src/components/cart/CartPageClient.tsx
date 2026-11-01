@@ -15,15 +15,20 @@ import {
   revalidateCart,
   updateCartItemQty,
 } from "@/lib/api/cart";
-import { formatDiscountPercent, formatPrice } from "@/lib/format";
+import { formatDiscountPercent, formatFaNumber, formatPrice } from "@/lib/format";
 import { useAuth } from "@/lib/auth/useAuth";
-import type { CartDto } from "@/types/cart";
+import type { CartDto, CartLine } from "@/types/cart";
+
+function maxStockMessage(max: number) {
+  return `حداکثر موجودی قابل سفارش ${formatFaNumber(max)} عدد`;
+}
 
 export function CartPageClient() {
   const { ready, isAuthenticated } = useAuth();
   const [cart, setCart] = useState<CartDto | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [lineErrors, setLineErrors] = useState<Record<string, string>>({});
   const [couponInput, setCouponInput] = useState("");
   const [giftInput, setGiftInput] = useState("");
   const [walletInput, setWalletInput] = useState("");
@@ -65,6 +70,53 @@ export function CartPageClient() {
     }
   }
 
+  async function changeLineQty(line: CartLine, next: number) {
+    const max = Math.max(line.stockAvailable || 0, 1);
+    if (next > max) {
+      setLineErrors((prev) => ({ ...prev, [line.id]: maxStockMessage(max) }));
+      return;
+    }
+
+    setLineErrors((prev) => {
+      const copy = { ...prev };
+      delete copy[line.id];
+      return copy;
+    });
+
+    // Optimistic update — keep stepper responsive.
+    setCart((prev) => {
+      if (!prev) return prev;
+      if (next <= 0) {
+        const items = prev.items.filter((x) => x.id !== line.id);
+        return { ...prev, items, itemCount: items.reduce((s, x) => s + x.quantity, 0) };
+      }
+      const items = prev.items.map((x) =>
+        x.id === line.id ? { ...x, quantity: next, lineTotal: x.unitPrice * next } : x,
+      );
+      return {
+        ...prev,
+        items,
+        itemCount: items.reduce((s, x) => s + x.quantity, 0),
+        subtotal: items.reduce((s, x) => s + x.unitPrice * x.quantity, 0),
+      };
+    });
+
+    try {
+      const nextCart =
+        next <= 0
+          ? await removeCartItem(line.id)
+          : await updateCartItemQty(line.id, next);
+      setCart(nextCart);
+    } catch (err) {
+      setLineErrors((prev) => ({
+        ...prev,
+        [line.id]:
+          err instanceof Error ? err.message : "به‌روزرسانی تعداد ناموفق بود",
+      }));
+      await refresh();
+    }
+  }
+
   if (!ready || loading) {
     return (
       <p className="py-12 text-center text-sm text-[var(--color-muted)]">
@@ -89,6 +141,9 @@ export function CartPageClient() {
     );
   }
 
+  const sellableItems = cart.items.filter((x) => x.inStock && x.stockAvailable > 0);
+  const canCheckout = sellableItems.length > 0;
+
   return (
     <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_320px]">
       <div className="space-y-3">
@@ -97,97 +152,106 @@ export function CartPageClient() {
             {error}
           </p>
         ) : null}
-        {cart.hasStockIssues ? (
-          <p className="rounded-lg bg-amber-50 px-3 py-2 text-sm text-amber-800">
-            برخی کالاها موجودی کافی ندارند — تعداد را اصلاح کنید.
-          </p>
-        ) : null}
 
         <ul className="divide-y divide-[var(--color-neutral-100)] rounded-xl border border-[var(--color-neutral-200)] bg-white">
-          {cart.items.map((line) => (
-            <li key={line.id} className="flex gap-3 p-4">
-              <Link
-                href={`/product/${encodeURIComponent(line.productSlug)}`}
-                className="size-20 shrink-0 overflow-hidden rounded-md bg-[var(--color-neutral-050)]"
-              >
-                <Image
-                  src={line.imageUrl || "/placeholders/product-appliance.png"}
-                  alt=""
-                  width={80}
-                  height={80}
-                  className="size-20 object-contain"
-                  unoptimized
-                />
-              </Link>
-              <div className="min-w-0 flex-1">
+          {cart.items.map((line) => {
+            const max = Math.max(line.stockAvailable || 0, line.quantity, 1);
+            const oos = !line.inStock || line.stockAvailable <= 0;
+            return (
+              <li key={line.id} className="flex gap-3 p-4">
                 <Link
                   href={`/product/${encodeURIComponent(line.productSlug)}`}
-                  className="line-clamp-2 text-sm font-medium text-[var(--color-neutral-900)]"
+                  className="size-20 shrink-0 overflow-hidden rounded-md bg-[var(--color-neutral-050)]"
                 >
-                  {line.title}
-                </Link>
-                <p className="mt-1 text-xs text-[var(--color-neutral-500)]">
-                  {line.sellerName}
-                  {line.variantLabel ? ` · ${line.variantLabel}` : ""}
-                </p>
-                {!line.inStock ? (
-                  <p className="mt-1 text-xs font-medium text-[var(--color-hint-object-error)]">
-                    ناموجود
-                  </p>
-                ) : null}
-                <div className="mt-3 flex flex-wrap items-center gap-3">
-                  <CartQtyStepper
-                    quantity={line.quantity}
-                    max={Math.max(line.stockAvailable || 0, line.quantity, 99)}
-                    disabled={busy || !line.inStock}
-                    onDecrease={() => {
-                      if (line.quantity <= 1) {
-                        void run(() => removeCartItem(line.id));
-                      } else {
-                        void run(() =>
-                          updateCartItemQty(line.id, line.quantity - 1),
-                        );
-                      }
-                    }}
-                    onIncrease={() =>
-                      void run(() =>
-                        updateCartItemQty(line.id, line.quantity + 1),
-                      )
-                    }
-                    onSetQuantity={(qty) =>
-                      void run(() => updateCartItemQty(line.id, qty))
-                    }
+                  <Image
+                    src={line.imageUrl || "/placeholders/product-appliance.png"}
+                    alt=""
+                    width={80}
+                    height={80}
+                    className="size-20 object-contain"
+                    unoptimized
                   />
-                  <button
-                    type="button"
-                    disabled={busy}
-                    onClick={() => void run(() => removeCartItem(line.id))}
-                    className="text-xs text-[var(--color-hint-object-error)]"
+                </Link>
+                <div className="min-w-0 flex-1">
+                  <Link
+                    href={`/product/${encodeURIComponent(line.productSlug)}`}
+                    className="line-clamp-2 text-sm font-medium text-[var(--color-neutral-900)]"
                   >
-                    حذف
-                  </button>
-                  <div className="ms-auto flex items-center gap-1">
-                    {line.originalPrice != null &&
-                    line.originalPrice > line.unitPrice &&
-                    line.discountPercent != null ? (
-                      <>
-                        <span className="text-xs text-[var(--color-neutral-300)] line-through">
-                          {formatPrice(line.originalPrice * line.quantity)}
-                        </span>
-                        <span className="rounded bg-[var(--color-hint-object-error)] px-1 text-[10px] font-bold text-white">
-                          {formatDiscountPercent(line.discountPercent)}
-                        </span>
-                      </>
+                    {line.title}
+                  </Link>
+                  <p className="mt-1 text-xs text-[var(--color-neutral-500)]">
+                    {line.sellerName}
+                    {line.variantLabel ? ` · ${line.variantLabel}` : ""}
+                  </p>
+                  {oos ? (
+                    <p className="mt-1 text-xs font-medium text-[var(--color-hint-object-error)]">
+                      ناموجود — از سبد حذف کنید یا بعداً دوباره تلاش کنید
+                    </p>
+                  ) : line.quantity >= max ? (
+                    <p className="mt-1 text-xs text-amber-700">
+                      {maxStockMessage(max)}
+                    </p>
+                  ) : null}
+                  {lineErrors[line.id] ? (
+                    <p className="mt-1 text-xs text-[var(--color-hint-object-error)]">
+                      {lineErrors[line.id]}
+                    </p>
+                  ) : null}
+                  <div className="mt-3 flex flex-wrap items-center gap-3">
+                    {oos ? (
+                      <button
+                        type="button"
+                        onClick={() => void changeLineQty(line, 0)}
+                        className="text-xs text-[var(--color-hint-object-error)]"
+                      >
+                        حذف از سبد
+                      </button>
+                    ) : (
+                      <CartQtyStepper
+                        quantity={line.quantity}
+                        max={max}
+                        disabled={false}
+                        onDecrease={() => {
+                          void changeLineQty(line, line.quantity - 1);
+                        }}
+                        onIncrease={() => {
+                          void changeLineQty(line, line.quantity + 1);
+                        }}
+                        onSetQuantity={(qty) => void changeLineQty(line, qty)}
+                      />
+                    )}
+                    {!oos ? (
+                      <button
+                        type="button"
+                        onClick={() => void changeLineQty(line, 0)}
+                        className="text-xs text-[var(--color-hint-object-error)]"
+                      >
+                        حذف
+                      </button>
                     ) : null}
-                    <span className="text-sm font-bold text-[var(--color-neutral-800)]">
-                      {formatPrice(line.lineTotal)}
-                    </span>
-                    <TomanIcon className="size-3.5" />
+                    <div className="ms-auto flex items-center gap-1">
+                      {line.originalPrice != null &&
+                      line.originalPrice > line.unitPrice &&
+                      line.discountPercent != null ? (
+                        <>
+                          <span className="text-xs text-[var(--color-neutral-300)] line-through">
+                            {formatPrice(line.originalPrice * line.quantity)}
+                          </span>
+                          <span className="rounded bg-[var(--color-hint-object-error)] px-1 text-[10px] font-bold text-white">
+                            {formatDiscountPercent(line.discountPercent)}
+                          </span>
+                        </>
+                      ) : null}
+                      <span className="text-sm font-bold text-[var(--color-neutral-800)]">
+                        {formatPrice(line.lineTotal)}
+                      </span>
+                      <TomanIcon className="size-3.5" />
+                    </div>
                   </div>
                 </div>
-              </div>
-            </li>
-          ))}
+              </li>
+            );
+          })}
         </ul>
       </div>
 
@@ -291,7 +355,9 @@ export function CartPageClient() {
 
         <dl className="space-y-2 border-t border-[var(--color-neutral-100)] pt-3 text-sm">
           <div className="flex justify-between text-[var(--color-neutral-600)]">
-            <dt>جمع کالاها ({new Intl.NumberFormat("fa-IR").format(cart.itemCount)})</dt>
+            <dt>
+              جمع کالاها ({formatFaNumber(cart.itemCount)})
+            </dt>
             <dd className="flex items-center gap-0.5 font-medium text-[var(--color-neutral-800)]">
               {formatPrice(cart.subtotal)}
               <TomanIcon className="size-3" />
@@ -326,14 +392,19 @@ export function CartPageClient() {
 
         <Link
           href={
-            isAuthenticated
-              ? "/checkout/shipping"
-              : `/users/login?returnUrl=${encodeURIComponent("/checkout/shipping")}`
+            !canCheckout
+              ? "#"
+              : isAuthenticated
+                ? "/checkout/shipping"
+                : `/users/login?returnUrl=${encodeURIComponent("/checkout/shipping")}`
           }
+          onClick={(e) => {
+            if (!canCheckout) e.preventDefault();
+          }}
           className={`flex h-12 w-full items-center justify-center rounded-[var(--medium-radius)] text-sm font-medium text-white ${
-            cart.hasStockIssues
-              ? "pointer-events-none bg-[var(--color-button-disable)] text-[var(--color-neutral-500)]"
-              : "bg-[var(--color-primary-500)] hover:bg-[var(--color-primary-700)]"
+            canCheckout
+              ? "bg-[var(--color-primary-500)] hover:bg-[var(--color-primary-700)]"
+              : "pointer-events-none bg-[var(--color-button-disable)] text-[var(--color-neutral-500)]"
           }`}
         >
           {isAuthenticated

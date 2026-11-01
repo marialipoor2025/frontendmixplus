@@ -50,7 +50,11 @@ export function ProductPurchasePanel({ data }: ProductPurchasePanelProps) {
   const onSelectOption = (groupId: string, valueId: string) =>
     setSelected((prev) => ({ ...prev, [groupId]: valueId }));
 
-  const inStock = activeSku?.inStock ?? true;
+  const skuStock = activeSku?.stock;
+  const inStock =
+    skuStock != null
+      ? skuStock > 0 && (activeSku?.inStock ?? true)
+      : (activeSku?.inStock ?? true);
 
   const variantLabel = groups
     .map((g) => g.values.find((v) => v.id === selected[g.id])?.label)
@@ -71,7 +75,7 @@ export function ProductPurchasePanel({ data }: ProductPurchasePanelProps) {
     discountPercent: buyBox.discountPercent,
     currency: "IRT",
     quantity: 1,
-    stockAvailable: inStock ? 99 : 0,
+    stockAvailable: inStock ? Math.max(skuStock ?? 15, 1) : 0,
   };
 
   return (

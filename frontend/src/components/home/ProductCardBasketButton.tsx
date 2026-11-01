@@ -41,7 +41,7 @@ export function ProductCardBasketButton({
         discountPercent: product.discountPercent,
         currency: product.price.currency || "IRT",
         quantity: 1,
-        stockAvailable: 99,
+        stockAvailable: product.inStock ? 15 : 0,
       });
       setAdded(true);
       window.setTimeout(() => setAdded(false), 1800);

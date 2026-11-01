@@ -224,9 +224,22 @@ internal static class CheckoutEndpoints
             return Results.BadRequest(new { error = "سبد خرید خالی است" });
         }
 
-        if (cart.Lines.Any(x => !x.InStock))
+        // Allow checkout when at least one sellable line exists; drop OOS rows first.
+        var oos = cart.Lines.Where(x => !x.InStock || x.StockAvailable <= 0).ToList();
+        if (oos.Count > 0)
         {
-            return Results.BadRequest(new { error = "برخی کالاها ناموجود هستند — سبد را به‌روز کنید" });
+            foreach (var line in oos)
+            {
+                cart.RemoveLine(line.Id);
+                db.CartLines.Remove(line);
+            }
+            cart.Touch();
+            await db.SaveChangesAsync(ct);
+        }
+
+        if (cart.Lines.Count == 0)
+        {
+            return Results.BadRequest(new { error = "کالای قابل سفارشی در سبد نیست" });
         }
 
         var quote = await BuildQuote(db, coupons, cart, body, ct);

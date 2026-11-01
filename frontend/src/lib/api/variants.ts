@@ -80,7 +80,8 @@ export async function getProductVariants(
           price: s.price,
           originalPrice: s.originalPrice ?? undefined,
           discountPercent: s.discountPercent ?? undefined,
-          inStock: s.inStock,
+          inStock: s.inStock && s.stock > 0,
+          stock: s.stock,
         }),
       ),
     };

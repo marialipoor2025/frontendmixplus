@@ -41,6 +41,7 @@ const AUTO_MS = 2800;
 export function SiteFeatures() {
   const scrollerRef = useRef<HTMLDivElement>(null);
   const [paused, setPaused] = useState(false);
+  const dirRef = useRef<"forward" | "back">("forward");
 
   useEffect(() => {
     if (paused) return;
@@ -55,13 +56,22 @@ export function SiteFeatures() {
       const rtl = getComputedStyle(el).direction === "rtl";
       const max = el.scrollWidth - el.clientWidth;
       const sl = el.scrollLeft;
-      let fromStart = sl <= 0 ? Math.abs(sl) : rtl ? max - sl : sl;
+      const fromStart = sl <= 0 ? Math.abs(sl) : rtl ? max - sl : sl;
+      const atEnd = fromStart >= max - 4;
+      const atStart = fromStart <= 4;
 
-      if (fromStart >= max - 4) {
-        el.scrollTo({ left: 0, behavior: "smooth" });
-      } else {
-        el.scrollBy({ left: rtl ? -step : step, behavior: "smooth" });
-      }
+      if (dirRef.current === "forward" && atEnd) dirRef.current = "back";
+      else if (dirRef.current === "back" && atStart) dirRef.current = "forward";
+
+      const goingForward = dirRef.current === "forward";
+      const delta = rtl
+        ? goingForward
+          ? -step
+          : step
+        : goingForward
+          ? step
+          : -step;
+      el.scrollBy({ left: delta, behavior: "smooth" });
     }, AUTO_MS);
     return () => window.clearInterval(id);
   }, [paused]);

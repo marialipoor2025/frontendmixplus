@@ -57,6 +57,8 @@ export function ScrollHorizontalWrapper({
   const [canPrev, setCanPrev] = useState(false);
   const [canNext, setCanNext] = useState(false);
   const [paused, setPaused] = useState(false);
+  /** Auto-scroll direction: always step one way, reverse at ends (no jump-to-start). */
+  const autoDirRef = useRef<"next" | "prev">("next");
 
   const updateButtons = useCallback(() => {
     const el = scrollerRef.current;
@@ -106,11 +108,17 @@ export function ScrollHorizontalWrapper({
     const id = window.setInterval(() => {
       const el = scrollerRef.current;
       if (!el) return;
-      const { canNext: next } = scrollMetrics(el);
-      if (next) {
-        scrollByDir("next");
-      } else {
-        el.scrollTo({ left: 0, behavior: "smooth" });
+      const { canPrev: prev, canNext: next } = scrollMetrics(el);
+      let dir = autoDirRef.current;
+      if (dir === "next" && !next) {
+        dir = "prev";
+        autoDirRef.current = dir;
+      } else if (dir === "prev" && !prev) {
+        dir = "next";
+        autoDirRef.current = dir;
+      }
+      if ((dir === "next" && next) || (dir === "prev" && prev)) {
+        scrollByDir(dir);
       }
     }, autoScrollMs);
     return () => window.clearInterval(id);

@@ -1,7 +1,9 @@
 "use client";
 
+import Image from "next/image";
 import { useEffect, useMemo, useState } from "react";
 import { AdminButton, AdminOutlineButton } from "@/components/admin/AdminUi";
+import { pickVariantUrl, uploadMediaAsset } from "@/lib/api/media";
 import { flatCategoryOptionsWithDepth } from "@/lib/category-tree";
 import type { AdminCategory } from "@/types/admin";
 
@@ -41,6 +43,8 @@ export function AdminCategoryForm({
 }: Props) {
   const [form, setForm] = useState<AdminCategory>(initial ?? empty);
   const [slugTouched, setSlugTouched] = useState(Boolean(initial?.slug));
+  const [uploading, setUploading] = useState(false);
+  const [uploadError, setUploadError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!slugTouched) {
@@ -164,17 +168,94 @@ export function AdminCategoryForm({
           />
           فعال
         </label>
-        <label className="block space-y-1 text-sm sm:col-span-2">
-          <span className="text-[var(--color-neutral-600)]">آدرس تصویر</span>
-          <input
-            dir="ltr"
-            value={form.imageUrl ?? ""}
-            onChange={(e) =>
-              setForm((p) => ({ ...p, imageUrl: e.target.value || undefined }))
-            }
-            className="w-full rounded-lg border border-[var(--color-neutral-200)] px-3 py-2"
-          />
-        </label>
+        <div className="space-y-2 text-sm sm:col-span-2">
+          <span className="text-[var(--color-neutral-600)]">تصویر دسته</span>
+          <div className="flex flex-wrap items-center gap-3">
+            <div className="flex size-16 items-center justify-center overflow-hidden rounded-full bg-[var(--color-neutral-100)]">
+              {form.imageUrl ? (
+                <Image
+                  src={form.imageUrl}
+                  alt=""
+                  width={64}
+                  height={64}
+                  unoptimized
+                  className="size-16 object-contain"
+                />
+              ) : (
+                <span className="text-[10px] text-[var(--color-neutral-400)]">
+                  بدون تصویر
+                </span>
+              )}
+            </div>
+            <label className="cursor-pointer rounded-lg border border-[var(--color-neutral-200)] px-3 py-2 text-xs font-medium hover:bg-[var(--color-neutral-50)]">
+              {uploading ? "در حال آپلود…" : "آپلود تصویر"}
+              <input
+                type="file"
+                accept="image/*"
+                className="hidden"
+                disabled={uploading}
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  e.target.value = "";
+                  if (!file) return;
+                  void (async () => {
+                    setUploading(true);
+                    setUploadError(null);
+                    try {
+                      const asset = await uploadMediaAsset(file);
+                      const url =
+                        pickVariantUrl(asset, "card") ||
+                        pickVariantUrl(asset, "thumb") ||
+                        pickVariantUrl(asset, "original");
+                      if (url) {
+                        setForm((p) => ({ ...p, imageUrl: url }));
+                      }
+                    } catch (err) {
+                      setUploadError(
+                        err instanceof Error ? err.message : "آپلود ناموفق بود",
+                      );
+                    } finally {
+                      setUploading(false);
+                    }
+                  })();
+                }}
+              />
+            </label>
+            {form.imageUrl ? (
+              <button
+                type="button"
+                className="text-xs text-[var(--color-hint-object-error)]"
+                onClick={() =>
+                  setForm((p) => ({ ...p, imageUrl: undefined }))
+                }
+              >
+                حذف تصویر
+              </button>
+            ) : null}
+          </div>
+          <label className="block space-y-1">
+            <span className="text-[11px] text-[var(--color-neutral-500)]">
+              یا آدرس مستقیم تصویر
+            </span>
+            <input
+              dir="ltr"
+              value={form.imageUrl ?? ""}
+              onChange={(e) =>
+                setForm((p) => ({
+                  ...p,
+                  imageUrl: e.target.value || undefined,
+                }))
+              }
+              className="w-full rounded-lg border border-[var(--color-neutral-200)] px-3 py-2"
+              placeholder="https://…"
+            />
+          </label>
+          {uploadError ? (
+            <p className="text-xs text-[var(--color-hint-object-error)]">
+              {uploadError}
+            </p>
+          ) : null}
+        </div>
       </div>
 
       <div className="flex flex-wrap gap-2">

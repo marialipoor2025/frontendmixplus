@@ -51,6 +51,21 @@ export default function AdminCategoriesPage() {
   );
 
   const columns: AdminColumn<AdminCategory>[] = [
+    {
+      key: "image",
+      header: "تصویر",
+      cell: (r) =>
+        r.imageUrl ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src={r.imageUrl}
+            alt=""
+            className="size-8 rounded-full object-contain bg-[var(--color-neutral-50)]"
+          />
+        ) : (
+          <span className="text-[10px] text-[var(--color-neutral-400)]">—</span>
+        ),
+    },
     { key: "name", header: "دسته", cell: (r) => r.name },
     { key: "parent", header: "والد", cell: (r) => r.parent },
     {

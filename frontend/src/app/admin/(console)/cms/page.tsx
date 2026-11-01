@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { AdminFooterSettings } from "@/components/admin/AdminFooterSettings";
+import { AdminSiteSettings } from "@/components/admin/AdminSiteSettings";
 import {
   AdminButton,
   AdminOutlineButton,
@@ -346,7 +347,8 @@ export default function AdminCmsPage() {
         }}
       />
 
-      <div className="mt-6">
+      <div className="mt-6 space-y-6">
+        <AdminSiteSettings />
         <AdminFooterSettings />
       </div>
     </RequireAdmin>

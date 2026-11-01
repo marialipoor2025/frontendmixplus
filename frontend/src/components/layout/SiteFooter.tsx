@@ -18,6 +18,7 @@ import {
   type FooterPartner,
   type FooterTrustSeal,
 } from "@/lib/api/footer";
+import { getSiteSettings } from "@/lib/api/site-settings";
 
 const WITH_MIXPLUS = [
   { label: "اتاق خبر میکپلاس", href: "/newsroom" },
@@ -132,16 +133,27 @@ export function SiteFooter() {
 
   useEffect(() => {
     let cancelled = false;
-    void getFooterSettings().then((settings) => {
-      if (cancelled) return;
-      setShowTrust(settings.showTrustSeals);
-      setShowPartners(settings.showPartners);
-      if (settings.trustSeals?.length) setTrustSeals(settings.trustSeals);
-      if (settings.partners?.length) setPartners(settings.partners);
-      if (settings.phonePrimary) setPhonePrimary(settings.phonePrimary);
-      if (settings.phoneSecondary) setPhoneSecondary(settings.phoneSecondary);
-      if (settings.hoursLine) setHoursLine(settings.hoursLine);
-    });
+    void Promise.all([getFooterSettings(), getSiteSettings()]).then(
+      ([settings, site]) => {
+        if (cancelled) return;
+        setShowTrust(settings.showTrustSeals);
+        setShowPartners(settings.showPartners);
+        if (settings.trustSeals?.length) setTrustSeals(settings.trustSeals);
+        if (settings.partners?.length) {
+          setPartners(
+            settings.partners.map((p) =>
+              /blog|mag|مجله|مگ/i.test(p.label) ||
+              /digikala\.com\/mag|mixplusshop\.ir/i.test(p.href)
+                ? { ...p, href: site.blogUrl || p.href }
+                : p,
+            ),
+          );
+        }
+        if (settings.phonePrimary) setPhonePrimary(settings.phonePrimary);
+        if (settings.phoneSecondary) setPhoneSecondary(settings.phoneSecondary);
+        if (settings.hoursLine) setHoursLine(settings.hoursLine);
+      },
+    );
     return () => {
       cancelled = true;
     };

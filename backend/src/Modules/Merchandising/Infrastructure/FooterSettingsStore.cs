@@ -136,7 +136,7 @@ public sealed class FooterSettingsStore(IHostEnvironment env) : IFooterSettingsS
             ],
             Partners =
             [
-                new() { Label = "مجله اینترنتی دیجی‌کالا مگ", Href = "https://www.digikala.com/mag/", Icon = "/images/footer/partners/mag.svg", Visible = true },
+                new() { Label = "مجله میکس پلاس", Href = "https://mixplusshop.ir", Icon = "/images/footer/partners/mag.svg", Visible = true },
                 new() { Label = "دیجی‌پی", Href = "https://www.mydigipay.com/", Icon = "/images/footer/partners/digipay.svg", Visible = true },
                 new() { Label = "دیجی‌استایل", Href = "https://www.digistyle.com/", Icon = "/images/footer/partners/digistyle.svg", Visible = true },
                 new() { Label = "دیجی‌کالا پلاس", Href = "/plus/landing", Icon = "/images/footer/partners/digiplus.svg", Visible = false },

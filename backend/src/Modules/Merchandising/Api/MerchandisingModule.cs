@@ -28,6 +28,7 @@ public sealed class MerchandisingModule : IModule
         services.AddScoped<IGetHomePageQuery, GetHomePageQuery>();
         services.AddSingleton<IFooterSettingsStore, FooterSettingsStore>();
         services.AddSingleton<ICmsPagesStore, CmsPagesStore>();
+        services.AddSingleton<ISiteSettingsStore, SiteSettingsStore>();
     }
 
     public void MapEndpoints(IEndpointRouteBuilder endpoints)
@@ -51,6 +52,27 @@ public sealed class MerchandisingModule : IModule
                 Results.Ok(await store.GetAsync(ct)))
             .WithTags("Merchandising")
             .WithName("GetFooterSettings");
+
+        endpoints.MapGet("/api/merchandising/site-settings", async (ISiteSettingsStore store, CancellationToken ct) =>
+                Results.Ok(await store.GetAsync(ct)))
+            .WithTags("Merchandising")
+            .WithName("GetSiteSettings");
+
+        endpoints.MapGet("/api/admin/merchandising/site-settings", async (ISiteSettingsStore store, CancellationToken ct) =>
+                Results.Ok(await store.GetAsync(ct)))
+            .WithTags("AdminCms")
+            .WithName("AdminGetSiteSettings");
+
+        endpoints.MapPut("/api/admin/merchandising/site-settings", async (
+                SiteSettingsDto body,
+                ISiteSettingsStore store,
+                CancellationToken ct) =>
+            {
+                await store.SaveAsync(body, ct);
+                return Results.Ok(await store.GetAsync(ct));
+            })
+            .WithTags("AdminCms")
+            .WithName("AdminSaveSiteSettings");
 
         endpoints.MapPost("/api/merchandising/newsletter", async (
                 NewsletterRequest body,

@@ -18,6 +18,13 @@ export function formatFaNumber(value: number): string {
   return new Intl.NumberFormat("fa-IR").format(value);
 }
 
+const FA_DIGITS = "۰۱۲۳۴۵۶۷۸۹";
+
+/** Replace Latin digits in any string with Persian digits (e.g. ۱۴ کالا). */
+export function toFaDigits(value: string): string {
+  return value.replace(/\d/g, (d) => FA_DIGITS[Number(d)] ?? d);
+}
+
 /** e.g. ۲ محصول — never English «2 product». */
 export function formatProductCount(count: number): string {
   return `${formatFaNumber(count)} محصول`;

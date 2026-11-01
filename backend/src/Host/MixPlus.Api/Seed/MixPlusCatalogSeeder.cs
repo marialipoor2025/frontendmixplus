@@ -397,8 +397,8 @@ public static class MixPlusCatalogSeeder
                 .Count();
 
             var subtitle = sellerCount > 1
-                ? $"{products.Count} کالا · {sellerCount} فروشنده"
-                : $"{products.Count} کالا";
+                ? $"{FaDigits(products.Count)} کالا · {FaDigits(sellerCount)} فروشنده"
+                : $"{FaDigits(products.Count)} کالا";
 
             keepKeys.Add(section.RailKey);
             await UpsertRailAsync(
@@ -786,6 +786,9 @@ public static class MixPlusCatalogSeeder
 
     private static string? NullIfEmpty(string? value) =>
         string.IsNullOrWhiteSpace(value) ? null : value.Trim();
+
+    private static string FaDigits(int n) =>
+        n.ToString("N0", System.Globalization.CultureInfo.GetCultureInfo("fa-IR"));
 
     private static async Task ReplaceImportSpecsAsync(
         CatalogDbContext catalog,

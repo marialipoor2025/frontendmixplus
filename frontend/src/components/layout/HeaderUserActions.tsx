@@ -19,7 +19,7 @@ import {
 } from "@/lib/api/wishlist";
 import { AUTH_CHANGED_EVENT } from "@/lib/auth/session";
 import { useAuth } from "@/lib/auth/useAuth";
-import { formatPrice } from "@/lib/format";
+import { formatFaNumber, formatPrice } from "@/lib/format";
 
 type HeaderUserActionsProps = {
   loginLabel?: string;
@@ -98,7 +98,7 @@ export function HeaderUserActions({
           className="relative flex size-11 items-center justify-center rounded-full bg-[rgb(22_114_221_/_0.1)]"
         >
           <span className="absolute -end-1.5 -top-0.5 flex size-5 items-center justify-center rounded-full bg-[var(--color-primary)] text-[10px] font-bold text-white">
-            {cartCount > 99 ? "99+" : cartCount}
+            {cartCount > 99 ? "۹۹+" : formatFaNumber(cartCount)}
           </span>
           <BottomNavCartIcon className="text-[#2B3674]" />
         </Link>

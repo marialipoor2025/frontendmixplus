@@ -26,6 +26,7 @@ import {
   NAV_ICON_CLASS,
 } from "@/components/layout/navMenuShared";
 import { subscribeCartCount } from "@/lib/api/cart";
+import { formatFaNumber } from "@/lib/format";
 
 type NavId = "chat" | "categories" | "cart" | "profile" | "home";
 
@@ -228,7 +229,7 @@ export function MobileBottomNav() {
               <BottomNavCartIcon className={iconClass("cart")} />
               {cartCount > 0 ? (
                 <span className="absolute end-0 top-0 flex min-w-[18px] items-center justify-center rounded-full bg-[var(--color-primary)] px-1 text-[10px] font-bold leading-[18px] text-white">
-                  {cartCount > 99 ? "99+" : cartCount}
+                  {cartCount > 99 ? "۹۹+" : formatFaNumber(cartCount)}
                 </span>
               ) : null}
             </Link>

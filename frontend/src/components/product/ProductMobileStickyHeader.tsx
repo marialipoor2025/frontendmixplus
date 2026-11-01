@@ -12,6 +12,7 @@ import { ProductMobileMoreSheet } from "@/components/product/ProductMobileMoreSh
 import { ProductMobileSearchSheet } from "@/components/product/ProductMobileSearchSheet";
 import { ProductShareSheet } from "@/components/product/ProductShareSheet";
 import { subscribeCartCount } from "@/lib/api/cart";
+import { formatFaNumber } from "@/lib/format";
 import {
   addToWishlist,
   isInWishlist,
@@ -210,7 +211,7 @@ export function ProductMobileStickyHeader({
               <CartIcon className="size-6" />
               {cartCount > 0 ? (
                 <span className="absolute end-0.5 top-0.5 flex min-w-[16px] items-center justify-center rounded-full bg-[var(--color-primary)] px-0.5 text-[9px] font-bold leading-[16px] text-white">
-                  {cartCount > 99 ? "99+" : cartCount}
+                  {cartCount > 99 ? "۹۹+" : formatFaNumber(cartCount)}
                 </span>
               ) : null}
             </Link>

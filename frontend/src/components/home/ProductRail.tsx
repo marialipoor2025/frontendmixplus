@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { ProductCard } from "@/components/home/ProductCard";
 import { ScrollHorizontalWrapper } from "@/components/home/ScrollHorizontalWrapper";
+import { toFaDigits } from "@/lib/format";
 import { ChevronLeftIcon } from "@/components/layout/icons";
 import { ProductCardImage } from "@/components/product/ProductCardImage";
 import { productPlaceholderSeed } from "@/lib/product-image-placeholder";
@@ -75,7 +76,7 @@ export function ProductRail({ rail }: ProductRailProps) {
             </h2>
             {rail.subtitle ? (
               <p className="text-xs leading-[180%] text-[var(--color-neutral-500)]">
-                {rail.subtitle}
+                {toFaDigits(rail.subtitle)}
               </p>
             ) : null}
           </div>

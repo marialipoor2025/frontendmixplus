@@ -6,6 +6,8 @@ function mediaRemotePatterns() {
     "http://127.0.0.1:5080",
     "http://localhost:5080",
     "http://193.36.84.230:5080",
+    "http://45.149.78.183",
+    "http://45.149.78.183:5080",
   ].filter(Boolean) as string[];
 
   const patterns: NonNullable<NextConfig["images"]>["remotePatterns"] = [];

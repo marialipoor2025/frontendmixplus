@@ -1,6 +1,5 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using MixPlus.BuildingBlocks.Application;
 using MixPlus.Modules.Identity.Application.Abstractions;
@@ -21,7 +20,6 @@ public sealed class OtpAuthService(
     ISmsSender sms,
     IEmailSender email,
     IConfiguration configuration,
-    IHostEnvironment environment,
     ILogger<OtpAuthService> logger) : IOtpAuthService
 {
     public async Task<Result<StartOtpResponse>> StartAsync(
@@ -136,8 +134,7 @@ public sealed class OtpAuthService(
     private string ResolvePlainCode()
     {
         var fixedCode = configuration["Sms:MockFixedCode"];
-        if (!string.IsNullOrWhiteSpace(fixedCode)
-            && string.Equals(configuration["Sms:Provider"], "Mock", StringComparison.OrdinalIgnoreCase))
+        if (!string.IsNullOrWhiteSpace(fixedCode) && IsMockSms())
         {
             return fixedCode.Trim();
         }
@@ -164,11 +161,23 @@ public sealed class OtpAuthService(
             cancellationToken);
     }
 
+    private bool IsMockSms()
+    {
+        var provider = configuration["Sms:Provider"] ?? "Mock";
+        var meliUser = configuration["Sms:Melipayamak:Username"];
+        var meliPass = configuration["Sms:Melipayamak:Password"];
+        var melipayamakReady =
+            string.Equals(provider, "Melipayamak", StringComparison.OrdinalIgnoreCase)
+            && !string.IsNullOrWhiteSpace(meliUser)
+            && !string.IsNullOrWhiteSpace(meliPass);
+        return !melipayamakReady;
+    }
+
     private StartOtpResponse ToStartResponse(OtpChallenge challenge, string plainCode, DateTime utcNow)
     {
-        var includeDevCode =
-            environment.IsDevelopment()
-            && string.Equals(configuration["Sms:Provider"], "Mock", StringComparison.OrdinalIgnoreCase);
+        // Show the code on the login form whenever SMS is mocked (including Production
+        // deploys that have not copied appsettings.Local.json yet).
+        var includeDevCode = IsMockSms();
 
         var resendIn = 0;
         if (challenge.LastSentAtUtc is { } sent)

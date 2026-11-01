@@ -32,7 +32,14 @@ public sealed class IdentityModule : IModule
         services.Configure<AdminStaffOptions>(configuration.GetSection(AdminStaffOptions.SectionName));
 
         var provider = configuration["Sms:Provider"] ?? "Mock";
-        if (string.Equals(provider, "Melipayamak", StringComparison.OrdinalIgnoreCase))
+        var meliUser = configuration["Sms:Melipayamak:Username"];
+        var meliPass = configuration["Sms:Melipayamak:Password"];
+        var useMelipayamak =
+            string.Equals(provider, "Melipayamak", StringComparison.OrdinalIgnoreCase)
+            && !string.IsNullOrWhiteSpace(meliUser)
+            && !string.IsNullOrWhiteSpace(meliPass);
+
+        if (useMelipayamak)
         {
             services.AddHttpClient<ISmsSender, MelipayamakSmsSender>(client =>
             {

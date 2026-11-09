@@ -1,0 +1,1722 @@
+/* Digikala Seller Center design tokens — from AuthenticatedHeaderDesktop */
+[data-seller-digi-page] {
+  --color-neutral-000: #ffffff;
+  --color-neutral-100: #f0f0f1;
+  --color-neutral-200: #e0e0e2;
+  --color-neutral-300: #c0c2c5;
+  --color-neutral-400: #a1a3a8;
+  --color-neutral-500: #81858b;
+  --color-neutral-600: #62666d;
+  --color-neutral-700: #424750;
+  --color-neutral-800: #232933;
+  --color-neutral-900: #030a16;
+
+  --color-brand-primary-500: #1ab1d4;
+  --color-brand-primary-700: #1796b4;
+  --color-brand-secondary-500: #028e71;
+
+  --color-text-heading: #030a16;
+  --color-text-high-emphasis: #424750;
+  --color-text-low-emphasis: #81858b;
+  --color-text-primary: #1ab1d4;
+  --color-text-ai: #8e44c8;
+  --color-icon-high-emphasis: #424750;
+  --color-icon-white: #ffffff;
+  --color-button-primary: #1ab1d4;
+  --color-button-ai: #8e44c8;
+  --color-button-ai-hover: #7f53ef;
+  --color-bg-ai: linear-gradient(114deg, #8f4aec 0%, #6860f3 49%, #2586ff 100%);
+  --color-bg-ai-shade-8: #f8efff;
+  --color-border-grade-2: #e0e0e2;
+  --color-bg-dark: #f5f7fa;
+  --color-hint-object-error: #ef5661;
+  --color-hint-object-caution: #f9a825;
+  --color-bg-error: rgba(239, 86, 97, 0.08);
+  --color-bg-caution: rgba(249, 168, 37, 0.08);
+
+  --authenticated-header-height: 64px;
+  --global-radius: 8px;
+  --medium-radius: 8px;
+  --card-border-radius: 12px;
+  --shadow-1: 0px 6px 12px rgba(3, 10, 22, 0.05);
+  --shadow-2: 0px 0px 12px rgba(3, 10, 22, 0.1);
+  --shadow-3: 0px 0px 12px rgba(3, 10, 22, 0.15);
+  --spacing-base: 4px;
+
+  /* Digi aliases used by pages */
+  --digi-primary: var(--color-brand-primary-500);
+  --digi-primary-hover: var(--color-brand-primary-700);
+  --digi-primary-soft: #d0f1f9;
+  --digi-primary-border: #4ccbe9;
+  --digi-brand: #ef4056;
+  --digi-border: var(--color-neutral-200);
+  --digi-border-strong: var(--color-neutral-300);
+  --digi-bg: var(--color-bg-dark);
+  --digi-surface: var(--color-neutral-000);
+  --digi-text: var(--color-text-high-emphasis);
+  --digi-text-strong: var(--color-text-heading);
+  --digi-muted: var(--color-text-low-emphasis);
+  --digi-danger: var(--color-hint-object-error);
+  --digi-danger-soft: rgba(239, 86, 97, 0.08);
+  --digi-warn: #f9a825;
+  --digi-warn-soft: rgba(249, 168, 37, 0.08);
+  --digi-success: #57cfb1;
+  --digi-success-soft: rgba(87, 207, 177, 0.08);
+  --digi-radius: var(--medium-radius);
+  --digi-shadow: var(--shadow-1);
+  --digi-header-h: var(--authenticated-header-height);
+
+  /* Bridge shared app tokens */
+  --color-primary: var(--color-brand-primary-500);
+  --color-primary-soft: var(--digi-primary-soft);
+  --color-neutral-50: var(--color-bg-dark);
+  --color-muted: var(--color-text-low-emphasis);
+
+  background-color: var(--color-bg-dark);
+  color: var(--color-text-high-emphasis);
+  direction: rtl;
+}
+
+[data-seller-digi-page] .digi-focus:focus-visible {
+  outline: 2px solid var(--color-brand-primary-500);
+  outline-offset: 1px;
+}
+
+/* Digikala AuthenticatedHeaderDesktop */
+[data-seller-digi-page] .digi-auth-header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 40;
+  display: flex;
+  height: var(--authenticated-header-height);
+  width: 100%;
+  align-items: center;
+  justify-content: space-between;
+  box-sizing: border-box;
+  overflow: visible;
+  background-color: #fff;
+  padding-right: calc(6 * var(--spacing-base));
+  padding-left: calc(6 * var(--spacing-base));
+  border-bottom: 1px solid var(--color-neutral-200);
+}
+
+[data-seller-digi-page] .digi-auth-header__nav-btn {
+  display: flex;
+  align-items: center;
+  padding-right: 12px;
+  padding-left: 8px;
+  white-space: nowrap;
+  cursor: pointer;
+  color: var(--color-text-high-emphasis);
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1.5;
+  background: transparent;
+  border: 0;
+}
+
+[data-seller-digi-page] .digi-auth-header__nav-btn:hover,
+[data-seller-digi-page] .digi-header-menu:hover .digi-auth-header__nav-btn,
+[data-seller-digi-page] .digi-auth-header__nav-btn[data-active="true"],
+[data-seller-digi-page] .digi-auth-header__nav-btn[aria-expanded="true"] {
+  color: var(--color-text-primary);
+}
+
+/* Digikala Menu / Menu__menuList — CSS hover dropdown (no header scroll) */
+[data-seller-digi-page] .digi-header-menu {
+  position: relative;
+  display: flex;
+  align-items: center;
+  height: var(--authenticated-header-height);
+  overflow: visible;
+}
+
+[data-seller-digi-page] .digi-auth-header__menu-list {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  z-index: 10;
+  box-sizing: border-box;
+  min-width: 200px;
+  max-height: 0;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  overflow: hidden;
+  scrollbar-width: none;
+  white-space: nowrap;
+  visibility: hidden;
+  opacity: 0;
+  pointer-events: none;
+  background-color: var(--color-neutral-000);
+  border-radius: var(--global-radius);
+  box-shadow: var(--shadow-3);
+  transition: max-height 0.2s ease-in, opacity 0.2s ease-in, visibility 0.2s ease-in;
+}
+
+[data-seller-digi-page] .digi-header-menu:hover .digi-auth-header__menu-list,
+[data-seller-digi-page] .digi-header-menu:focus-within .digi-auth-header__menu-list,
+[data-seller-digi-page] .digi-header-menu--open .digi-auth-header__menu-list,
+[data-seller-digi-page] .digi-auth-header__menu-list.is-open {
+  visibility: visible;
+  opacity: 1;
+  max-height: 480px;
+  padding-top: calc(1 * var(--spacing-base));
+  padding-bottom: calc(1 * var(--spacing-base));
+  overflow-y: auto;
+  pointer-events: auto;
+}
+
+[data-seller-digi-page] .digi-auth-header__menu-item {
+  display: flex;
+  align-items: center;
+  padding: 8px 16px;
+  color: var(--color-neutral-500);
+  font-size: 14px;
+  line-height: 1.7;
+  text-decoration: none;
+  border-bottom: 1px solid var(--color-neutral-100);
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+[data-seller-digi-page] .digi-auth-header__menu-list > li:last-child .digi-auth-header__menu-item {
+  border-bottom: 0;
+}
+
+[data-seller-digi-page] .digi-auth-header__menu-item:hover,
+[data-seller-digi-page] .digi-auth-header__menu-item[data-active="true"] {
+  background: var(--color-neutral-100);
+  color: var(--color-text-primary);
+}
+
+[data-seller-digi-page] .digi-auth-header__update-badge {
+  width: 6px;
+  height: 6px;
+  margin-inline-start: 4px;
+  border-radius: 50%;
+  background: var(--color-hint-object-error);
+}
+
+[data-seller-digi-page] .digi-auth-header__new-badge {
+  display: inline-flex;
+  align-items: center;
+  margin-inline-start: 4px;
+  padding: 0 8px;
+  border-radius: 4px;
+  background: rgba(239, 86, 97, 0.12);
+  color: var(--color-hint-object-error);
+  font-size: 10px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+[data-seller-digi-page] .digi-auth-header__icon-btn {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-inline-start: 8px;
+  color: var(--color-icon-high-emphasis);
+}
+
+[data-seller-digi-page] .digi-auth-header__count {
+  position: absolute;
+  top: -4px;
+  inset-inline-end: -6px;
+  display: flex;
+  min-width: 16px;
+  height: 16px;
+  align-items: center;
+  justify-content: center;
+  padding: 0 4px;
+  border-radius: 8px;
+  background: var(--color-brand-secondary-500);
+  color: #fff;
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 1;
+}
+
+[data-seller-digi-page] .digi-auth-header__divider {
+  width: 1px;
+  height: 24px;
+  margin-inline: 8px;
+  background: var(--color-neutral-200);
+}
+
+[data-seller-digi-page] .digi-main {
+  padding-top: calc(var(--authenticated-header-height) + 16px);
+}
+
+/* —— Digikala TableCard (product list) —— */
+[data-seller-digi-page] .digi-incomplete-banner {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 16px;
+  background: #fff;
+  border: 1px solid var(--color-neutral-200);
+  border-radius: var(--card-border-radius);
+  box-shadow: var(--shadow-1);
+}
+
+[data-seller-digi-page] .digi-table-card {
+  background: #fff;
+  border: 1px solid var(--color-neutral-200);
+  border-radius: var(--card-border-radius);
+  box-shadow: var(--shadow-1);
+  overflow: hidden;
+}
+
+[data-seller-digi-page] .digi-search-field {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  margin-bottom: 8px;
+  border: 1px solid var(--color-neutral-200);
+  border-radius: var(--medium-radius);
+  background: var(--color-neutral-100);
+  color: var(--color-icon-high-emphasis);
+}
+
+[data-seller-digi-page] .digi-search-field__input {
+  flex: 1;
+  width: 100%;
+  border: 0;
+  background: transparent;
+  outline: none;
+  font-size: 14px;
+  color: var(--color-text-high-emphasis);
+}
+
+[data-seller-digi-page] .digi-search-field__input::placeholder {
+  color: var(--color-text-low-emphasis);
+}
+
+[data-seller-digi-page] .digi-filter-all {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 4px;
+  border: 0;
+  background: transparent;
+  color: var(--color-text-primary);
+  font-size: 14px;
+  font-weight: 600;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+[data-seller-digi-page] .digi-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 8px;
+  border: 1px solid var(--color-neutral-200);
+  border-radius: var(--medium-radius);
+  background: #fff;
+  color: var(--color-text-high-emphasis);
+  font-size: 13px;
+  font-weight: 600;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+[data-seller-digi-page] .digi-chip--on {
+  border-color: var(--color-brand-primary-500);
+  background: rgba(26, 177, 212, 0.08);
+  color: var(--color-text-primary);
+}
+
+[data-seller-digi-page] .digi-btn-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px 16px;
+  border-radius: var(--medium-radius);
+  background: var(--color-button-primary);
+  color: #fff;
+  font-size: 14px;
+  font-weight: 600;
+  text-decoration: none;
+  border: 0;
+  cursor: pointer;
+}
+
+[data-seller-digi-page] .digi-btn-primary:hover {
+  background: var(--color-brand-primary-700);
+}
+
+[data-seller-digi-page] .digi-btn-ai {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px 16px;
+  border-radius: var(--medium-radius);
+  background: var(--color-bg-ai);
+  color: #fff;
+  font-size: 14px;
+  font-weight: 600;
+  text-decoration: none;
+  border: 0;
+  cursor: pointer;
+}
+
+[data-seller-digi-page] .digi-btn-ai:hover {
+  filter: brightness(1.05);
+}
+
+/* Digikala ProductCreationLayout — /pwa/product/create/initial */
+[data-seller-digi-page] .digi-create-card {
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+  width: 100%;
+  padding: calc(4 * var(--spacing-base));
+  background: var(--color-neutral-000);
+  border-radius: var(--global-radius);
+  box-shadow: none;
+}
+
+[data-seller-digi-page] .digi-create-options {
+  display: flex;
+  overflow-x: auto;
+  scrollbar-width: thin;
+}
+
+[data-seller-digi-page] .digi-create-option {
+  display: flex;
+  flex-direction: column;
+  flex: 1 0 auto;
+  width: 25%;
+  min-width: 280px;
+}
+
+@media (min-width: 1280px) {
+  [data-seller-digi-page] .digi-create-option {
+    min-width: 330px;
+  }
+}
+
+[data-seller-digi-page] .digi-create-divider {
+  flex: 0 0 1px;
+  align-self: stretch;
+  width: 1px;
+  background: var(--color-border-grade-2);
+}
+
+[data-seller-digi-page] .digi-create-option__body {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  height: 100%;
+  min-height: 520px;
+  padding: calc(4 * var(--spacing-base));
+}
+
+[data-seller-digi-page] .digi-create-option__top {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+[data-seller-digi-page] .digi-create-option__image {
+  width: 100px;
+  height: 100px;
+}
+
+[data-seller-digi-page] .digi-create-option__image svg,
+[data-seller-digi-page] .digi-create-option__image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+[data-seller-digi-page] .digi-create-option__heading {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-top: calc(8 * var(--spacing-base));
+  margin-bottom: calc(2 * var(--spacing-base));
+}
+
+[data-seller-digi-page] .digi-create-option__title {
+  width: fit-content;
+  margin: 0;
+  color: var(--color-text-heading);
+  font-size: 18px;
+  font-weight: 700;
+  line-height: 1.6;
+}
+
+[data-seller-digi-page] .digi-create-option__title--ai {
+  color: var(--color-text-ai);
+}
+
+[data-seller-digi-page] .digi-create-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 12px;
+  border-radius: var(--medium-radius);
+  background: var(--color-bg-ai-shade-8);
+  color: var(--color-text-ai);
+  font-size: 12px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+[data-seller-digi-page] .digi-create-option__subtitle {
+  margin: 0 0 calc(4 * var(--spacing-base));
+  color: var(--color-neutral-700);
+  font-size: 14px;
+  line-height: 1.7;
+}
+
+[data-seller-digi-page] .digi-create-bullets {
+  display: flex;
+  flex-direction: column;
+  gap: calc(4 * var(--spacing-base));
+  width: 100%;
+  margin: calc(3 * var(--spacing-base)) 0 0;
+  padding: calc(4 * var(--spacing-base));
+  list-style: disc;
+  list-style-position: inside;
+  text-align: right;
+}
+
+[data-seller-digi-page] .digi-create-bullets li {
+  color: var(--color-text-high-emphasis);
+}
+
+[data-seller-digi-page] .digi-create-bullets p {
+  display: inline;
+  margin: 0 16px;
+  color: var(--color-text-high-emphasis);
+  font-size: 14px;
+  line-height: 1.7;
+}
+
+[data-seller-digi-page] .digi-create-option__cta {
+  display: flex;
+  width: 100%;
+  margin-top: auto;
+  padding-top: 16px;
+}
+
+[data-seller-digi-page] .digi-btn-create {
+  width: 100%;
+  min-height: 48px;
+  padding: 12px 16px;
+  font-size: 15px;
+  border-radius: var(--global-radius);
+}
+
+[data-seller-digi-page] .digi-btn-create svg {
+  margin-right: 8px;
+  fill: currentColor;
+}
+
+[data-seller-digi-page] .digi-pipe {
+  width: 1px;
+  height: 16px;
+  background: var(--color-neutral-200);
+}
+
+[data-seller-digi-page] .digi-pagesize {
+  min-width: 64px;
+  padding: 6px 28px 6px 10px;
+  border: 0;
+  border-radius: var(--medium-radius);
+  background: var(--color-neutral-100);
+  color: var(--color-text-high-emphasis);
+  font-size: 13px;
+}
+
+[data-seller-digi-page] .digi-product-grid {
+  display: grid;
+  grid-template-columns: 0.7fr 1.6fr 0.9fr 0.7fr 1fr 0.9fr 1fr 0.8fr 0.8fr 0.9fr 1fr 0.5fr;
+  gap: 0;
+  min-width: 1100px;
+  align-items: center;
+}
+
+[data-seller-digi-page] .digi-product-grid--head {
+  padding: 8px 16px;
+  color: var(--color-neutral-700);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+[data-seller-digi-page] .digi-product-row {
+  margin: 12px 0;
+  padding: 8px 16px;
+  border: 1px solid var(--color-neutral-100);
+  border-radius: var(--medium-radius);
+  background: #fff;
+}
+
+[data-seller-digi-page] .digi-product-row:hover {
+  border-color: var(--color-neutral-200);
+  box-shadow: var(--shadow-1);
+}
+
+[data-seller-digi-page] .digi-dkp-badge {
+  padding: 2px 6px;
+  border-radius: 4px;
+  background: var(--color-neutral-100);
+  color: var(--color-text-low-emphasis);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+[data-seller-digi-page] .digi-badge-neutral,
+[data-seller-digi-page] .digi-badge-error,
+[data-seller-digi-page] .digi-badge-success {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 12px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+[data-seller-digi-page] .digi-badge-neutral {
+  background: rgba(98, 102, 109, 0.08);
+  color: var(--color-neutral-600);
+}
+
+[data-seller-digi-page] .digi-badge-error {
+  background: rgba(239, 86, 97, 0.08);
+  color: var(--color-hint-object-error);
+}
+
+[data-seller-digi-page] .digi-badge-success {
+  background: rgba(87, 207, 177, 0.12);
+  color: #016f59;
+}
+
+[data-seller-digi-page] .digi-more-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border: 1px solid var(--color-brand-primary-500);
+  border-radius: var(--medium-radius);
+  background: #fff;
+  color: var(--color-text-primary);
+  cursor: pointer;
+}
+
+[data-seller-digi-page] .digi-row-menu {
+  position: absolute;
+  top: 100%;
+  inset-inline-end: 0;
+  z-index: 20;
+  min-width: 160px;
+  margin-top: 4px;
+  padding: 4px 0;
+  background: #fff;
+  border: 1px solid var(--color-neutral-200);
+  border-radius: var(--medium-radius);
+  box-shadow: var(--shadow-2);
+}
+
+[data-seller-digi-page] .digi-row-menu__item {
+  display: block;
+  width: 100%;
+  padding: 8px 12px;
+  border: 0;
+  background: transparent;
+  color: var(--color-text-high-emphasis);
+  font-size: 13px;
+  text-align: start;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+[data-seller-digi-page] .digi-row-menu__item:hover {
+  background: var(--color-neutral-100);
+  color: var(--color-text-primary);
+}
+
+[data-seller-digi-page] .digi-page-btn {
+  display: inline-flex;
+  min-width: 32px;
+  height: 32px;
+  align-items: center;
+  justify-content: center;
+  padding: 0 8px;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--color-neutral-500);
+  font-size: 13px;
+  cursor: pointer;
+}
+
+[data-seller-digi-page] .digi-page-btn:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
+[data-seller-digi-page] .digi-page-btn--active {
+  background: rgba(26, 177, 212, 0.12);
+  color: var(--color-text-primary);
+  font-weight: 700;
+}
+
+[data-seller-digi-page] .digi-page-btn--muted {
+  color: var(--color-neutral-500);
+}
+
+/* Digikala /pwa/product/create/1 — 5-step stepper */
+[data-seller-digi-page] .digi-create-flow {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+[data-seller-digi-page] .digi-create-flow__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+[data-seller-digi-page] .digi-create-flow__title {
+  margin: 0;
+  color: var(--color-text-heading);
+  font-size: 20px;
+  font-weight: 800;
+}
+
+[data-seller-digi-page] .digi-create-flow__subtitle {
+  margin: 4px 0 0;
+  color: var(--color-text-low-emphasis);
+  font-size: 13px;
+}
+
+[data-seller-digi-page] .digi-create-stepper {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 12px 16px;
+  background: var(--color-neutral-000);
+  border: 1px solid var(--color-neutral-200);
+  border-radius: var(--global-radius);
+}
+
+[data-seller-digi-page] .digi-create-stepper__item {
+  display: flex;
+  flex: 1 1 0;
+  min-width: 96px;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 4px;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  color: var(--color-neutral-400);
+}
+
+[data-seller-digi-page] .digi-create-stepper__item:disabled {
+  cursor: default;
+}
+
+[data-seller-digi-page] .digi-create-stepper__icon {
+  display: inline-flex;
+  width: 36px;
+  height: 36px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  border: 2px solid var(--color-neutral-200);
+  background: var(--color-neutral-000);
+  color: var(--color-neutral-400);
+}
+
+[data-seller-digi-page] .digi-create-stepper__label {
+  font-size: 13px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+[data-seller-digi-page] .digi-create-stepper__item[data-state="active"] {
+  color: var(--color-text-primary);
+}
+
+[data-seller-digi-page] .digi-create-stepper__item[data-state="active"] .digi-create-stepper__icon {
+  border-color: var(--color-brand-primary-500);
+  color: var(--color-brand-primary-500);
+  background: rgba(26, 177, 212, 0.08);
+}
+
+[data-seller-digi-page] .digi-create-stepper__item[data-state="done"] {
+  color: var(--color-brand-secondary-500);
+}
+
+[data-seller-digi-page] .digi-create-stepper__item[data-state="done"] .digi-create-stepper__icon {
+  border-color: var(--color-brand-secondary-500);
+  background: var(--color-brand-secondary-500);
+  color: #fff;
+}
+
+[data-seller-digi-page] .digi-create-flow__card {
+  padding: calc(4 * var(--spacing-base));
+  background: var(--color-neutral-000);
+  border-radius: var(--global-radius);
+  border: 1px solid var(--color-neutral-200);
+}
+
+[data-seller-digi-page] .digi-create-select-row {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 48px;
+  padding: 10px 16px;
+  border: 1px solid var(--color-neutral-200);
+  border-radius: var(--medium-radius);
+  background: var(--color-neutral-000);
+  cursor: pointer;
+  text-align: right;
+}
+
+[data-seller-digi-page] .digi-create-select-row:hover {
+  border-color: var(--color-brand-primary-300);
+}
+
+[data-seller-digi-page] .digi-create-select-row__label {
+  margin: 0;
+  color: var(--color-text-high-emphasis);
+  font-size: 14px;
+}
+
+[data-seller-digi-page] .digi-create-select-row__action {
+  flex-shrink: 0;
+  color: var(--color-text-primary);
+  font-size: 14px;
+  font-weight: 700;
+}
+
+/* Digikala CategorySelectionModal */
+[data-seller-digi-page] .digi-cat-modal-root {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+}
+
+[data-seller-digi-page] .digi-cat-modal-scrim {
+  position: absolute;
+  inset: 0;
+  border: 0;
+  background: rgba(0, 0, 0, 0.3);
+  cursor: pointer;
+}
+
+[data-seller-digi-page] .digi-cat-modal {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  width: 480px;
+  max-width: min(928px, 100%);
+  height: min(676px, 80vh);
+  max-height: 80vh;
+  overflow: auto;
+  background: var(--color-neutral-000);
+  border-radius: var(--medium-radius);
+  box-shadow: var(--shadow-2);
+}
+
+[data-seller-digi-page] .digi-cat-modal__header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--color-neutral-200);
+}
+
+[data-seller-digi-page] .digi-cat-modal__close {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--color-icon-high-emphasis);
+  cursor: pointer;
+}
+
+[data-seller-digi-page] .digi-cat-modal__title {
+  margin: 0;
+  color: var(--color-neutral-700);
+  font-size: 18px;
+  font-weight: 700;
+}
+
+[data-seller-digi-page] .digi-cat-modal__body {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-height: 0;
+  padding: 24px 24px 0;
+}
+
+[data-seller-digi-page] .digi-cat-modal__main {
+  flex: 1;
+  min-height: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+  padding: 12px 24px;
+}
+
+[data-seller-digi-page] .digi-cat-modal__search {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  gap: 8px;
+  padding: 8px;
+  border: 1px solid var(--color-neutral-200);
+  border-radius: var(--medium-radius);
+  background: var(--color-neutral-000);
+  color: var(--color-icon-high-emphasis);
+}
+
+[data-seller-digi-page] .digi-cat-modal__search input {
+  flex: 1;
+  width: 100%;
+  border: 0;
+  background: transparent;
+  outline: none;
+  color: var(--color-text-high-emphasis);
+  font-size: 14px;
+}
+
+[data-seller-digi-page] .digi-cat-modal__search input::placeholder {
+  color: var(--color-text-low-emphasis);
+}
+
+[data-seller-digi-page] .digi-cat-modal__breadcrumb {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px;
+  min-height: 28px;
+  margin-top: 8px;
+  padding-left: 8px;
+  color: var(--color-text-low-emphasis);
+  font-size: 13px;
+}
+
+[data-seller-digi-page] .digi-cat-modal__crumb {
+  border: 0;
+  background: transparent;
+  color: var(--color-text-primary);
+  font-size: 13px;
+  cursor: pointer;
+  padding: 0;
+}
+
+[data-seller-digi-page] .digi-cat-modal__crumb:disabled {
+  color: var(--color-text-low-emphasis);
+  cursor: default;
+}
+
+[data-seller-digi-page] .digi-cat-modal__crumb-sep {
+  margin: 0 4px;
+  color: var(--color-neutral-400);
+}
+
+[data-seller-digi-page] .digi-cat-modal__grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+[data-seller-digi-page] .digi-cat-modal__item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 16px;
+  border: 0;
+  border-bottom: 1px solid var(--color-neutral-200);
+  background: transparent;
+  color: var(--color-text-high-emphasis);
+  font-size: 14px;
+  text-align: right;
+  cursor: pointer;
+}
+
+[data-seller-digi-page] .digi-cat-modal__item span:first-child {
+  flex: 1;
+}
+
+[data-seller-digi-page] .digi-cat-modal__item:hover,
+[data-seller-digi-page] .digi-cat-modal__item[data-selected="true"] {
+  background: rgba(26, 177, 212, 0.06);
+  color: var(--color-text-primary);
+}
+
+[data-seller-digi-page] .digi-cat-modal__empty {
+  grid-column: 1 / -1;
+  padding: 24px 8px;
+  color: var(--color-text-low-emphasis);
+  font-size: 13px;
+  text-align: center;
+}
+
+[data-seller-digi-page] .digi-cat-modal__footer {
+  position: sticky;
+  bottom: 0;
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  padding: 16px 0 24px;
+  border-top: 1px solid var(--color-neutral-200);
+  background: #fff;
+}
+
+[data-seller-digi-page] .digi-cat-modal__continue {
+  min-width: 96px;
+  min-height: 40px;
+}
+
+[data-seller-digi-page] .digi-cat-modal__continue:disabled {
+  background: var(--color-neutral-300);
+  cursor: default;
+}
+
+[data-seller-digi-page] .digi-create-input {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid var(--color-neutral-200);
+  border-radius: var(--medium-radius);
+  background: #fff;
+  color: var(--color-text-high-emphasis);
+  font-size: 14px;
+  outline: none;
+}
+
+[data-seller-digi-page] .digi-create-input:focus {
+  border-color: var(--color-brand-primary-500);
+}
+
+[data-seller-digi-page] .digi-create-flow__actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  margin-top: 24px;
+}
+
+[data-seller-digi-page] .digi-create-flow__continue {
+  min-width: 120px;
+  min-height: 44px;
+}
+
+[data-seller-digi-page] .digi-create-flow__back {
+  min-height: 44px;
+  padding: 10px 16px;
+  border: 1px solid var(--color-neutral-200);
+  border-radius: var(--medium-radius);
+  background: #fff;
+  color: var(--color-text-high-emphasis);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+[data-seller-digi-page] .digi-create-flow__back:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+
+[data-seller-digi-page] .digi-create-flow__text {
+  min-height: 44px;
+  padding: 10px 16px;
+  border: 0;
+  background: transparent;
+  color: var(--color-text-primary);
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+[data-seller-digi-page] .digi-create-flow__actions {
+  justify-content: flex-end;
+}
+
+[data-seller-digi-page] .digi-create-input--muted {
+  background: var(--color-neutral-100);
+}
+
+/* Digikala HorizontalTimeline */
+[data-seller-digi-page] .digi-timeline {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  gap: 12px;
+  overflow: hidden;
+}
+
+[data-seller-digi-page] .digi-timeline__seg {
+  display: flex;
+  flex: 1 1 0;
+  min-width: 0;
+  align-items: center;
+  gap: 12px;
+}
+
+[data-seller-digi-page] .digi-timeline__item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+[data-seller-digi-page] .digi-timeline__item:disabled {
+  cursor: default;
+}
+
+[data-seller-digi-page] .digi-timeline__icon {
+  display: inline-flex;
+  width: 32px;
+  height: 32px;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: var(--color-neutral-300);
+  color: #fff;
+}
+
+[data-seller-digi-page] .digi-timeline__item[data-state="done"] .digi-timeline__icon,
+[data-seller-digi-page] .digi-timeline__item[data-state="active"] .digi-timeline__icon {
+  background: var(--color-brand-primary-500);
+}
+
+[data-seller-digi-page] .digi-timeline__label {
+  margin: 0;
+  color: var(--color-text-disable, #c0c2c5);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+[data-seller-digi-page] .digi-timeline__item[data-state="done"] .digi-timeline__label {
+  color: var(--color-text-high-emphasis);
+}
+
+[data-seller-digi-page] .digi-timeline__item[data-state="active"] .digi-timeline__label {
+  color: var(--color-text-high-emphasis);
+  font-weight: 800;
+}
+
+[data-seller-digi-page] .digi-timeline__bar {
+  flex: 1 1 40px;
+  min-width: 24px;
+  height: 4px;
+  border-radius: var(--medium-radius);
+  background: var(--color-neutral-100);
+  overflow: hidden;
+}
+
+[data-seller-digi-page] .digi-timeline__bar-inner {
+  width: 0;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--color-brand-primary-500);
+}
+
+[data-seller-digi-page] .digi-timeline__bar[data-state="done"] .digi-timeline__bar-inner {
+  width: 100%;
+}
+
+[data-seller-digi-page] .digi-timeline__bar[data-state="active"] .digi-timeline__bar-inner {
+  width: 45%;
+}
+
+/* Digikala ProductCreation step 2 — اطلاعات کلی */
+[data-seller-digi-page] .digi-general {
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+  margin: 16px 8px;
+}
+
+[data-seller-digi-page] .digi-general__field {
+  display: block;
+  width: 100%;
+}
+
+[data-seller-digi-page] .digi-general__required {
+  display: block;
+  margin-bottom: 8px;
+  color: var(--color-neutral-700);
+  font-size: 14px;
+}
+
+[data-seller-digi-page] .digi-general__required::after {
+  content: " *";
+  color: var(--color-hint-object-error);
+}
+
+[data-seller-digi-page] .digi-general__text-btn {
+  margin-top: 4px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--color-text-primary);
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+[data-seller-digi-page] .digi-general__divider {
+  display: block;
+  width: 100%;
+  height: 1px;
+  border: 0;
+  background: var(--color-neutral-100);
+}
+
+[data-seller-digi-page] .digi-general__grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 32px;
+}
+
+@media (min-width: 768px) {
+  [data-seller-digi-page] .digi-general__grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+[data-seller-digi-page] .digi-general__block {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+[data-seller-digi-page] .digi-general__h5 {
+  color: var(--color-text-heading);
+  font-size: 18px;
+  font-weight: 800;
+}
+
+[data-seller-digi-page] .digi-general__hint {
+  color: var(--color-text-high-emphasis);
+  font-size: 14px;
+}
+
+[data-seller-digi-page] .digi-general__radios {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+[data-seller-digi-page] .digi-general__radio {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 0;
+  cursor: pointer;
+  color: var(--color-text-high-emphasis);
+  font-size: 14px;
+}
+
+[data-seller-digi-page] .digi-general__dims-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  align-items: flex-end;
+}
+
+[data-seller-digi-page] .digi-general__dim {
+  display: flex;
+  flex: 1 1 0;
+  min-width: 90px;
+  align-items: center;
+  gap: 4px;
+}
+
+[data-seller-digi-page] .digi-general__dim span {
+  flex-shrink: 0;
+  color: var(--color-text-high-emphasis);
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+[data-seller-digi-page] .digi-general__progress-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+[data-seller-digi-page] .digi-general__progress-title {
+  color: var(--color-text-heading);
+  font-size: 16px;
+  font-weight: 800;
+}
+
+[data-seller-digi-page] .digi-general__progressbar {
+  height: 8px;
+  overflow: hidden;
+  border-radius: 8px;
+  background: var(--color-neutral-100);
+}
+
+[data-seller-digi-page] .digi-general__progressbar-fill {
+  height: 100%;
+  border-radius: inherit;
+  background: var(--color-brand-primary-500);
+  transition: width 0.2s ease;
+}
+
+[data-seller-digi-page] .digi-general__progressbar-fill[data-empty="true"] {
+  background: var(--color-hint-object-error);
+  width: 2% !important;
+}
+
+/* Digikala ProductCreation step 3 — مشخصات */
+[data-seller-digi-page] .digi-attrs {
+  display: flex;
+  flex-direction: column;
+  gap: calc(8 * var(--spacing-base));
+}
+
+[data-seller-digi-page] .digi-attrs__title {
+  color: var(--color-text-heading);
+  font-size: 18px;
+  font-weight: 800;
+}
+
+[data-seller-digi-page] .digi-attrs__grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: calc(8 * var(--spacing-base));
+}
+
+@media (min-width: 768px) {
+  [data-seller-digi-page] .digi-attrs__grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+[data-seller-digi-page] .digi-attrs__field {
+  display: block;
+  width: 100%;
+}
+
+[data-seller-digi-page] .digi-attrs__label {
+  display: block;
+  margin-bottom: 8px;
+  color: var(--color-neutral-700);
+  font-size: 14px;
+}
+
+[data-seller-digi-page] .digi-attrs__input-wrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0;
+  background: #fff;
+}
+
+[data-seller-digi-page] .digi-attrs__input-wrap .digi-create-input {
+  flex: 1;
+}
+
+[data-seller-digi-page] .digi-attrs__unit {
+  flex-shrink: 0;
+  color: var(--color-text-high-emphasis);
+  font-size: 13px;
+  white-space: nowrap;
+}
+
+[data-seller-digi-page] .digi-attrs__helper {
+  margin: 4px 0 0;
+  color: var(--color-text-low-emphasis);
+  font-size: 13px;
+  line-height: 1.7;
+}
+
+/* Digikala ProductCreation step 4 — عنوان */
+[data-seller-digi-page] .digi-title-step {
+  display: flex;
+  flex-direction: column;
+  gap: calc(4 * var(--spacing-base));
+  margin-top: calc(9 * var(--spacing-base));
+  margin-bottom: calc(9 * var(--spacing-base));
+}
+
+[data-seller-digi-page] .digi-title-step__h5 {
+  color: var(--color-text-heading);
+  font-size: 18px;
+  font-weight: 800;
+}
+
+[data-seller-digi-page] .digi-title-step__lead {
+  margin-top: 4px;
+  color: var(--color-text-high-emphasis);
+  font-size: 14px;
+  line-height: 1.7;
+}
+
+[data-seller-digi-page] .digi-title-step__ai-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  margin: 12px 0;
+}
+
+[data-seller-digi-page] .digi-title-step__ai-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 4px;
+  border: 0;
+  background: transparent;
+  color: var(--color-text-ai);
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+[data-seller-digi-page] .digi-title-step__token {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px;
+  border-radius: 100px;
+  background: var(--color-bg-ai-shade-8);
+  color: var(--color-text-ai);
+  font-size: 12px;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+[data-seller-digi-page] .digi-title-step__titles {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+@media (min-width: 768px) {
+  [data-seller-digi-page] .digi-title-step__titles {
+    flex-direction: row;
+    gap: 12px;
+  }
+
+  [data-seller-digi-page] .digi-title-step__titles > label {
+    flex: 1;
+  }
+}
+
+[data-seller-digi-page] .digi-create-textarea {
+  width: 100%;
+  min-height: 64px;
+  padding: 10px 12px;
+  border: 1px solid var(--color-neutral-200);
+  border-radius: var(--medium-radius);
+  background: #fff;
+  color: var(--color-text-high-emphasis);
+  font-size: 14px;
+  line-height: 1.7;
+  resize: vertical;
+  outline: none;
+  font-family: inherit;
+}
+
+[data-seller-digi-page] .digi-create-textarea:focus {
+  border-color: var(--color-brand-primary-500);
+}
+
+[data-seller-digi-page] .digi-create-textarea--desc {
+  min-height: 96px;
+}
+
+[data-seller-digi-page] .digi-title-step__counter {
+  margin: 4px 0 0;
+  color: var(--color-neutral-500);
+  font-size: 12px;
+  font-weight: 700;
+  text-align: left;
+  direction: ltr;
+}
+
+[data-seller-digi-page] .digi-title-step__proscons {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-top: 8px;
+}
+
+[data-seller-digi-page] .digi-title-step__chip-input {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+[data-seller-digi-page] .digi-title-step__chip-input .digi-create-input {
+  padding-left: 48px;
+}
+
+[data-seller-digi-page] .digi-title-step__plus {
+  position: absolute;
+  left: 4px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border: 0;
+  background: transparent;
+  color: var(--color-neutral-400);
+  cursor: pointer;
+}
+
+[data-seller-digi-page] .digi-title-step__chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 8px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+[data-seller-digi-page] .digi-title-step__chips li {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: rgba(2, 142, 113, 0.1);
+  color: var(--color-brand-secondary-700);
+  font-size: 12px;
+}
+
+[data-seller-digi-page] .digi-title-step__chips--neg li {
+  background: rgba(239, 86, 97, 0.1);
+  color: var(--color-hint-object-error);
+}
+
+[data-seller-digi-page] .digi-title-step__chips button {
+  border: 0;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  font-size: 14px;
+  line-height: 1;
+}
+
+/* Digikala ProductCreation step 5 — عکس */
+[data-seller-digi-page] .digi-photo-step {
+  padding: calc(8 * var(--spacing-base));
+}
+
+[data-seller-digi-page] .digi-photo-step__h5 {
+  width: fit-content;
+  margin: 0 0 8px;
+  color: var(--color-text-heading);
+  font-size: 18px;
+  font-weight: 800;
+}
+
+[data-seller-digi-page] .digi-photo-step__radios {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+[data-seller-digi-page] .digi-photo-step__divider {
+  margin: 20px 0;
+}
+
+[data-seller-digi-page] .digi-photo-step__help {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin: 20px 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--color-text-primary);
+  font-size: 13px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+[data-seller-digi-page] .digi-photo-step__hint {
+  margin: 20px 0;
+}
+
+[data-seller-digi-page] .digi-photo-step__upload-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  align-items: flex-start;
+}
+
+[data-seller-digi-page] .digi-photo-step__drop {
+  display: flex;
+  width: 120px;
+  height: 120px;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border: 1px dashed var(--color-brand-secondary-500);
+  border-radius: var(--medium-radius);
+  background: rgba(2, 142, 113, 0.04);
+  color: var(--color-icon-secondary);
+  cursor: pointer;
+}
+
+[data-seller-digi-page] .digi-photo-step__drop:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+[data-seller-digi-page] .digi-photo-step__drop span {
+  font-size: 13px;
+  font-weight: 700;
+}
+
+[data-seller-digi-page] .digi-photo-step__rules {
+  color: var(--color-text-high-emphasis);
+  font-size: 13px;
+}
+
+[data-seller-digi-page] .digi-photo-step__rules p {
+  margin: 0 0 8px;
+  font-weight: 700;
+}
+
+[data-seller-digi-page] .digi-photo-step__rules ul {
+  margin: 0;
+  padding-inline-start: 20px;
+}
+
+[data-seller-digi-page] .digi-photo-step__rules li {
+  margin-bottom: 4px;
+  list-style: disc;
+}
+
+[data-seller-digi-page] .digi-photo-step__ai-wait {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 20px;
+  color: var(--color-brand-primary-300);
+  font-size: 13px;
+}
+
+[data-seller-digi-page] .digi-photo-step__list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin: 20px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+[data-seller-digi-page] .digi-photo-step__list li {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  align-items: center;
+}
+
+[data-seller-digi-page] .digi-photo-step__thumb {
+  position: relative;
+  width: 96px;
+  height: 96px;
+  overflow: hidden;
+  border: 1px solid var(--color-neutral-200);
+  border-radius: var(--medium-radius);
+  background: var(--color-neutral-100);
+}
+
+[data-seller-digi-page] .digi-photo-step__thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+[data-seller-digi-page] .digi-photo-step__primary {
+  position: absolute;
+  bottom: 4px;
+  inset-inline-start: 4px;
+  padding: 1px 6px;
+  border-radius: 4px;
+  background: var(--color-brand-primary-500);
+  color: #fff;
+  font-size: 10px;
+  font-weight: 700;
+}
+
+[data-seller-digi-page] .digi-photo-step__remove {
+  border: 0;
+  background: transparent;
+  color: var(--color-hint-object-error);
+  font-size: 12px;
+  cursor: pointer;
+}
+
+[data-seller-digi-page] .digi-photo-step__ai-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 20px;
+}
+
+[data-seller-digi-page] .digi-photo-step__ai-outline {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 40px;
+  padding: 8px 14px;
+  border: 1px solid var(--color-text-ai);
+  border-radius: var(--medium-radius);
+  background: #fff;
+  color: var(--color-text-ai);
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+[data-seller-digi-page] .digi-photo-step__ai-outline:disabled {
+  opacity: 0.45;
+  cursor: default;
+}

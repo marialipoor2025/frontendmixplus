@@ -11,6 +11,24 @@ export type SellerMe = {
   isActive: boolean;
 };
 
+export type SellerDashboardStats = {
+  shopName: string;
+  productCount: number;
+  publishedCount: number;
+  draftCount: number;
+  outOfStockCount: number;
+};
+
+export type SellerOrderListItem = {
+  id: string;
+  customerName: string;
+  status: string;
+  createdAt: string;
+  itemCount: number;
+  sellerTotal: number;
+  currency: string;
+};
+
 export type SellerProductListItem = {
   id: string;
   title: string;
@@ -78,6 +96,59 @@ function absoluteUrl(url: string) {
 
 export async function getSellerMe(): Promise<SellerMe> {
   return apiClient<SellerMe>("/api/seller/me", { auth: true });
+}
+
+export async function getSellerDashboard(): Promise<SellerDashboardStats> {
+  const row = await apiClient<{
+    shopName: string;
+    productCount: number;
+    publishedCount: number;
+    draftCount: number;
+    outOfStockCount: number;
+  }>("/api/seller/dashboard", { auth: true });
+
+  return {
+    shopName: row.shopName ?? "",
+    productCount: row.productCount ?? 0,
+    publishedCount: row.publishedCount ?? 0,
+    draftCount: row.draftCount ?? 0,
+    outOfStockCount: row.outOfStockCount ?? 0,
+  };
+}
+
+export async function listSellerOrders(params?: {
+  status?: string;
+  page?: number;
+  pageSize?: number;
+}): Promise<PagedResult<SellerOrderListItem>> {
+  const result = await apiClient<{
+    items: SellerOrderListItem[];
+    page: number;
+    pageSize: number;
+    totalCount: number;
+    totalPages: number;
+  }>("/api/seller/orders", {
+    auth: true,
+    query: {
+      status: params?.status,
+      page: params?.page ?? 1,
+      pageSize: params?.pageSize ?? 10,
+    },
+  });
+
+  return {
+    items: (result.items ?? []).map((row) => ({
+      ...row,
+      customerName: row.customerName ?? "",
+      itemCount: row.itemCount ?? 0,
+      sellerTotal: row.sellerTotal ?? 0,
+      currency: row.currency ?? "IRT",
+    })),
+    page: result.page,
+    pageSize: result.pageSize,
+    totalCount: result.totalCount,
+    totalPages: result.totalPages,
+  };
 }
 
 export async function updateSellerProfile(input: {

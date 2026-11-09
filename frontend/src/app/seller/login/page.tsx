@@ -20,9 +20,9 @@ export default function SellerLoginPage() {
       <Suspense fallback={<p className="text-sm text-[var(--color-muted)]">در حال بارگذاری…</p>}>
         <LoginFormCard
           mode="seller"
-          defaultReturnUrl="/seller/dashboard"
+          defaultReturnUrl="/seller/digi/dashboard"
           title="ورود یا ثبت‌نام فروشنده"
-          subtitle="شماره موبایل یا ایمیل خود را وارد کنید — هر فروشنده‌ای می‌تواند شروع کند"
+          subtitle="شماره موبایل یا ایمیل خود را وارد کنید؛ سپس مراحل ثبت فروشگاه را کامل کنید"
         />
       </Suspense>
     </div>

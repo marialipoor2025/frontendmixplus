@@ -43,16 +43,16 @@ export default async function SellersJoinPage() {
           </ol>
           <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
             <Link
-              href="/seller/login?returnUrl=/seller/dashboard"
+              href="/seller/login?returnUrl=/seller/digi/dashboard"
               className="inline-flex h-12 items-center justify-center rounded-lg bg-[var(--color-primary)] px-6 text-sm font-bold text-white"
             >
               ورود / ثبت‌نام فروشنده
             </Link>
             <Link
-              href="/seller/dashboard"
+              href="/seller/onboarding"
               className="inline-flex h-12 items-center justify-center rounded-lg border border-[var(--color-neutral-200)] px-6 text-sm font-medium"
             >
-              رفتن به پنل
+              ادامه ثبت‌نام فروشگاه
             </Link>
           </div>
         </div>

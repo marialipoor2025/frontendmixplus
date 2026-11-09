@@ -55,10 +55,18 @@ type Props = {
   mode: "create" | "edit";
   productId?: string;
   initialStep?: string | null;
+  /** Route prefix for create/manage URLs. Digi panel passes `/seller/digi/products`. */
+  basePath?: string;
 };
 
-export function ProductWizard({ mode, productId, initialStep }: Props) {
+export function ProductWizard({
+  mode,
+  productId,
+  initialStep,
+  basePath = "/seller/products",
+}: Props) {
   const router = useRouter();
+  const listHref = basePath;
   const [step, setStep] = useState<SellerWizardStepId>(parseStepId(initialStep));
   const [draft, setDraft] = useState<SellerProductDraft | null>(null);
   const [bootError, setBootError] = useState<string | null>(null);
@@ -145,8 +153,8 @@ export function ProductWizard({ mode, productId, initialStep }: Props) {
     if (typeof window === "undefined") return;
     const path =
       isCreate || id.startsWith("draft-")
-        ? `/seller/products/new?draft=${encodeURIComponent(id)}&step=${next}`
-        : `/seller/products/${encodeURIComponent(id)}/manage?step=${next}`;
+        ? `${basePath}/new?draft=${encodeURIComponent(id)}&step=${next}`
+        : `${basePath}/${encodeURIComponent(id)}/manage?step=${next}`;
     window.history.replaceState(window.history.state, "", path);
   }
 
@@ -191,7 +199,7 @@ export function ProductWizard({ mode, productId, initialStep }: Props) {
     if (draft.isLocalOnly && !result.isLocalOnly) {
       removeDraft(draft.id);
       router.replace(
-        `/seller/products/${encodeURIComponent(result.id)}/manage?step=gallery`,
+        `${basePath}/${encodeURIComponent(result.id)}/manage?step=gallery`,
       );
       return;
     }
@@ -295,7 +303,7 @@ export function ProductWizard({ mode, productId, initialStep }: Props) {
     if (!draft) return;
     const result = await publishSellerProduct(draft, publish);
     setDraft(markStep(result, "preview", "saved"));
-    router.push("/seller/dashboard");
+    router.push(listHref);
   }
 
   if (loading) {
@@ -310,7 +318,7 @@ export function ProductWizard({ mode, productId, initialStep }: Props) {
     return (
       <div className="space-y-3">
         <p className="text-sm text-red-700">{bootError ?? "خطا"}</p>
-        <Link href="/seller/dashboard" className="text-sm text-[var(--color-primary)]">
+        <Link href={listHref} className="text-sm text-[var(--color-primary)]">
           بازگشت به محصولات
         </Link>
       </div>
@@ -324,7 +332,7 @@ export function ProductWizard({ mode, productId, initialStep }: Props) {
     <div className="space-y-4">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
-          <Link href="/seller/dashboard" className="text-xs text-[var(--color-primary)]">
+          <Link href={listHref} className="text-xs text-[var(--color-primary)]">
             ← محصولات من
           </Link>
           <h1 className="mt-1 text-lg font-bold text-[var(--color-neutral-900)]">

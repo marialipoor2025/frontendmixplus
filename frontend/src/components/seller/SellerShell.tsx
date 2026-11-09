@@ -3,14 +3,13 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import type { ReactNode } from "react";
+import { GradientFrame } from "@/components/profile/ProfileShell";
+import { LogoutIcon } from "@/components/layout/icons";
+import { NAV_ICON_CLASS } from "@/components/layout/navMenuShared";
+import { CLASSIC_SELLER_NAV, isSellerNavActive } from "@/components/seller/sellerNav";
 import { useAuth } from "@/lib/auth/useAuth";
 
-const NAV = [
-  { id: "dashboard", title: "مدیریت محصولات", href: "/seller/dashboard" },
-  { id: "new-product", title: "افزودن محصول", href: "/seller/products/new" },
-  { id: "settings", title: "تنظیمات فروشگاه", href: "/seller/settings" },
-] as const;
-
+/** Classic MixPlus seller console (sidebar) — kept for swap / comparison. */
 export function SellerShell({ children }: { children: ReactNode }) {
   const pathname = usePathname() || "/seller/dashboard";
   const router = useRouter();
@@ -38,6 +37,12 @@ export function SellerShell({ children }: { children: ReactNode }) {
             </div>
           </div>
           <div className="flex items-center gap-3">
+            <Link
+              href="/seller/digi/dashboard"
+              className="hidden rounded-lg border border-[var(--color-neutral-200)] px-3 py-1.5 text-xs text-[var(--color-neutral-700)] sm:inline-flex"
+            >
+              پیش‌نمایش پنل دیجی
+            </Link>
             <div className="text-end">
               <p className="text-xs font-medium text-[var(--color-neutral-800)]">
                 {user?.displayName ?? "فروشنده"}
@@ -58,32 +63,43 @@ export function SellerShell({ children }: { children: ReactNode }) {
       </header>
 
       <div className="mx-auto grid max-w-[1100px] gap-4 px-4 py-4 lg:grid-cols-[220px_minmax(0,1fr)] lg:gap-6 lg:py-6">
-        <aside className="rounded-xl border border-[var(--color-neutral-200)] bg-white p-3">
-          <nav aria-label="منوی پنل فروشنده" className="flex flex-col gap-0.5">
-            {NAV.map((item) => {
-              const active =
-                item.href === "/seller/dashboard"
-                  ? pathname === "/seller/dashboard" ||
-                    (pathname.startsWith("/seller/products/") &&
-                      !pathname.includes("/new"))
-                  : pathname.startsWith(item.href);
-              return (
-                <Link
-                  key={item.id}
-                  href={item.href}
-                  className={[
-                    "rounded-lg px-3 py-2.5 text-sm font-medium transition",
-                    active
-                      ? "bg-[var(--color-primary-soft)] text-[var(--color-primary)]"
-                      : "text-[var(--color-neutral-700)] hover:bg-[var(--color-neutral-50)]",
-                  ].join(" ")}
+        <GradientFrame>
+          <aside className="rounded-[11px] bg-white p-3">
+            <nav aria-label="منوی پنل فروشنده" className="flex flex-col gap-0.5">
+              {CLASSIC_SELLER_NAV.map((item) => {
+                const active = isSellerNavActive(pathname, item.href);
+                return (
+                  <Link
+                    key={item.id}
+                    href={item.href}
+                    className={[
+                      "rounded-lg px-3 py-2.5 text-sm font-medium transition",
+                      active
+                        ? "bg-[var(--color-primary-soft)] text-[var(--color-primary)]"
+                        : "text-[var(--color-neutral-700)] hover:bg-[var(--color-neutral-50)]",
+                    ].join(" ")}
+                  >
+                    {item.title}
+                  </Link>
+                );
+              })}
+            </nav>
+            <div className="mt-4 border-t border-[var(--color-neutral-100)] pt-3">
+              <GradientFrame radius="rounded-lg" className="w-full">
+                <button
+                  type="button"
+                  onClick={() => void handleLogout()}
+                  className="flex w-full items-center justify-center gap-2 rounded-[7px] bg-white px-3 py-2.5 text-sm font-bold text-[var(--color-primary)] transition hover:bg-[var(--color-primary-soft)]"
                 >
-                  {item.title}
-                </Link>
-              );
-            })}
-          </nav>
-        </aside>
+                  <LogoutIcon
+                    className={`${NAV_ICON_CLASS} text-[var(--color-primary)]`}
+                  />
+                  خروج از پنل
+                </button>
+              </GradientFrame>
+            </div>
+          </aside>
+        </GradientFrame>
         <main className="min-w-0">{children}</main>
       </div>
     </div>

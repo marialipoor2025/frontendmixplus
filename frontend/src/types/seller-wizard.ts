@@ -31,9 +31,26 @@ export type SellerProductBasics = {
   brandName: string;
   categoryId: string;
   categoryName: string;
+  /** Digikala path label e.g. لوازم خانگی برقی / لوازم توکار / هود */
+  categoryPath?: string;
   condition: "new" | "used";
   inStock: boolean;
   isPublished: boolean;
+  /** Digikala create step 2 — اطلاعات کلی */
+  model?: string;
+  productTypes?: string[];
+  division?: string;
+  origin?: "" | "iranian" | "foreign";
+  mefaType?: "general" | "exclusive";
+  mefaId?: string;
+  packageLength?: string;
+  packageWidth?: string;
+  packageHeight?: string;
+  packageWeight?: string;
+  /** Digikala create step 4 — عنوان */
+  titleEn?: string;
+  advantages?: string[];
+  disadvantages?: string[];
 };
 
 export type SellerProductPricing = {
@@ -89,9 +106,23 @@ export function emptyBasics(): SellerProductBasics {
     brandName: "",
     categoryId: "",
     categoryName: "",
+    categoryPath: "",
     condition: "new",
     inStock: true,
     isPublished: false,
+    model: "",
+    productTypes: [],
+    division: "",
+    origin: "",
+    mefaType: "general",
+    mefaId: "",
+    packageLength: "",
+    packageWidth: "",
+    packageHeight: "",
+    packageWeight: "",
+    titleEn: "",
+    advantages: [],
+    disadvantages: [],
   };
 }
 

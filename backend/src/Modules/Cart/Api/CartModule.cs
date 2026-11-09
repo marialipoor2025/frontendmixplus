@@ -33,5 +33,6 @@ public sealed class CartModule : IModule
         endpoints.MapCartEndpoints();
         endpoints.MapCheckoutEndpoints();
         endpoints.MapAdminOrderEndpoints();
+        endpoints.MapSellerOrderEndpoints();
     }
 }

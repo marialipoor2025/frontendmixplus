@@ -324,7 +324,7 @@ public sealed class CatalogProductCardReadPort(CatalogDbContext db) : IProductCa
         {
             if (hay.Contains(token, StringComparison.Ordinal)) return true;
             if (token.Length < 3) return false;
-            return hay.Split([' ', '-', '_', '/'], StringSplitOptions.RemoveEmptyEntries)
+            return hay.Split(new[] { ' ', '-', '_', '/' }, StringSplitOptions.RemoveEmptyEntries)
                 .Any(word => Levenshtein(token, word) <= 1);
         });
     }

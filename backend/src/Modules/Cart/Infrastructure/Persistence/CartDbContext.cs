@@ -66,12 +66,14 @@ public sealed class CartDbContext : DbContext
             entity.Property(x => x.ProductSlug).HasMaxLength(200).IsRequired();
             entity.Property(x => x.OfferExternalKey).HasMaxLength(100).IsRequired();
             entity.Property(x => x.SkuExternalKey).HasMaxLength(100).IsRequired();
+            entity.Property(x => x.SellerExternalKey).HasMaxLength(100);
             entity.Property(x => x.SellerName).HasMaxLength(200);
             entity.Property(x => x.Title).HasMaxLength(500).IsRequired();
             entity.Property(x => x.ImageUrl).HasMaxLength(1000);
             entity.Property(x => x.VariantLabel).HasMaxLength(200);
             entity.Property(x => x.UnitPrice).HasPrecision(18, 2);
             entity.Property(x => x.Currency).HasMaxLength(8);
+            entity.HasIndex(x => x.SellerExternalKey);
         });
 
         modelBuilder.Entity<ShoppingCart>(entity =>

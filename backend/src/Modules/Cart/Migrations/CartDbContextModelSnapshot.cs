@@ -223,6 +223,11 @@ namespace MixPlus.Modules.Cart.Migrations
                     b.Property<int>("Quantity")
                         .HasColumnType("integer");
 
+                    b.Property<string>("SellerExternalKey")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
                     b.Property<string>("SellerName")
                         .IsRequired()
                         .HasMaxLength(200)
@@ -249,6 +254,8 @@ namespace MixPlus.Modules.Cart.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("OrderId");
+
+                    b.HasIndex("SellerExternalKey");
 
                     b.ToTable("OrderLines", "cart");
                 });

@@ -32,6 +32,7 @@ internal static class SellerCatalogEndpoints
     {
         var group = endpoints.MapGroup("/api/seller").WithTags("SellerCatalog");
 
+        group.MapGet("/dashboard", GetDashboard).WithName("SellerDashboard");
         group.MapGet("/products", ListProducts).WithName("SellerListProducts");
         group.MapPost("/products", CreateProduct).WithName("SellerCreateProduct");
         group.MapGet("/products/{id}", GetProduct).WithName("SellerGetProduct");
@@ -48,6 +49,31 @@ internal static class SellerCatalogEndpoints
         group.MapDelete("/products/{id}/amazing-offer", WithdrawAmazingOffer).WithName("SellerWithdrawAmazingOffer");
         group.MapPost("/categories", CreateSellerCategory).WithName("SellerCreateCategory");
         group.MapPut("/categories/{id}/active", SetSellerCategoryActive).WithName("SellerSetCategoryActive");
+    }
+
+    private static async Task<IResult> GetDashboard(
+        HttpRequest request,
+        CatalogDbContext db,
+        ICurrentUserAccessor users,
+        ISellerAccountReadPort sellers,
+        CancellationToken ct)
+    {
+        var (seller, error) = await ResolveSellerAsync(request, users, sellers, ct);
+        if (error is not null) return error;
+
+        var products = db.Products.AsNoTracking()
+            .Where(x => x.SellerId == seller!.Id);
+
+        var productCount = await products.CountAsync(ct);
+        var publishedCount = await products.CountAsync(x => x.IsPublished, ct);
+        var outOfStockCount = await products.CountAsync(x => !x.InStock, ct);
+
+        return Results.Ok(new SellerDashboardDto(
+            seller.Name,
+            productCount,
+            publishedCount,
+            productCount - publishedCount,
+            outOfStockCount));
     }
 
     private static async Task<IResult> ListProducts(
@@ -1069,6 +1095,13 @@ internal static class SellerCatalogEndpoints
             product.InStock,
             gallery);
     }
+
+    private sealed record SellerDashboardDto(
+        string ShopName,
+        int ProductCount,
+        int PublishedCount,
+        int DraftCount,
+        int OutOfStockCount);
 
     private sealed record SellerProductListItemDto(
         string Id,

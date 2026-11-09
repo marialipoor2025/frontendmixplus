@@ -12,6 +12,7 @@ public sealed class OrderLine : Entity
     public string ProductSlug { get; private set; } = string.Empty;
     public string OfferExternalKey { get; private set; } = string.Empty;
     public string SkuExternalKey { get; private set; } = string.Empty;
+    public string SellerExternalKey { get; private set; } = string.Empty;
     public string SellerName { get; private set; } = string.Empty;
     public string Title { get; private set; } = string.Empty;
     public string ImageUrl { get; private set; } = string.Empty;
@@ -28,6 +29,9 @@ public sealed class OrderLine : Entity
             ProductSlug = line.ProductSlug,
             OfferExternalKey = line.OfferExternalKey,
             SkuExternalKey = line.SkuExternalKey,
+            SellerExternalKey = string.IsNullOrWhiteSpace(line.SellerExternalKey)
+                ? line.OfferExternalKey
+                : line.SellerExternalKey,
             SellerName = line.SellerName,
             Title = line.Title,
             ImageUrl = line.ImageUrl,

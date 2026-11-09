@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>پیشخوان — پنل دامون</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="assets/shell.css" />
+</head>
+<body>
+  <div id="sidebar-backdrop" class="sidebar-backdrop" hidden aria-hidden="true"></div>
+
+  <div id="app-shell" class="app-shell">
+    <!-- ═══════ SIDEBAR ═══════ -->
+    <aside class="sidebar" aria-label="ناوبری اصلی">
+      <div class="sidebar-inner">
+        <div class="sidebar-brand">
+          <a href="#dashboard" class="sidebar-logo" data-nav="dashboard" aria-label="دامون">
+            <img
+              alt="دامون هایپرصنعت"
+              width="160"
+              height="48"
+              decoding="async"
+              loading="eager"
+              src="assets/images/damoon-logo.png"
+            />
+          </a>
+        </div>
+
+        <div class="sidebar-toolbar">
+          <button
+            type="button"
+            id="collapse-btn"
+            class="collapse-btn"
+            aria-expanded="true"
+            aria-label="جمع کردن نوار کناری"
+            title="جمع کردن نوار کناری"
+          >
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
+              <path d="M15 6l-6 6 6 6" />
+            </svg>
+          </button>
+        </div>
+
+        <nav class="sidebar-nav" aria-label="بخش‌های پنل">
+          <!-- خرید -->
+          <div class="nav-group">
+            <span class="nav-group-label">خرید</span>
+            <ul class="nav-list">
+              <li>
+                <a href="#dashboard" class="nav-link" data-nav="dashboard" title="پیشخوان">
+                  <span class="nav-icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+                      <rect x="3" y="3" width="7" height="7" rx="1.5" />
+                      <rect x="14" y="3" width="7" height="7" rx="1.5" />
+                      <rect x="3" y="14" width="7" height="7" rx="1.5" />
+                      <rect x="14" y="14" width="7" height="7" rx="1.5" />
+                    </svg>
+                  </span>
+                  <span class="nav-label">پیشخوان</span>
+                </a>
+              </li>
+              <li class="nav-item-mega" id="nav-products-mega">
+                <a href="#products" class="nav-link" data-nav="products" title="محصولات" aria-haspopup="true" aria-expanded="false" id="nav-products-trigger">
+                  <span class="nav-icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M4 5.5A2.5 2.5 0 016.5 3H20v16H6.5A2.5 2.5 0 004 16.5v-11z" />
+                      <path d="M4 16.5A2.5 2.5 0 016.5 19H20" />
+                      <path d="M8 8h8M8 12h5" />
+                    </svg>
+                  </span>
+                  <span class="nav-label">محصولات</span>
+                  <span class="nav-mega-caret" aria-hidden="true">◂</span>
+                </a>
+              </li>
+              <li>
+                <a href="#requests" class="nav-link" data-nav="requests" title="درخواست‌ها">
+                  <span class="nav-icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2" />
+                      <rect x="9" y="3" width="6" height="4" rx="1" />
+                      <path d="M9 12h6M9 16h4" />
+                    </svg>
+                  </span>
+                  <span class="nav-label">درخواست‌ها</span>
+                  <span class="nav-badge" aria-label="۴ مورد">4</span>
+                </a>
+              </li>
+            </ul>
+          </div>
+
+          <!-- مالی و اسناد -->
+          <div class="nav-group">
+            <span class="nav-group-label">مالی و اسناد</span>
+            <ul class="nav-list">
+              <li>
+                <a href="#documents" class="nav-link" data-nav="documents" title="اسناد">
+                  <span class="nav-icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M14 3H7a2 2 0 00-2 2v14a2 2 0 002 2h10a2 2 0 002-2V8l-5-5z" />
+                      <path d="M14 3v5h5M9 13h6M9 17h4" />
+                    </svg>
+                  </span>
+                  <span class="nav-label">اسناد</span>
+                  <span class="nav-badge" aria-label="۲ مورد">2</span>
+                </a>
+              </li>
+              <li>
+                <a href="#finance" class="nav-link" data-nav="finance" title="مالی">
+                  <span class="nav-icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+                      <rect x="3" y="6" width="18" height="12" rx="2" />
+                      <path d="M3 10h18" />
+                      <circle cx="16" cy="14" r="1.25" fill="currentColor" stroke="none" />
+                    </svg>
+                  </span>
+                  <span class="nav-label">مالی</span>
+                  <span class="nav-badge" aria-label="۱ مورد">1</span>
+                </a>
+              </li>
+              <li>
+                <a href="#reports" class="nav-link" data-nav="reports" title="گزارش‌ها">
+                  <span class="nav-icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M4 19V5M4 19h16" />
+                      <path d="M8 15v-4M12 15V8M16 15v-7" />
+                    </svg>
+                  </span>
+                  <span class="nav-label">گزارش‌ها</span>
+                </a>
+              </li>
+            </ul>
+          </div>
+
+          <!-- پشتیبانی و حساب -->
+          <div class="nav-group">
+            <span class="nav-group-label">پشتیبانی و حساب</span>
+            <ul class="nav-list">
+              <li>
+                <a href="#support" class="nav-link" data-nav="support" title="پشتیبانی">
+                  <span class="nav-icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M12 3a7 7 0 00-7 7v2a3 3 0 003 3h1v-5H7a5 5 0 0110 0h-2v5h1a3 3 0 003-3v-2a7 7 0 00-7-7z" />
+                      <path d="M9 19h6" />
+                    </svg>
+                  </span>
+                  <span class="nav-label">پشتیبانی</span>
+                </a>
+              </li>
+              <li>
+                <a href="#account" class="nav-link" data-nav="account" title="حساب کاربری">
+                  <span class="nav-icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+                      <circle cx="12" cy="8" r="3.5" />
+                      <path d="M5 19.5c1.8-3.2 4.2-4.5 7-4.5s5.2 1.3 7 4.5" />
+                    </svg>
+                  </span>
+                  <span class="nav-label">حساب کاربری</span>
+                </a>
+              </li>
+            </ul>
+          </div>
+        </nav>
+      </div>
+    </aside>
+
+    <!-- ═══════ MAIN ═══════ -->
+    <div class="main-column">
+      <header class="topbar">
+        <div class="topbar-container shadow-1">
+          <div class="topbar-row">
+            <div class="topbar-col topbar-col-main">
+              <button
+                type="button"
+                id="menu-toggle"
+                class="menu-toggle"
+                aria-label="باز کردن منو"
+                aria-expanded="false"
+                aria-controls="app-shell"
+              >
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
+                  <path d="M4 7h16M4 12h16M4 17h16" />
+                </svg>
+              </button>
+              <div class="mobile-logo">
+                <a href="#dashboard" data-nav="dashboard" aria-label="دامون">
+                  <img
+                    alt="دامون هایپرصنعت"
+                    width="168"
+                    height="48"
+                    decoding="async"
+                    loading="eager"
+                    src="assets/images/damoon-logo.png"
+                  />
+                </a>
+              </div>
+              <div class="header-search-form">
+                <form class="header-search-inner" action="#" onsubmit="return false;">
+                  <input
+                    class="header-search-input"
+                    type="search"
+                    name="s"
+                    placeholder="جستجو"
+                    autocomplete="off"
+                    aria-label="جستجو"
+                  />
+                  <span class="header-search-ico" aria-hidden="true">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="19" fill="none" viewBox="0 0 18 19">
+                      <path stroke="#707EAE" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M13.125 13.375 16.5 16.75"></path>
+                      <path stroke="#707EAE" stroke-linejoin="round" stroke-width="1.5" d="M15 8.5a6.75 6.75 0 1 0-13.5 0 6.75 6.75 0 0 0 13.5 0Z"></path>
+                    </svg>
+                  </span>
+                </form>
+              </div>
+            </div>
+
+            <div class="topbar-col topbar-col-actions">
+              <div class="head-enquiry">
+                <a class="topbar-cta topbar-cta-outline" href="#requests" data-nav="requests">
+                  <span aria-hidden="true">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" viewBox="0 0 18 18" stroke="#2A75BB">
+                      <g stroke="currentColor" stroke-width="1.5" clip-path="url(#damoon-org-clip)">
+                        <path stroke-linejoin="round" d="m3.75 5.25-.914.61c-.655.436-.983.655-1.16.988-.178.333-.177.724-.174 1.507a133 133 0 0 0 .036 2.876c.058 2.306.087 3.459.934 4.306.848.848 2.017.877 4.354.936a87 87 0 0 0 4.349 0c2.337-.059 3.505-.088 4.353-.936s.877-2 .934-4.306c.024-.972.033-1.933.037-2.876.002-.783.003-1.174-.174-1.507-.178-.333-.505-.552-1.16-.989l-.915-.609"></path>
+                        <path stroke-linejoin="round" d="m1.5 7.5 5.185 3.11c1.128.678 1.692 1.016 2.315 1.016s1.187-.338 2.315-1.015L16.5 7.5"></path>
+                        <path d="M3.75 9V4.5c0-1.414 0-2.121.44-2.56.439-.44 1.146-.44 2.56-.44h4.5c1.414 0 2.121 0 2.56.44.44.439.44 1.146.44 2.56V9"></path>
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M7.5 7.5h3m-3-3h3"></path>
+                      </g>
+                      <defs>
+                        <clipPath id="damoon-org-clip"><path fill="#fff" d="M0 0h18v18H0z"></path></clipPath>
+                      </defs>
+                    </svg>
+                  </span>
+                  خرید سازمانی
+                </a>
+                <a class="topbar-cta topbar-cta-primary" href="#proforma" data-nav="proforma" id="head-quote-cta">
+                  <span class="head-quote-count" hidden>0</span>
+                  <span aria-hidden="true">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="19" fill="none" viewBox="0 0 18 19" stroke="#fff">
+                      <path stroke="currentColor" stroke-linejoin="round" stroke-width="1.5" d="m12.33 16.26.415-.517c.364-.455 1.136-.418 1.444.069.37.585 1.283.469 1.536-.07.013-.028-.02.042.008-.2.029-.242.017-.298-.007-.408l-1.442-6.81c-.362-1.713-.543-2.568-1.167-3.071s-1.503-.503-3.263-.503H8.146c-1.76 0-2.64 0-3.263.503s-.805 1.358-1.167 3.07l-1.443 6.81c-.023.111-.035.167-.007.409s-.004.172.009.2c.253.539 1.166.655 1.536.07.308-.487 1.08-.524 1.444-.069l.415.518c.521.652 1.611.652 2.133 0l.065-.082c.554-.692 1.71-.692 2.264 0l.065.082c.522.652 1.612.652 2.134 0Z"></path>
+                      <path stroke="currentColor" stroke-linecap="round" stroke-width="1.5" d="M1.863 7.375c-.44-.456-.357-1.043-.357-2.511s0-2.202.44-2.658c.438-.456 1.145-.456 2.558-.456h8.992c1.413 0 2.12 0 2.559.456s.439 1.19.439 2.658.082 2.055-.357 2.511"></path>
+                      <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 7.75H6.75M10.5 10.75H6"></path>
+                    </svg>
+                  </span>
+                  صدور پیش فاکتور
+                </a>
+              </div>
+
+              <div class="head-tools">
+                <div class="head-cart" id="head-cart">
+                  <a class="head-cart-btn" href="#products" data-nav="products" aria-label="سبد درخواست">
+                    <span class="head-cart-count" hidden>0</span>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="22" height="23" fill="none" viewBox="0 0 22 23" aria-hidden="true">
+                      <path stroke="#2B3674" stroke-width="1.5" d="m2.062 14.443.365-2.071c.432-2.448.647-3.672 1.502-4.397s2.083-.725 4.538-.725h5.066c2.455 0 3.683 0 4.538.725s1.07 1.949 1.502 4.397l.365 2.071c.598 3.388.896 5.082-.023 6.195-.92 1.112-2.62 1.112-6.017 1.112H8.102c-3.398 0-5.097 0-6.017-1.113s-.62-2.806-.023-6.194ZM6.5 7.25l.168-2.014a4.347 4.347 0 0 1 8.664 0L15.5 7.25"></path>
+                      <path stroke="#2B3674" stroke-linecap="round" stroke-width="1.5" d="M14 10.25c-.13 1.413-1.434 2.5-3 2.5s-2.87-1.087-3-2.5"></path>
+                    </svg>
+                  </a>
+                  <div class="head-cart-dropdown" hidden>
+                    <div class="head-cart-dropdown-top">
+                      <div class="head-cart-meta"><span class="head-cart-meta-count">0</span><span>عدد</span></div>
+                      <a class="head-cart-view" href="#products" data-nav="products">
+                        <span>مشاهده سبد درخواست</span>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="#2A75BB" viewBox="0 0 16 16" aria-hidden="true"><path fill="currentColor" d="M9.864 5.197a.75.75 0 1 0-1.061-1.06zM6 8l-.53-.53a.75.75 0 0 0 0 1.06zm2.803 3.864a.75.75 0 1 0 1.06-1.061zm0-7.728L5.47 7.47l1.06 1.06 3.334-3.333zM5.47 8.53l3.333 3.334 1.06-1.061L6.53 7.47z"></path></svg>
+                      </a>
+                    </div>
+                    <div class="head-cart-list"></div>
+                    <div class="head-cart-empty" hidden>سبد درخواست خالی است</div>
+                    <div class="head-cart-footer">
+                      <div class="head-cart-total">
+                        <span>جمع کل</span>
+                        <strong class="head-cart-total-val">۰ تومان</strong>
+                      </div>
+                      <a class="head-cart-checkout" href="#products" data-nav="products">سبد درخواست</a>
+                    </div>
+                  </div>
+                </div>
+
+                <button type="button" class="head-wish" id="head-wish" aria-label="علاقه‌مندی‌ها">
+                  <span class="head-wish-count" hidden>0</span>
+                  <svg xmlns="http://www.w3.org/2000/svg" width="21" height="21" fill="none" viewBox="0 0 18 16" aria-hidden="true">
+                    <path stroke="#2B3674" stroke-linecap="round" stroke-width="1.5" d="M14.597 1.996c-2.011-1.234-3.767-.737-4.821.055-.433.325-.649.487-.776.487s-.343-.162-.776-.487c-1.054-.792-2.81-1.29-4.82-.055-2.64 1.619-3.238 6.96 2.85 11.467 1.16.858 1.74 1.287 2.746 1.287s1.586-.43 2.745-1.287c6.089-4.507 5.491-9.848 2.852-11.467Z"></path>
+                  </svg>
+                </button>
+
+                <div class="head-account" id="head-account">
+                  <button type="button" class="head-account-btn" aria-expanded="false" aria-haspopup="true">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="22" fill="none" viewBox="0 0 20 22" aria-hidden="true">
+                      <path stroke="#2B3674" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4.578 14.732c-1.415.842-5.125 2.562-2.865 4.715 1.103 1.051 2.332 1.803 3.878 1.803h8.818c1.545 0 2.775-.752 3.878-1.803 2.26-2.153-1.45-3.873-2.865-4.715a10.66 10.66 0 0 0-10.844 0"></path>
+                      <path stroke="#2B3674" stroke-width="1.5" d="M14.5 5.75a4.5 4.5 0 1 1-9 0 4.5 4.5 0 0 1 9 0Z"></path>
+                    </svg>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="#2A75BB" viewBox="0 0 16 16" aria-hidden="true">
+                      <path fill="currentColor" d="M5.196 6.136a.75.75 0 1 0-1.06 1.061l1.06-1.06zM8 10l-.53.53a.75.75 0 0 0 1.06 0zm3.864-2.803a.75.75 0 0 0-1.06-1.06zm-7.727 0L7.47 10.53l1.06-1.06-3.333-3.334zM8.53 10.53l3.333-3.333-1.06-1.06L7.468 9.47l1.06 1.06z"></path>
+                    </svg>
+                  </button>
+                  <div class="head-account-menu" hidden>
+                    <ul>
+                      <li><a href="#dashboard" data-nav="dashboard">حساب کاربری</a></li>
+                      <li><a href="#requests" data-nav="requests">لیست‌ها</a></li>
+                      <li><a href="#documents" data-nav="documents">سفارشات</a></li>
+                      <li><a href="#finance" data-nav="finance">دیدگاه‌ها</a></li>
+                      <li><button type="button" class="head-account-logout">خروج از حساب کاربری</button></li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <main id="content-stage" class="content-stage" tabindex="-1">
+        <!-- Filled by shell.js -->
+      </main>
+    </div>
+  </div>
+
+  <!-- Products mega-menu (ported outside sidebar overflow) -->
+  <div id="prod-mega" class="prod-mega" hidden aria-hidden="true">
+    <div class="prod-mega-panel" role="menu" aria-label="دسته‌بندی محصولات">
+      <div class="prod-mega-main">
+        <ul class="prod-mega-cats" id="prod-mega-cats"></ul>
+        <div class="prod-mega-sub" id="prod-mega-sub"></div>
+      </div>
+      <div class="prod-mega-brands" id="prod-mega-brands" aria-label="برندهای این دسته"></div>
+    </div>
+  </div>
+
+  <!-- Global chatbot (all panel pages) -->
+  <div id="compare-dock" class="compare-dock" hidden></div>
+
+  <div id="damoon-chatbot" class="chatbot" data-open="false">
+    <div id="chatbot-panel" class="chatbot-panel" role="dialog" aria-labelledby="chatbot-title" aria-modal="false" hidden>
+      <header class="chatbot-head">
+        <div class="chatbot-head-meta">
+          <span class="chatbot-avatar" aria-hidden="true">د</span>
+          <div>
+            <h2 id="chatbot-title" class="chatbot-title">پشتیبانی دامون</h2>
+            <p class="chatbot-status"><span class="chatbot-online" aria-hidden="true"></span>آنلاین · پاسخ سریع</p>
+          </div>
+        </div>
+        <button type="button" class="chatbot-close" id="chatbot-close" aria-label="بستن گفتگو">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+            <path d="M6 6l12 12M18 6L6 18" stroke-linecap="round" />
+          </svg>
+        </button>
+      </header>
+      <div class="chatbot-messages" id="chatbot-messages" aria-live="polite">
+        <div class="chatbot-msg is-bot">
+          <p>سلام 👋 من دستیار فروش دامون هستم. برای استعلام قیمت، پیش‌فاکتور یا پیگیری سفارش پیام بگذارید.</p>
+        </div>
+      </div>
+      <form class="chatbot-form" id="chatbot-form">
+        <input
+          type="text"
+          id="chatbot-input"
+          class="chatbot-input"
+          placeholder="پیام خود را بنویسید…"
+          autocomplete="off"
+          aria-label="پیام پشتیبانی"
+        />
+        <button type="submit" class="chatbot-send" aria-label="ارسال">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor" aria-hidden="true">
+            <path d="M3.4 20.6 21 12 3.4 3.4l.1 6.8L15 12 3.5 13.8z" />
+          </svg>
+        </button>
+      </form>
+    </div>
+
+    <button type="button" class="chatbot-fab" id="chatbot-fab" aria-expanded="false" aria-controls="chatbot-panel" aria-label="گفتگو با پشتیبانی">
+      <span class="chatbot-ping animate-slowPing" aria-hidden="true"></span>
+      <span class="chatbot-fab-icon" aria-hidden="true">
+        <svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="#fff" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 11.5a8.5 8.5 0 01-8.5 8.5H8l-5 3V11.5A8.5 8.5 0 0111.5 3h1a8.5 8.5 0 018.5 8.5z" />
+          <path d="M8.5 10h7M8.5 13.5h4.5" />
+        </svg>
+      </span>
+    </button>
+  </div>
+
+  <script src="assets/products.js"></script>
+  <script src="assets/shell.js"></script>
+</body>
+</html>

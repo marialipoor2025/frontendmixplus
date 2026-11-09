@@ -1,0 +1,396 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Damoon Customer Club — AS-IS process (best-practice structure)
+  Pattern: B2B Quote-to-Cash / Customer Portal Procure-to-Pay
+  Scope: processes actually implemented in panel.damoon-co.com today
+  Open in: https://demo.bpmn.io/
+-->
+<bpmn:definitions
+  xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL"
+  xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI"
+  xmlns:dc="http://www.omg.org/spec/DD/20100524/DC"
+  xmlns:di="http://www.omg.org/spec/DD/20100524/DI"
+  id="Definitions_DamoonAsIsStandard"
+  targetNamespace="https://panel.damoon-co.com/bpmn/as-is-standard"
+  exporter="Cursor Damoon Audit"
+  exporterVersion="3.0">
+
+  <!-- =========================================================
+       Collaboration (common B2B portal parties)
+       ========================================================= -->
+  <bpmn:collaboration id="Collab_AsIs_Q2C" name="Damoon AS-IS — Quote-to-Cash (Customer Portal)">
+    <bpmn:participant id="Part_Buyer" name="Customer (Buyer)" processRef="Proc_Buyer"/>
+    <bpmn:participant id="Part_Portal" name="Damoon Customer Portal" processRef="Proc_Portal"/>
+    <bpmn:participant id="Part_Seller" name="Damoon Sales Operations" processRef="Proc_Seller"/>
+    <bpmn:participant id="Part_Billing" name="Billing / Didar CRM" processRef="Proc_Billing"/>
+
+    <bpmn:messageFlow id="MF_A1" name="Credentials" sourceRef="T_B_Authenticate" targetRef="T_P_ValidateSession"/>
+    <bpmn:messageFlow id="MF_A2" name="RFQ / Purchase intent" sourceRef="T_B_SubmitIntent" targetRef="T_P_CreateCase"/>
+    <bpmn:messageFlow id="MF_A3" name="New case (معامله)" sourceRef="T_P_CreateCase" targetRef="T_S_Qualify"/>
+    <bpmn:messageFlow id="MF_A4" name="Status feedback" sourceRef="T_S_Qualify" targetRef="T_P_PublishStatus"/>
+    <bpmn:messageFlow id="MF_A5" name="Quotation (پیش‌فاکتور)" sourceRef="T_S_Quote" targetRef="T_P_PublishQuote"/>
+    <bpmn:messageFlow id="MF_A6" name="View quotation" sourceRef="T_B_ReviewQuote" targetRef="T_P_PublishQuote"/>
+    <bpmn:messageFlow id="MF_A7" name="Commercial invoice" sourceRef="T_S_Invoice" targetRef="T_Bill_Issue"/>
+    <bpmn:messageFlow id="MF_A8" name="Open invoice" sourceRef="T_B_ViewInvoice" targetRef="T_Bill_Present"/>
+    <bpmn:messageFlow id="MF_A9" name="Payment notice + proof" sourceRef="T_B_NotifyPayment" targetRef="T_P_RecordPaymentNotice"/>
+    <bpmn:messageFlow id="MF_A10" name="Payment notice to ops" sourceRef="T_P_RecordPaymentNotice" targetRef="T_S_Reconcile"/>
+  </bpmn:collaboration>
+
+  <!-- =========================================================
+       1) BUYER — standard customer portal journey
+       ========================================================= -->
+  <bpmn:process id="Proc_Buyer" name="Buyer Quote-to-Cash journey (AS-IS)" isExecutable="false">
+
+    <bpmn:startEvent id="Start_B" name="Need industrial equipment"/>
+    <bpmn:sequenceFlow id="SF_B01" sourceRef="Start_B" targetRef="T_B_Authenticate"/>
+
+    <!-- Phase 1: Access -->
+    <bpmn:task id="T_B_Authenticate" name="1. Access portal&#10;Register or Login + captcha"/>
+    <bpmn:sequenceFlow id="SF_B02" sourceRef="T_B_Authenticate" targetRef="T_B_Orient"/>
+
+    <bpmn:task id="T_B_Orient" name="2. Orient on dashboard&#10;Open deals · quotes · unpaid balance"/>
+    <bpmn:sequenceFlow id="SF_B03" sourceRef="T_B_Orient" targetRef="GW_B_Purpose"/>
+
+    <!-- Phase 2: Intent -->
+    <bpmn:exclusiveGateway id="GW_B_Purpose" name="Purpose?"/>
+    <bpmn:sequenceFlow id="SF_B04" name="New purchase intent" sourceRef="GW_B_Purpose" targetRef="GW_B_Channel"/>
+    <bpmn:sequenceFlow id="SF_B05" name="Track existing case" sourceRef="GW_B_Purpose" targetRef="T_B_TrackCase"/>
+    <bpmn:sequenceFlow id="SF_B06" name="Self-service (account/reports)" sourceRef="GW_B_Purpose" targetRef="T_B_SelfService"/>
+
+    <bpmn:exclusiveGateway id="GW_B_Channel" name="How to request?"/>
+    <bpmn:sequenceFlow id="SF_B07" name="Catalog → cart" sourceRef="GW_B_Channel" targetRef="T_B_Discover"/>
+    <bpmn:sequenceFlow id="SF_B08" name="Manual RFQ form" sourceRef="GW_B_Channel" targetRef="T_B_ManualRFQ"/>
+
+    <bpmn:task id="T_B_Discover" name="3a. Discover products&#10;Category → SKU list + search"/>
+    <bpmn:sequenceFlow id="SF_B09" sourceRef="T_B_Discover" targetRef="T_B_ComposeCart"/>
+
+    <bpmn:task id="T_B_ComposeCart" name="3b. Compose cart&#10;Add SKU · adjust qty"/>
+    <bpmn:sequenceFlow id="SF_B10" sourceRef="T_B_ComposeCart" targetRef="T_B_SubmitIntent"/>
+
+    <bpmn:task id="T_B_ManualRFQ" name="3c. Manual RFQ&#10;Select items · notes · attachments"/>
+    <bpmn:sequenceFlow id="SF_B11" sourceRef="T_B_ManualRFQ" targetRef="T_B_SubmitIntent"/>
+
+    <bpmn:task id="T_B_SubmitIntent" name="4. Submit purchase intent&#10;Checkout or /requests/new (+ captcha)"/>
+    <bpmn:sequenceFlow id="SF_B12" sourceRef="T_B_SubmitIntent" targetRef="T_B_TrackCase"/>
+
+    <!-- Phase 3: Case follow-up -->
+    <bpmn:task id="T_B_TrackCase" name="5. Track case (معامله)&#10;Status: ارتباط اولیه / پیگیری"/>
+    <bpmn:sequenceFlow id="SF_B13" sourceRef="T_B_TrackCase" targetRef="GW_B_Commercial"/>
+
+    <bpmn:exclusiveGateway id="GW_B_Commercial" name="Commercial document?"/>
+    <bpmn:sequenceFlow id="SF_B14" name="Quotation ready" sourceRef="GW_B_Commercial" targetRef="T_B_ReviewQuote"/>
+    <bpmn:sequenceFlow id="SF_B15" name="Invoice ready" sourceRef="GW_B_Commercial" targetRef="T_B_ViewInvoice"/>
+    <bpmn:sequenceFlow id="SF_B16" name="Not yet" sourceRef="GW_B_Commercial" targetRef="End_B_Waiting"/>
+
+    <!-- Phase 4: Quote -->
+    <bpmn:task id="T_B_ReviewQuote" name="6. Review quotation&#10;پیش‌فاکتور in-panel PDF/print"/>
+    <bpmn:sequenceFlow id="SF_B17" sourceRef="T_B_ReviewQuote" targetRef="GW_B_Commercial"/>
+
+    <!-- Phase 5: Invoice & pay -->
+    <bpmn:task id="T_B_ViewInvoice" name="7. View invoice&#10;Redirect to Didar CRM"/>
+    <bpmn:sequenceFlow id="SF_B18" sourceRef="T_B_ViewInvoice" targetRef="T_B_NotifyPayment"/>
+
+    <bpmn:task id="T_B_NotifyPayment" name="8. Notify payment&#10;Bank · amount · cheque · proof"/>
+    <bpmn:sequenceFlow id="SF_B19" sourceRef="T_B_NotifyPayment" targetRef="End_B_Paid"/>
+
+    <!-- Side path -->
+    <bpmn:task id="T_B_SelfService" name="Maintain profile / view reports&#10;/account · /reports"/>
+    <bpmn:sequenceFlow id="SF_B20" sourceRef="T_B_SelfService" targetRef="GW_B_Purpose"/>
+
+    <bpmn:endEvent id="End_B_Waiting" name="Waiting on seller"/>
+    <bpmn:endEvent id="End_B_Paid" name="Payment notice submitted"/>
+  </bpmn:process>
+
+  <!-- =========================================================
+       2) PORTAL — system capabilities (AS-IS)
+       ========================================================= -->
+  <bpmn:process id="Proc_Portal" name="Customer portal system (AS-IS)" isExecutable="false">
+    <bpmn:startEvent id="Start_P" name="HTTP session"/>
+    <bpmn:sequenceFlow id="SF_P01" sourceRef="Start_P" targetRef="T_P_ValidateSession"/>
+
+    <bpmn:task id="T_P_ValidateSession" name="Validate auth&#10;Session + captcha"/>
+    <bpmn:sequenceFlow id="SF_P02" sourceRef="T_P_ValidateSession" targetRef="T_P_ServeCatalog"/>
+
+    <bpmn:task id="T_P_ServeCatalog" name="Serve catalog &amp; search&#10;Taxonomy + SKU grid"/>
+    <bpmn:sequenceFlow id="SF_P03" sourceRef="T_P_ServeCatalog" targetRef="T_P_ManageCart"/>
+
+    <bpmn:task id="T_P_ManageCart" name="Manage cart&#10;Browser localStorage"/>
+    <bpmn:sequenceFlow id="SF_P04" sourceRef="T_P_ManageCart" targetRef="T_P_CreateCase"/>
+
+    <bpmn:task id="T_P_CreateCase" name="Create commercial case&#10;معامله from cart or RFQ"/>
+    <bpmn:sequenceFlow id="SF_P05" sourceRef="T_P_CreateCase" targetRef="T_P_PublishStatus"/>
+
+    <bpmn:task id="T_P_PublishStatus" name="Publish case status&#10;to customer UI"/>
+    <bpmn:sequenceFlow id="SF_P06" sourceRef="T_P_PublishStatus" targetRef="T_P_PublishQuote"/>
+
+    <bpmn:task id="T_P_PublishQuote" name="Publish quotation&#10;/proformas/:id"/>
+    <bpmn:sequenceFlow id="SF_P07" sourceRef="T_P_PublishQuote" targetRef="T_P_RecordPaymentNotice"/>
+
+    <bpmn:task id="T_P_RecordPaymentNotice" name="Record payment notice&#10;/finance tabs"/>
+    <bpmn:sequenceFlow id="SF_P08" sourceRef="T_P_RecordPaymentNotice" targetRef="End_P"/>
+
+    <bpmn:endEvent id="End_P" name="Portal ready"/>
+  </bpmn:process>
+
+  <!-- =========================================================
+       3) SELLER OPS — back-office (observed via UI)
+       ========================================================= -->
+  <bpmn:process id="Proc_Seller" name="Sales operations (AS-IS, observed)" isExecutable="false">
+    <bpmn:startEvent id="Start_S" name="Inbound case"/>
+    <bpmn:sequenceFlow id="SF_S01" sourceRef="Start_S" targetRef="T_S_Qualify"/>
+
+    <bpmn:task id="T_S_Qualify" name="Qualify &amp; follow up&#10;ارتباط اولیه → پیگیری اول"/>
+    <bpmn:sequenceFlow id="SF_S02" sourceRef="T_S_Qualify" targetRef="T_S_Quote"/>
+
+    <bpmn:task id="T_S_Quote" name="Prepare quotation&#10;Issue پیش‌فاکتور"/>
+    <bpmn:sequenceFlow id="SF_S03" sourceRef="T_S_Quote" targetRef="T_S_Invoice"/>
+
+    <bpmn:task id="T_S_Invoice" name="Issue commercial invoice&#10;فاکتور"/>
+    <bpmn:sequenceFlow id="SF_S04" sourceRef="T_S_Invoice" targetRef="T_S_Reconcile"/>
+
+    <bpmn:task id="T_S_Reconcile" name="Reconcile settlement&#10;تسویه‌نشده / مانده"/>
+    <bpmn:sequenceFlow id="SF_S05" sourceRef="T_S_Reconcile" targetRef="End_S"/>
+
+    <bpmn:endEvent id="End_S" name="Case settled or open"/>
+  </bpmn:process>
+
+  <!-- =========================================================
+       4) BILLING / DIDAR — external invoice channel (AS-IS)
+       ========================================================= -->
+  <bpmn:process id="Proc_Billing" name="External billing channel (AS-IS)" isExecutable="false">
+    <bpmn:startEvent id="Start_Bill" name="Invoice issued"/>
+    <bpmn:sequenceFlow id="SF_Bill01" sourceRef="Start_Bill" targetRef="T_Bill_Issue"/>
+
+    <bpmn:task id="T_Bill_Issue" name="Store invoice in Didar"/>
+    <bpmn:sequenceFlow id="SF_Bill02" sourceRef="T_Bill_Issue" targetRef="T_Bill_Present"/>
+
+    <bpmn:task id="T_Bill_Present" name="Present invoice to customer&#10;app.didar.me (outside portal shell)"/>
+    <bpmn:sequenceFlow id="SF_Bill03" sourceRef="T_Bill_Present" targetRef="End_Bill"/>
+
+    <bpmn:endEvent id="End_Bill" name="Customer left portal shell"/>
+  </bpmn:process>
+
+  <!-- =========================================================
+       DIAGRAM — phased columns (best-practice readability)
+       Columns: Access | Intent | Case | Quote | Invoice/Pay
+       ========================================================= -->
+  <bpmndi:BPMNDiagram id="BPMNDiagram_AsIs_Standard">
+    <bpmndi:BPMNPlane id="BPMNPlane_AsIs_Standard" bpmnElement="Collab_AsIs_Q2C">
+
+      <!-- Pools -->
+      <bpmndi:BPMNShape id="SH_Part_Buyer" bpmnElement="Part_Buyer" isHorizontal="true">
+        <dc:Bounds x="100" y="40" width="2200" height="360"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SH_Part_Portal" bpmnElement="Part_Portal" isHorizontal="true">
+        <dc:Bounds x="100" y="440" width="2200" height="150"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SH_Part_Seller" bpmnElement="Part_Seller" isHorizontal="true">
+        <dc:Bounds x="100" y="630" width="2200" height="140"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SH_Part_Billing" bpmnElement="Part_Billing" isHorizontal="true">
+        <dc:Bounds x="100" y="810" width="2200" height="120"/>
+      </bpmndi:BPMNShape>
+
+      <!-- ===== BUYER ===== -->
+      <bpmndi:BPMNShape id="SH_Start_B" bpmnElement="Start_B">
+        <dc:Bounds x="160" y="178" width="36" height="36"/>
+        <bpmndi:BPMNLabel><dc:Bounds x="136" y="221" width="84" height="27"/></bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SH_T_B_Authenticate" bpmnElement="T_B_Authenticate">
+        <dc:Bounds x="240" y="160" width="140" height="70"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SH_T_B_Orient" bpmnElement="T_B_Orient">
+        <dc:Bounds x="420" y="160" width="150" height="70"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SH_GW_B_Purpose" bpmnElement="GW_B_Purpose" isMarkerVisible="true">
+        <dc:Bounds x="610" y="175" width="50" height="50"/>
+        <bpmndi:BPMNLabel><dc:Bounds x="604" y="232" width="62" height="14"/></bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+
+      <bpmndi:BPMNShape id="SH_GW_B_Channel" bpmnElement="GW_B_Channel" isMarkerVisible="true">
+        <dc:Bounds x="710" y="105" width="50" height="50"/>
+        <bpmndi:BPMNLabel><dc:Bounds x="692" y="78" width="86" height="14"/></bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SH_T_B_Discover" bpmnElement="T_B_Discover">
+        <dc:Bounds x="800" y="70" width="140" height="60"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SH_T_B_ComposeCart" bpmnElement="T_B_ComposeCart">
+        <dc:Bounds x="980" y="70" width="130" height="60"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SH_T_B_ManualRFQ" bpmnElement="T_B_ManualRFQ">
+        <dc:Bounds x="800" y="160" width="140" height="60"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SH_T_B_SubmitIntent" bpmnElement="T_B_SubmitIntent">
+        <dc:Bounds x="1160" y="110" width="150" height="70"/>
+      </bpmndi:BPMNShape>
+
+      <bpmndi:BPMNShape id="SH_T_B_TrackCase" bpmnElement="T_B_TrackCase">
+        <dc:Bounds x="1360" y="160" width="150" height="70"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SH_GW_B_Commercial" bpmnElement="GW_B_Commercial" isMarkerVisible="true">
+        <dc:Bounds x="1560" y="175" width="50" height="50"/>
+        <bpmndi:BPMNLabel><dc:Bounds x="1540" y="232" width="90" height="27"/></bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+
+      <bpmndi:BPMNShape id="SH_T_B_ReviewQuote" bpmnElement="T_B_ReviewQuote">
+        <dc:Bounds x="1660" y="70" width="150" height="70"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SH_T_B_ViewInvoice" bpmnElement="T_B_ViewInvoice">
+        <dc:Bounds x="1660" y="160" width="150" height="70"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SH_End_B_Waiting" bpmnElement="End_B_Waiting">
+        <dc:Bounds x="1717" y="292" width="36" height="36"/>
+        <bpmndi:BPMNLabel><dc:Bounds x="1690" y="335" width="90" height="27"/></bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+
+      <bpmndi:BPMNShape id="SH_T_B_NotifyPayment" bpmnElement="T_B_NotifyPayment">
+        <dc:Bounds x="1860" y="160" width="150" height="70"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SH_End_B_Paid" bpmnElement="End_B_Paid">
+        <dc:Bounds x="2060" y="177" width="36" height="36"/>
+        <bpmndi:BPMNLabel><dc:Bounds x="2030" y="220" width="96" height="40"/></bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+
+      <bpmndi:BPMNShape id="SH_T_B_SelfService" bpmnElement="T_B_SelfService">
+        <dc:Bounds x="800" y="280" width="160" height="60"/>
+      </bpmndi:BPMNShape>
+
+      <!-- Buyer edges -->
+      <bpmndi:BPMNEdge id="E_SF_B01" bpmnElement="SF_B01"><di:waypoint x="196" y="196"/><di:waypoint x="240" y="196"/></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="E_SF_B02" bpmnElement="SF_B02"><di:waypoint x="380" y="196"/><di:waypoint x="420" y="196"/></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="E_SF_B03" bpmnElement="SF_B03"><di:waypoint x="570" y="196"/><di:waypoint x="610" y="196"/></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="E_SF_B04" bpmnElement="SF_B04"><di:waypoint x="635" y="175"/><di:waypoint x="635" y="130"/><di:waypoint x="710" y="130"/></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="E_SF_B05" bpmnElement="SF_B05"><di:waypoint x="660" y="200"/><di:waypoint x="1360" y="200"/></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="E_SF_B06" bpmnElement="SF_B06"><di:waypoint x="635" y="225"/><di:waypoint x="635" y="310"/><di:waypoint x="800" y="310"/></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="E_SF_B07" bpmnElement="SF_B07"><di:waypoint x="735" y="105"/><di:waypoint x="735" y="100"/><di:waypoint x="800" y="100"/></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="E_SF_B08" bpmnElement="SF_B08"><di:waypoint x="735" y="155"/><di:waypoint x="735" y="190"/><di:waypoint x="800" y="190"/></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="E_SF_B09" bpmnElement="SF_B09"><di:waypoint x="940" y="100"/><di:waypoint x="980" y="100"/></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="E_SF_B10" bpmnElement="SF_B10"><di:waypoint x="1110" y="100"/><di:waypoint x="1235" y="100"/><di:waypoint x="1235" y="110"/></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="E_SF_B11" bpmnElement="SF_B11"><di:waypoint x="940" y="190"/><di:waypoint x="1235" y="190"/><di:waypoint x="1235" y="180"/></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="E_SF_B12" bpmnElement="SF_B12"><di:waypoint x="1310" y="145"/><di:waypoint x="1435" y="145"/><di:waypoint x="1435" y="160"/></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="E_SF_B13" bpmnElement="SF_B13"><di:waypoint x="1510" y="200"/><di:waypoint x="1560" y="200"/></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="E_SF_B14" bpmnElement="SF_B14"><di:waypoint x="1585" y="175"/><di:waypoint x="1585" y="105"/><di:waypoint x="1660" y="105"/></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="E_SF_B15" bpmnElement="SF_B15"><di:waypoint x="1610" y="200"/><di:waypoint x="1660" y="200"/></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="E_SF_B16" bpmnElement="SF_B16"><di:waypoint x="1585" y="225"/><di:waypoint x="1585" y="310"/><di:waypoint x="1717" y="310"/></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="E_SF_B17" bpmnElement="SF_B17"><di:waypoint x="1735" y="140"/><di:waypoint x="1735" y="160"/><di:waypoint x="1610" y="160"/><di:waypoint x="1610" y="200"/></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="E_SF_B18" bpmnElement="SF_B18"><di:waypoint x="1810" y="200"/><di:waypoint x="1860" y="200"/></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="E_SF_B19" bpmnElement="SF_B19"><di:waypoint x="2010" y="195"/><di:waypoint x="2060" y="195"/></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="E_SF_B20" bpmnElement="SF_B20"><di:waypoint x="880" y="340"/><di:waypoint x="635" y="340"/><di:waypoint x="635" y="225"/></bpmndi:BPMNEdge>
+
+      <!-- ===== PORTAL (aligned under buyer phases) ===== -->
+      <bpmndi:BPMNShape id="SH_Start_P" bpmnElement="Start_P">
+        <dc:Bounds x="160" y="492" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SH_T_P_ValidateSession" bpmnElement="T_P_ValidateSession">
+        <dc:Bounds x="240" y="475" width="140" height="70"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SH_T_P_ServeCatalog" bpmnElement="T_P_ServeCatalog">
+        <dc:Bounds x="800" y="475" width="140" height="70"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SH_T_P_ManageCart" bpmnElement="T_P_ManageCart">
+        <dc:Bounds x="980" y="475" width="130" height="70"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SH_T_P_CreateCase" bpmnElement="T_P_CreateCase">
+        <dc:Bounds x="1160" y="475" width="150" height="70"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SH_T_P_PublishStatus" bpmnElement="T_P_PublishStatus">
+        <dc:Bounds x="1360" y="475" width="150" height="70"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SH_T_P_PublishQuote" bpmnElement="T_P_PublishQuote">
+        <dc:Bounds x="1660" y="475" width="150" height="70"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SH_T_P_RecordPaymentNotice" bpmnElement="T_P_RecordPaymentNotice">
+        <dc:Bounds x="1860" y="475" width="150" height="70"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SH_End_P" bpmnElement="End_P">
+        <dc:Bounds x="2060" y="492" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+
+      <bpmndi:BPMNEdge id="E_SF_P01" bpmnElement="SF_P01"><di:waypoint x="196" y="510"/><di:waypoint x="240" y="510"/></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="E_SF_P02" bpmnElement="SF_P02"><di:waypoint x="380" y="510"/><di:waypoint x="800" y="510"/></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="E_SF_P03" bpmnElement="SF_P03"><di:waypoint x="940" y="510"/><di:waypoint x="980" y="510"/></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="E_SF_P04" bpmnElement="SF_P04"><di:waypoint x="1110" y="510"/><di:waypoint x="1160" y="510"/></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="E_SF_P05" bpmnElement="SF_P05"><di:waypoint x="1310" y="510"/><di:waypoint x="1360" y="510"/></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="E_SF_P06" bpmnElement="SF_P06"><di:waypoint x="1510" y="510"/><di:waypoint x="1660" y="510"/></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="E_SF_P07" bpmnElement="SF_P07"><di:waypoint x="1810" y="510"/><di:waypoint x="1860" y="510"/></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="E_SF_P08" bpmnElement="SF_P08"><di:waypoint x="2010" y="510"/><di:waypoint x="2060" y="510"/></bpmndi:BPMNEdge>
+
+      <!-- ===== SELLER ===== -->
+      <bpmndi:BPMNShape id="SH_Start_S" bpmnElement="Start_S">
+        <dc:Bounds x="160" y="672" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SH_T_S_Qualify" bpmnElement="T_S_Qualify">
+        <dc:Bounds x="1360" y="655" width="150" height="70"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SH_T_S_Quote" bpmnElement="T_S_Quote">
+        <dc:Bounds x="1660" y="655" width="150" height="70"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SH_T_S_Invoice" bpmnElement="T_S_Invoice">
+        <dc:Bounds x="1860" y="655" width="140" height="70"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SH_T_S_Reconcile" bpmnElement="T_S_Reconcile">
+        <dc:Bounds x="2040" y="655" width="140" height="70"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SH_End_S" bpmnElement="End_S">
+        <dc:Bounds x="2220" y="672" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+
+      <bpmndi:BPMNEdge id="E_SF_S01" bpmnElement="SF_S01"><di:waypoint x="196" y="690"/><di:waypoint x="1360" y="690"/></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="E_SF_S02" bpmnElement="SF_S02"><di:waypoint x="1510" y="690"/><di:waypoint x="1660" y="690"/></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="E_SF_S03" bpmnElement="SF_S03"><di:waypoint x="1810" y="690"/><di:waypoint x="1860" y="690"/></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="E_SF_S04" bpmnElement="SF_S04"><di:waypoint x="2000" y="690"/><di:waypoint x="2040" y="690"/></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="E_SF_S05" bpmnElement="SF_S05"><di:waypoint x="2180" y="690"/><di:waypoint x="2220" y="690"/></bpmndi:BPMNEdge>
+
+      <!-- ===== BILLING / DIDAR ===== -->
+      <bpmndi:BPMNShape id="SH_Start_Bill" bpmnElement="Start_Bill">
+        <dc:Bounds x="160" y="852" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SH_T_Bill_Issue" bpmnElement="T_Bill_Issue">
+        <dc:Bounds x="1860" y="835" width="140" height="70"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SH_T_Bill_Present" bpmnElement="T_Bill_Present">
+        <dc:Bounds x="2040" y="835" width="160" height="70"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SH_End_Bill" bpmnElement="End_Bill">
+        <dc:Bounds x="2240" y="852" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+
+      <bpmndi:BPMNEdge id="E_SF_Bill01" bpmnElement="SF_Bill01"><di:waypoint x="196" y="870"/><di:waypoint x="1860" y="870"/></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="E_SF_Bill02" bpmnElement="SF_Bill02"><di:waypoint x="2000" y="870"/><di:waypoint x="2040" y="870"/></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="E_SF_Bill03" bpmnElement="SF_Bill03"><di:waypoint x="2200" y="870"/><di:waypoint x="2240" y="870"/></bpmndi:BPMNEdge>
+
+      <!-- Message flows (column-aligned) -->
+      <bpmndi:BPMNEdge id="E_MF_A1" bpmnElement="MF_A1">
+        <di:waypoint x="310" y="230"/><di:waypoint x="310" y="475"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="E_MF_A2" bpmnElement="MF_A2">
+        <di:waypoint x="1235" y="180"/><di:waypoint x="1235" y="475"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="E_MF_A3" bpmnElement="MF_A3">
+        <di:waypoint x="1235" y="545"/><di:waypoint x="1235" y="620"/><di:waypoint x="1435" y="655"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="E_MF_A4" bpmnElement="MF_A4">
+        <di:waypoint x="1435" y="655"/><di:waypoint x="1435" y="545"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="E_MF_A5" bpmnElement="MF_A5">
+        <di:waypoint x="1735" y="655"/><di:waypoint x="1735" y="545"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="E_MF_A6" bpmnElement="MF_A6">
+        <di:waypoint x="1735" y="140"/><di:waypoint x="1735" y="475"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="E_MF_A7" bpmnElement="MF_A7">
+        <di:waypoint x="1930" y="725"/><di:waypoint x="1930" y="835"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="E_MF_A8" bpmnElement="MF_A8">
+        <di:waypoint x="1810" y="230"/><di:waypoint x="2120" y="230"/><di:waypoint x="2120" y="835"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="E_MF_A9" bpmnElement="MF_A9">
+        <di:waypoint x="1935" y="230"/><di:waypoint x="1935" y="475"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="E_MF_A10" bpmnElement="MF_A10">
+        <di:waypoint x="2010" y="545"/><di:waypoint x="2110" y="545"/><di:waypoint x="2110" y="655"/>
+      </bpmndi:BPMNEdge>
+
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

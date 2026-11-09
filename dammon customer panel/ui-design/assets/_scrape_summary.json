@@ -1,0 +1,8 @@
+{
+  "valves": 20,
+  "coldroom": 0,
+  "compressor": 20,
+  "control": 15,
+  "condenser": 20,
+  "consumables": 20
+}

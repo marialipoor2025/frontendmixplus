@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>سبد و ثبت درخواست | باشگاه مشتریان دامون</title>
+  <link rel="stylesheet" href="../assets/damoon-tobe.css" />
+</head>
+<body data-nav="products">
+  <div class="app-shell">
+    <aside class="sidebar">
+      <div class="sidebar-brand">
+        <div class="logo-mark"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8"><path d="M4 7h16M4 12h16M4 17h10"/><circle cx="18" cy="17" r="2.5"/></svg></div>
+        <div class="brand-text">
+          <div class="brand-name">دامون</div>
+          <div class="brand-sub">باشگاه مشتریان</div>
+        </div>
+      </div>
+      <nav class="sidebar-nav" aria-label="منوی اصلی">
+        <div class="nav-section">اصلی</div>
+        <a class="nav-item" data-nav="dashboard" href="03-dashboard.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg><span>پیشخوان</span></a>
+        <a class="nav-item" data-nav="products" href="04-products.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 7h16v12H4z"/><path d="M8 7V5h8v2"/><path d="M9 12h6"/></svg><span>کاتالوگ</span></a>
+        <a class="nav-item" data-nav="requests" href="08-requests.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M8 4h8a2 2 0 012 2v14l-6-3-6 3V6a2 2 0 012-2z"/></svg><span>درخواست‌ها</span></a>
+        <a class="nav-item" data-nav="finance" href="12-finance.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="6" width="18" height="12" rx="2"/><path d="M3 10h18"/><circle cx="16" cy="14" r="1.5"/></svg><span>مالی</span></a>
+        <a class="nav-item" data-nav="reports" href="14-reports.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 19V5"/><path d="M4 19h16"/><path d="M8 15v-4"/><path d="M12 15V8"/><path d="M16 15v-6"/></svg><span>گزارش‌ها</span></a>
+        <div class="nav-section">حساب</div>
+        <a class="nav-item" data-nav="account" href="15-account.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="8" r="3.5"/><path d="M5 19c1.5-3 4-4.5 7-4.5S17.5 16 19 19"/></svg><span>حساب کاربری</span></a>
+      </nav>
+      <div class="sidebar-foot">TO-BE mockup · بدون Didar خارجی</div>
+    </aside>
+    <div class="main-col">
+      <header class="topbar">
+        <div class="topbar-search">
+          <svg class="search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3-3"/></svg>
+          <input type="search" placeholder="جستجوی کالا، کد فنی، شماره معامله…" />
+        </div>
+        <div class="topbar-actions">
+          <a class="cart-btn" href="06-checkout.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 6h15l-1.5 9h-12z"/><circle cx="9" cy="20" r="1.5"/><circle cx="17" cy="20" r="1.5"/><path d="M6 6L5 3H2"/></svg><span>سبد</span><span class="cart-badge">3</span></a>
+          <a class="user-chip" href="15-account.html">
+            <span class="user-avatar">اا</span>
+            <span class="name">احمدرضا ابراهیمی</span>
+          </a>
+        </div>
+      </header>
+      <main class="content">
+
+        <div class="page-header">
+          <div>
+            <div class="breadcrumb"><a href="05-product-list.html">کاتالوگ</a><span class="sep">/</span><span>سبد</span></div>
+            <h1>بازبینی سبد و ثبت درخواست</h1>
+            <p class="sub">پس از ورود، کپچا لازم نیست — فقط تأیید اقلام و ارسال</p>
+          </div>
+        </div>
+
+        <div class="grid-aside">
+          <div class="card">
+            <div class="card-head"><h2>اقلام سبد</h2><a class="text-sm" href="05-product-list.html">افزودن کالا</a></div>
+            <div class="table-wrap">
+              <table class="table">
+                <thead>
+                  <tr><th>کد</th><th>شرح</th><th>تعداد</th><th></th></tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td class="num fw-600">1122701</td>
+                    <td>بال ولو سوزنی جوشی 1/4 اینچی مدل GBC 6s دانفوس</td>
+                    <td><div class="qty"><button type="button">−</button><span>۱۲</span><button type="button">+</button></div></td>
+                    <td class="actions"><button type="button" class="btn btn-sm btn-ghost">حذف</button></td>
+                  </tr>
+                  <tr>
+                    <td class="num fw-600">3722710</td>
+                    <td>بال ولو "3/8 ساده هانسِن HBC 10</td>
+                    <td><div class="qty"><button type="button">−</button><span>۳</span><button type="button">+</button></div></td>
+                    <td class="actions"><button type="button" class="btn btn-sm btn-ghost">حذف</button></td>
+                  </tr>
+                  <tr>
+                    <td class="num fw-600">1122702</td>
+                    <td>بال ولو سوزنی جوشی 3/8 اینچی مدل GBC 10s دانفوس</td>
+                    <td><div class="qty"><button type="button">−</button><span>۱</span><button type="button">+</button></div></td>
+                    <td class="actions"><button type="button" class="btn btn-sm btn-ghost">حذف</button></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="card-body">
+              <div class="form-group mb-0">
+                <label class="form-label" for="note">توضیحات برای کارشناس فروش</label>
+                <textarea class="form-control" id="note" placeholder="مثلاً: تحویل تهران، اولویت فوری برای پروژه سردخانه…">آدرس تحویل: میدان شمشیری، خیابان خردمند شمالی، پلاک ۱۰۵/۱ — تماس: ۰۹۳۹۰۸۷۷۸۷۶</textarea>
+              </div>
+            </div>
+          </div>
+
+          <div class="stack-md">
+            <div class="card card-pad">
+              <h3 style="margin:0 0 0.75rem;font-size:0.95rem;">خلاصه ارسال</h3>
+              <div class="flex-between text-sm" style="margin-bottom:0.45rem;"><span class="muted">تعداد اقلام</span><span class="fw-600 num">۳</span></div>
+              <div class="flex-between text-sm" style="margin-bottom:0.45rem;"><span class="muted">جمع تعداد</span><span class="fw-600 num">۱۶</span></div>
+              <div class="flex-between text-sm mb-1"><span class="muted">قیمت‌گذاری</span><span>پس از بررسی کارشناس</span></div>
+              <div class="callout callout-blue" style="margin-bottom:1rem;">با ارسال، معامله جدید در وضعیت «ارتباط اولیه» ساخته می‌شود.</div>
+              <a class="btn btn-primary btn-lg btn-block" href="09-deal-detail.html">ثبت درخواست خرید</a>
+              <a class="btn btn-ghost btn-block" href="07-request-new.html">یا از ویزارد سه‌مرحله‌ای</a>
+            </div>
+          </div>
+        </div>
+
+      </main>
+    </div>
+  </div>
+  <script src="../assets/damoon-shell.js"></script>
+</body>
+</html>

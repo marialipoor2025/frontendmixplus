@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>اعلام پرداخت | باشگاه مشتریان دامون</title>
+  <link rel="stylesheet" href="../assets/damoon-tobe.css" />
+</head>
+<body data-nav="finance">
+  <div class="app-shell">
+    <aside class="sidebar">
+      <div class="sidebar-brand">
+        <div class="logo-mark"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8"><path d="M4 7h16M4 12h16M4 17h10"/><circle cx="18" cy="17" r="2.5"/></svg></div>
+        <div class="brand-text">
+          <div class="brand-name">دامون</div>
+          <div class="brand-sub">باشگاه مشتریان</div>
+        </div>
+      </div>
+      <nav class="sidebar-nav" aria-label="منوی اصلی">
+        <div class="nav-section">اصلی</div>
+        <a class="nav-item" data-nav="dashboard" href="03-dashboard.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg><span>پیشخوان</span></a>
+        <a class="nav-item" data-nav="products" href="04-products.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 7h16v12H4z"/><path d="M8 7V5h8v2"/><path d="M9 12h6"/></svg><span>کاتالوگ</span></a>
+        <a class="nav-item" data-nav="requests" href="08-requests.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M8 4h8a2 2 0 012 2v14l-6-3-6 3V6a2 2 0 012-2z"/></svg><span>درخواست‌ها</span></a>
+        <a class="nav-item" data-nav="finance" href="12-finance.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="6" width="18" height="12" rx="2"/><path d="M3 10h18"/><circle cx="16" cy="14" r="1.5"/></svg><span>مالی</span></a>
+        <a class="nav-item" data-nav="reports" href="14-reports.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 19V5"/><path d="M4 19h16"/><path d="M8 15v-4"/><path d="M12 15V8"/><path d="M16 15v-6"/></svg><span>گزارش‌ها</span></a>
+        <div class="nav-section">حساب</div>
+        <a class="nav-item" data-nav="account" href="15-account.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="8" r="3.5"/><path d="M5 19c1.5-3 4-4.5 7-4.5S17.5 16 19 19"/></svg><span>حساب کاربری</span></a>
+      </nav>
+      <div class="sidebar-foot">TO-BE mockup · بدون Didar خارجی</div>
+    </aside>
+    <div class="main-col">
+      <header class="topbar">
+        <div class="topbar-search">
+          <svg class="search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3-3"/></svg>
+          <input type="search" placeholder="جستجوی کالا، کد فنی، شماره معامله…" />
+        </div>
+        <div class="topbar-actions">
+          <a class="cart-btn" href="06-checkout.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 6h15l-1.5 9h-12z"/><circle cx="9" cy="20" r="1.5"/><circle cx="17" cy="20" r="1.5"/><path d="M6 6L5 3H2"/></svg><span>سبد</span><span class="cart-badge">3</span></a>
+          <a class="user-chip" href="15-account.html">
+            <span class="user-avatar">اا</span>
+            <span class="name">احمدرضا ابراهیمی</span>
+          </a>
+        </div>
+      </header>
+      <main class="content">
+
+        <div class="page-header">
+          <div>
+            <div class="breadcrumb"><a href="12-finance.html">مالی</a><span class="sep">/</span><span>اعلام واریز</span></div>
+            <h1>اعلام پرداخت</h1>
+            <p class="sub">فرم راهنمایی‌شده — اتصال به فاکتور باز</p>
+          </div>
+        </div>
+
+        <div class="grid-aside">
+          <div class="card">
+            <div class="card-head"><h2>اطلاعات واریز</h2></div>
+            <div class="card-body">
+              <div class="form-group">
+                <label class="form-label" for="inv">فاکتور مرتبط</label>
+                <select class="form-control" id="inv">
+                  <option selected>I-94 — معامله ۲۴۳۰۵ — ۱۵٬۴۰۰٬۰۰۰ ریال</option>
+                  <option>بدون فاکتور (پیش‌پرداخت)</option>
+                </select>
+              </div>
+              <div class="form-row">
+                <div class="form-group">
+                  <label class="form-label" for="amount">مبلغ واریزی (ریال)</label>
+                  <input class="form-control num" id="amount" type="text" value="۱۵٬۴۰۰٬۰۰۰" dir="ltr" />
+                </div>
+                <div class="form-group">
+                  <label class="form-label" for="paydate">تاریخ واریز</label>
+                  <input class="form-control" id="paydate" type="text" value="۱۴۰۴/۰۸/۱۵" />
+                </div>
+              </div>
+              <div class="form-row">
+                <div class="form-group">
+                  <label class="form-label" for="ref">شماره پیگیری / مرجع بانک</label>
+                  <input class="form-control" id="ref" type="text" placeholder="مثلاً ۱۲۳۴۵۶۷۸۹۰" dir="ltr" />
+                </div>
+                <div class="form-group">
+                  <label class="form-label" for="bank">بانک مبدأ</label>
+                  <select class="form-control" id="bank">
+                    <option>ملت</option>
+                    <option>ملی</option>
+                    <option>تجارت</option>
+                    <option>سامان</option>
+                    <option>سایر</option>
+                  </select>
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="receipt">تصویر رسید</label>
+                <input class="form-control" id="receipt" type="file" />
+                <div class="form-hint">JPG یا PDF تا ۵ مگابایت</div>
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="paynote">توضیح</label>
+                <textarea class="form-control" id="paynote" placeholder="اختیاری">تسویه کامل فاکتور I-94</textarea>
+              </div>
+              <div class="flex gap-sm">
+                <a class="btn btn-primary" href="12-finance.html">ثبت اعلام واریز</a>
+                <a class="btn btn-ghost" href="12-finance.html">انصراف</a>
+              </div>
+            </div>
+          </div>
+
+          <div class="stack-md">
+            <div class="card card-pad">
+              <h3 style="margin:0 0 0.5rem;font-size:0.95rem;">حساب مقصد دامون</h3>
+              <p class="text-sm muted">پس از واریز، اعلام را ثبت کنید تا واحد مالی تأیید کند.</p>
+              <div class="text-sm stack-sm" style="margin-top:0.75rem;">
+                <div><span class="muted">بانک:</span> ملت</div>
+                <div><span class="muted">شبا:</span> <span class="num" dir="ltr">IR00-0000-0000-0000-0000-0000-00</span></div>
+                <div><span class="muted">به نام:</span> شرکت مهندسی بازرگانی دامون</div>
+              </div>
+            </div>
+            <div class="callout callout-amber">
+              تا تأیید مالی، مانده فاکتور «پرداخت‌نشده» می‌ماند. وضعیت در پیشخوان و هاب مالی به‌روز می‌شود.
+            </div>
+            <a class="btn btn-secondary btn-block" href="11-invoices.html">بازگشت به فاکتور I-94</a>
+          </div>
+        </div>
+
+      </main>
+    </div>
+  </div>
+  <script src="../assets/damoon-shell.js"></script>
+</body>
+</html>

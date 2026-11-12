@@ -51,3 +51,15 @@ backend/**/obj/
 backend/**/.vs/
 *.user
 *.suo
+
+.browser-auth/
+
+# Digikala seller scrape dumps (large; regenerate via scripts/scrape-digikala-seller.mjs)
+/data/digikala-scrape/product-list.json
+/data/digikala-scrape/product-management.json
+/data/digikala-scrape/variant-management.json
+/data/digikala-scrape/category-5808-validation-bind.json
+/tmp-digi-js/
+/tmp-*.json
+/tmp-*.js
+

@@ -44,15 +44,36 @@ public static class DatabaseInitializer
             return;
         }
 
+        var digiCatalogOnly = config.GetValue("Seed:DigiCatalog", false);
+
         await SeedHomeAndNavAsync(services, config, logger);
-        await CatalogSeeder.SeedAsync(services, config, logger);
-        await DigikalaCategoryTreeSeeder.SeedAsync(services, logger);
-        await VariantSeeder.SeedAsync(services, config, logger);
-        await OfferSeeder.SeedAsync(services, config, logger);
+
+        if (!digiCatalogOnly)
+        {
+            await CatalogSeeder.SeedAsync(services, config, logger);
+            await DigikalaCategoryTreeSeeder.SeedAsync(services, logger);
+            await VariantSeeder.SeedAsync(services, config, logger);
+            await OfferSeeder.SeedAsync(services, config, logger);
+        }
+        else
+        {
+            logger.LogInformation(
+                "Seed:DigiCatalog=true — skipping mock Catalog / Digikala tree / MixPlus / sample variants+offers");
+        }
+
         await HomeCompositionSeeder.SeedAsync(services, config, logger);
         await NavigationSeeder.SeedAsync(services, config, logger);
         await SellerPortalSeeder.SeedAsync(services, logger);
-        await MixPlusCatalogSeeder.SeedAsync(services, config, logger);
+
+        if (!digiCatalogOnly)
+        {
+            await MixPlusCatalogSeeder.SeedAsync(services, config, logger);
+        }
+
+        await DigiSellerScrapeSeeder.SeedAsync(services, config, logger);
+        await DigiCatalogFromScrapeSeeder.SeedAsync(services, config, logger);
+        await DigiProductDetailEnricherSeeder.SeedAsync(services, config, logger);
+        await DigiCategoryHierarchySeeder.SeedAsync(services, config, logger);
     }
 
     private static async Task MigrateModulesAsync(

@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using MixPlus.Modules.Catalog.Application.Abstractions;
 using MixPlus.Modules.Catalog.Domain.Brands;
 using MixPlus.Modules.Catalog.Domain.Categories;
+using MixPlus.Modules.Catalog.Domain.Digi;
 using MixPlus.Modules.Catalog.Domain.Offers;
 using MixPlus.Modules.Catalog.Domain.Products;
 using MixPlus.Modules.Catalog.Domain.Reviews;
@@ -31,6 +32,10 @@ public sealed class CatalogDbContext : DbContext, ICatalogDbContext
     public DbSet<SpecDefinition> SpecDefinitions => Set<SpecDefinition>();
     public DbSet<ProductReview> Reviews => Set<ProductReview>();
     public DbSet<ProductOffer> Offers => Set<ProductOffer>();
+    public DbSet<DigiManagedProduct> DigiManagedProducts => Set<DigiManagedProduct>();
+    public DbSet<DigiMarketplaceProduct> DigiMarketplaceProducts => Set<DigiMarketplaceProduct>();
+    public DbSet<DigiSellerVariant> DigiSellerVariants => Set<DigiSellerVariant>();
+    public DbSet<DigiCategoryFormSchema> DigiCategoryFormSchemas => Set<DigiCategoryFormSchema>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -242,6 +247,77 @@ public sealed class CatalogDbContext : DbContext, ICatalogDbContext
                 money.Property(m => m.Amount).HasColumnName("OriginalPriceAmount").HasPrecision(18, 2);
                 money.Property(m => m.Currency).HasColumnName("OriginalPriceCurrency").HasMaxLength(8);
             });
+        });
+
+        modelBuilder.Entity<DigiManagedProduct>(entity =>
+        {
+            entity.ToTable("DigiManagedProducts");
+            entity.HasKey(x => x.Id);
+            entity.Ignore(x => x.DomainEvents);
+            entity.Property(x => x.ExternalKey).HasMaxLength(100).IsRequired();
+            entity.HasIndex(x => x.ExternalKey).IsUnique();
+            entity.HasIndex(x => x.DigikalaProductId).IsUnique();
+            entity.Property(x => x.Title).HasMaxLength(500).IsRequired();
+            entity.Property(x => x.TitleEn).HasMaxLength(500);
+            entity.Property(x => x.BrandTitle).HasMaxLength(200);
+            entity.Property(x => x.CategoryTitle).HasMaxLength(200);
+            entity.Property(x => x.Status).HasMaxLength(80);
+            entity.Property(x => x.ModerationStatus).HasMaxLength(80);
+            entity.Property(x => x.ImageUrl).HasMaxLength(1000);
+            entity.Property(x => x.ProductUrl).HasMaxLength(1000);
+            entity.Property(x => x.Site).HasMaxLength(40);
+            entity.Property(x => x.PayloadJson).HasColumnType("jsonb").IsRequired();
+        });
+
+        modelBuilder.Entity<DigiMarketplaceProduct>(entity =>
+        {
+            entity.ToTable("DigiMarketplaceProducts");
+            entity.HasKey(x => x.Id);
+            entity.Ignore(x => x.DomainEvents);
+            entity.Property(x => x.ExternalKey).HasMaxLength(100).IsRequired();
+            entity.HasIndex(x => x.ExternalKey).IsUnique();
+            entity.HasIndex(x => x.DigikalaProductId).IsUnique();
+            entity.Property(x => x.Title).HasMaxLength(500).IsRequired();
+            entity.Property(x => x.Status).HasMaxLength(80);
+            entity.Property(x => x.Commission).HasMaxLength(80);
+            entity.Property(x => x.PriceType).HasMaxLength(80);
+            entity.Property(x => x.Brand).HasMaxLength(200);
+            entity.Property(x => x.Category).HasMaxLength(200);
+            entity.Property(x => x.ImageUrl).HasMaxLength(1000);
+            entity.Property(x => x.Site).HasMaxLength(40);
+            entity.Property(x => x.PayloadJson).HasColumnType("jsonb").IsRequired();
+        });
+
+        modelBuilder.Entity<DigiSellerVariant>(entity =>
+        {
+            entity.ToTable("DigiSellerVariants");
+            entity.HasKey(x => x.Id);
+            entity.Ignore(x => x.DomainEvents);
+            entity.Property(x => x.ExternalKey).HasMaxLength(100).IsRequired();
+            entity.HasIndex(x => x.ExternalKey).IsUnique();
+            entity.HasIndex(x => x.DigikalaVariantId).IsUnique();
+            entity.HasIndex(x => x.DigikalaProductId);
+            entity.Property(x => x.SupplierCode).HasMaxLength(120);
+            entity.Property(x => x.Title).HasMaxLength(500).IsRequired();
+            entity.Property(x => x.ProductTitle).HasMaxLength(500);
+            entity.Property(x => x.CategoryTitle).HasMaxLength(200);
+            entity.Property(x => x.PriceType).HasMaxLength(80);
+            entity.Property(x => x.ImageUrl).HasMaxLength(1000);
+            entity.Property(x => x.ProductUrl).HasMaxLength(1000);
+            entity.Property(x => x.PayloadJson).HasColumnType("jsonb").IsRequired();
+        });
+
+        modelBuilder.Entity<DigiCategoryFormSchema>(entity =>
+        {
+            entity.ToTable("DigiCategoryFormSchemas");
+            entity.HasKey(x => x.Id);
+            entity.Ignore(x => x.DomainEvents);
+            entity.Property(x => x.ExternalKey).HasMaxLength(100).IsRequired();
+            entity.HasIndex(x => x.ExternalKey).IsUnique();
+            entity.HasIndex(x => x.DigikalaCategoryId).IsUnique();
+            entity.Property(x => x.LeafTitle).HasMaxLength(200).IsRequired();
+            entity.Property(x => x.CategoryPathJson).HasColumnType("jsonb");
+            entity.Property(x => x.SchemaJson).HasColumnType("jsonb").IsRequired();
         });
     }
 }

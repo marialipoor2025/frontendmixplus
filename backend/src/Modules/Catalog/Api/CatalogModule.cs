@@ -242,7 +242,8 @@ public sealed class CatalogModule : IModule
                         .FirstOrDefaultAsync(c => c.ExternalKey == product.CategoryExternalKey, ct);
                 }
 
-                return Results.Ok(ToDto(product, category));
+                var categoryPath = await BuildCategoryPathAsync(db, category, ct);
+                return Results.Ok(ToDto(product, category, categoryPath));
             })
             .WithName("GetCatalogProduct");
 
@@ -389,7 +390,40 @@ public sealed class CatalogModule : IModule
         endpoints.MapSellerCatalogEndpoints();
     }
 
-    private static ProductCardDto ToDto(Product product, Category? category = null)
+    private static async Task<IReadOnlyList<CategoryPathItemDto>> BuildCategoryPathAsync(
+        CatalogDbContext db,
+        Category? leaf,
+        CancellationToken ct)
+    {
+        if (leaf is null) return [];
+
+        var all = await db.Categories.AsNoTracking()
+            .Where(x => x.IsActive)
+            .ToDictionaryAsync(x => x.Id, ct);
+
+        var path = new List<CategoryPathItemDto>();
+        Category? current = leaf;
+        var guard = 0;
+        while (current is not null && guard++ < 16)
+        {
+            path.Insert(0, new CategoryPathItemDto(
+                current.ExternalKey,
+                current.Title,
+                current.Slug,
+                current.Href));
+            if (current.ParentId is not Guid pid || !all.TryGetValue(pid, out current))
+            {
+                break;
+            }
+        }
+
+        return path;
+    }
+
+    private static ProductCardDto ToDto(
+        Product product,
+        Category? category = null,
+        IReadOnlyList<CategoryPathItemDto>? categoryPath = null)
     {
         IReadOnlyList<string>? badges = null;
         if (!string.IsNullOrWhiteSpace(product.BadgesJson))
@@ -432,7 +466,8 @@ public sealed class CatalogModule : IModule
             categorySlug,
             categoryHref,
             product.SkuCode,
-            product.ImageAlt);
+            product.ImageAlt,
+            categoryPath);
     }
 
     /// <summary>

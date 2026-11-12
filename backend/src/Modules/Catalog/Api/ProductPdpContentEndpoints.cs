@@ -52,6 +52,7 @@ internal static class ProductPdpContentEndpoints
             expertReviewPreview = content.ExpertReviewPreview ?? "",
             expertReviewFull = content.ExpertReviewFull ?? "",
             features = content.Features ?? [],
+            returnNotice = content.ReturnNotice ?? "",
             showWarranty = content.ShowWarranty ?? true,
             warranty = content.Warranty ?? "",
             showDelivery = content.ShowDelivery ?? true,
@@ -77,6 +78,7 @@ internal static class ProductPdpContentEndpoints
             metaDescription = product.MetaDescription,
             metaKeywords = product.MetaKeywords,
             imageAlt = product.ImageAlt,
+            galleryImages = content.GalleryImages ?? [],
         });
     }
 
@@ -101,6 +103,7 @@ internal static class ProductPdpContentEndpoints
         public string? ExpertReviewPreview { get; set; }
         public string? ExpertReviewFull { get; set; }
         public List<PdpFeatureDto>? Features { get; set; }
+        public string? ReturnNotice { get; set; }
         public bool? ShowWarranty { get; set; }
         public string? Warranty { get; set; }
         public bool? ShowDelivery { get; set; }
@@ -114,7 +117,10 @@ internal static class ProductPdpContentEndpoints
         public decimal? InsurancePrice { get; set; }
         public decimal? InsuranceOriginalPrice { get; set; }
         public int? InsuranceDiscountPercent { get; set; }
+        public List<PdpGalleryImageDto>? GalleryImages { get; set; }
     }
 
     internal sealed record PdpFeatureDto(string Id, string Label, string Value);
+
+    internal sealed record PdpGalleryImageDto(string Id, string Url, string? Alt);
 }

@@ -24,7 +24,10 @@ public sealed record ProductCardDto(
     string? CategorySlug = null,
     string? CategoryHref = null,
     string? SkuCode = null,
-    string? ImageAlt = null);
+    string? ImageAlt = null,
+    IReadOnlyList<CategoryPathItemDto>? CategoryPath = null);
+
+public sealed record CategoryPathItemDto(string Id, string Title, string Slug, string Href);
 
 public sealed record MoneyDto(decimal Amount, string Currency);
 

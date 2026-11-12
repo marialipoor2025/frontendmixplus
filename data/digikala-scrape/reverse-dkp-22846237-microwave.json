@@ -1,0 +1,376 @@
+{
+  "scrapedAt": "2026-11-12T16:22:24.949Z",
+  "sampleProductId": 22846237,
+  "sampleDkp": "DKP-22846237",
+  "categoryId": 5808,
+  "categoryPath": [
+    "لوازم خانگی برقی",
+    "لوازم پخت و پز",
+    "مایکروویو، مایکروفر"
+  ],
+  "leafTitle": "مایکروویو، مایکروفر",
+  "createSteps": [
+    {
+      "step": 1,
+      "title": "دسته‌بندی",
+      "url": "/pwa/product/create/1?categoryId=5808",
+      "notes": "Leaf category + تنوع گروه کالایی (رنگ for microwave)",
+      "fields": [
+        {
+          "id": "categoryId",
+          "label": "دسته‌بندی",
+          "required": true,
+          "value": 5808
+        },
+        {
+          "id": "variantGroup",
+          "label": "تنوع گروه کالایی",
+          "required": true,
+          "options": [
+            "رنگ"
+          ],
+          "observed": "رنگ"
+        }
+      ]
+    },
+    {
+      "step": 2,
+      "title": "اطلاعات کلی",
+      "url": "/pwa/product/create/2?categoryId=5808",
+      "api": "/api/v2/product-creation/category/5808/validation",
+      "fields": [
+        {
+          "id": "brand_id",
+          "label": "برند یا نام سازنده کالا",
+          "required": true
+        },
+        {
+          "id": "product_type",
+          "label": "نوع کالا",
+          "required": true,
+          "source": "category_product_types"
+        },
+        {
+          "id": "model",
+          "label": "مدل کالا",
+          "required": true
+        },
+        {
+          "id": "division_id",
+          "label": "دسته بندی کالا",
+          "required": true,
+          "source": "divisions"
+        },
+        {
+          "id": "is_iranian",
+          "label": "مبدا کالا",
+          "required": true
+        },
+        {
+          "id": "category_mefa_type",
+          "label": "شناسه عمومی / اختصاصی",
+          "required": true,
+          "options": [
+            "general",
+            "exclusive"
+          ],
+          "note": "allow_fake=false; non-original disabled for this category"
+        },
+        {
+          "id": "general_mefa_id",
+          "label": "شناسه عمومی",
+          "required": true,
+          "source": "general_mefa"
+        },
+        {
+          "id": "package_length",
+          "label": "طول بسته‌بندی",
+          "unit": "cm",
+          "required": true
+        },
+        {
+          "id": "package_width",
+          "label": "عرض بسته‌بندی",
+          "unit": "cm",
+          "required": true
+        },
+        {
+          "id": "package_height",
+          "label": "ارتفاع بسته‌بندی",
+          "unit": "cm",
+          "required": true
+        },
+        {
+          "id": "package_weight",
+          "label": "وزن با بسته‌بندی",
+          "unit": "g",
+          "required": true
+        },
+        {
+          "id": "description",
+          "label": "شرح کالا",
+          "required": false
+        },
+        {
+          "id": "pros_cons",
+          "label": "نقاط ضعف و قوت",
+          "required": false
+        }
+      ],
+      "bindSummary": {
+        "brandsCount": 130,
+        "category_product_types": [
+          {
+            "value": "10500",
+            "text": "سولاردام"
+          },
+          {
+            "value": "4706",
+            "text": "مایکروویو"
+          },
+          {
+            "value": "4707",
+            "text": "مایکروویو توکار"
+          },
+          {
+            "value": "4768",
+            "text": "همراه با کانوکشن"
+          },
+          {
+            "value": "4705",
+            "text": "همراه با گریل"
+          }
+        ],
+        "divisions": [
+          {
+            "value": "5977",
+            "text": "\"—\""
+          },
+          {
+            "value": "12825",
+            "text": "سولاردام"
+          },
+          {
+            "value": "5979",
+            "text": "مایکروفر"
+          },
+          {
+            "value": "5978",
+            "text": "مایکروویو"
+          }
+        ],
+        "allow_fake": false,
+        "show_colors": false,
+        "dimension_level": "product",
+        "category_mefa_type": "general",
+        "general_mefa_keys": [
+          "7048",
+          "7049"
+        ],
+        "platforms": [
+          {
+            "value": "digikala",
+            "text": "دیجیکالا",
+            "selected": true
+          },
+          {
+            "value": "fresh",
+            "text": "فِرِش",
+            "selected": false
+          }
+        ]
+      }
+    },
+    {
+      "step": 3,
+      "title": "مشخصات",
+      "url": "/pwa/product/create/3",
+      "api": "POST /api/v2/product-creation/attributes (requires draft_product_id)",
+      "note": "Category-specific attribute schema loaded after draft creation",
+      "fieldsFromLiveProduct": [
+        {
+          "title": "مشخصات",
+          "attributes": [
+            {
+              "title": "نوع مایکروویو، مایکروفر",
+              "values": [
+                "مایکروویو توکار ",
+                "همراه با کانوکشن ",
+                "همراه با گریل "
+              ]
+            },
+            {
+              "title": "پهنا",
+              "values": [
+                "59 میلی‌متر"
+              ]
+            },
+            {
+              "title": "عمق",
+              "values": [
+                "56 میلی‌متر"
+              ]
+            },
+            {
+              "title": "ارتفاع",
+              "values": [
+                "45 میلی‌متر"
+              ]
+            },
+            {
+              "title": "وزن",
+              "values": [
+                "15000 کیلوگرم"
+              ]
+            },
+            {
+              "title": "امکانات و قابلیت‌های مایکروویو/مایکروفر",
+              "values": [
+                "تنظیم میزان حرارت ",
+                "تایمر "
+              ]
+            },
+            {
+              "title": "جهت باز شدن در",
+              "values": [
+                "به سمت پایین "
+              ]
+            },
+            {
+              "title": "ظرفیت",
+              "values": [
+                "45 لیتر"
+              ]
+            },
+            {
+              "title": "امکانات آماده سازی غذا",
+              "values": [
+                "گریل ",
+                "برنامه پخت ",
+                "پخت ترکیبی "
+              ]
+            },
+            {
+              "title": "تعداد برنامه مایکروویو",
+              "values": [
+                "13 "
+              ]
+            },
+            {
+              "title": "توان مصرفی مایکروویو",
+              "values": [
+                "900 وات"
+              ]
+            },
+            {
+              "title": "توضیحات صفحه نمایش",
+              "values": [
+                "مایکروویو MC01 دارای 4 برنامه پخت فر، 13 برنامه پخت اتوماتیک و 4 برنامه ترکیبی پخت است که انعطاف بالایی در آماده‌سازی انواع غذاها ایجاد می‌کند. همچنین دو شلف با پایه بلند و کوتاه داخل دستگاه قرار دارد تا بتوانید بسته به نوع پخت، از فضای داخلی بهترین استفاده را ببرید. "
+              ]
+            },
+            {
+              "title": "سیستم ایمنی",
+              "values": [
+                "سیستم خاموشی خودکار "
+              ]
+            },
+            {
+              "title": "شناسه کالا",
+              "values": [
+                "2903792513933 "
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "step": 4,
+      "title": "عنوان",
+      "url": "/pwa/product/create/4"
+    },
+    {
+      "step": 5,
+      "title": "عکس",
+      "url": "/pwa/product/create/5"
+    }
+  ],
+  "sampleProduct": {
+    "id": 22846237,
+    "title_fa": "مایکروویو 900 وات 45 لیتر میکس پلاس مدل MC01 ",
+    "brand": {
+      "id": 46995,
+      "code": "mix-plus",
+      "title_fa": "میکس پلاس",
+      "title_en": "mixplus",
+      "url": {
+        "base": null,
+        "uri": "/brand/mix-plus/"
+      },
+      "visibility": true,
+      "logo": {
+        "storage_ids": [],
+        "url": [
+          "https://dkstatics-public.digikala.com/digikala-brands/7ab55f5e1f25f9b91b5e86504197e542680cd508_1727685619.jpg?x-oss-process=image/resize,m_lfit,h_120,w_120/quality,q_80"
+        ],
+        "thumbnail_url": null,
+        "temporary_id": null,
+        "webp_url": null
+      },
+      "is_premium": false,
+      "is_miscellaneous": false,
+      "is_name_similar": false
+    },
+    "category": {
+      "id": 5808,
+      "title_fa": "مایکروویو، مایکروفر",
+      "title_en": "اجاق مایکروویو",
+      "code": "microwave",
+      "content_description": "",
+      "content_box": "",
+      "return_reason_alert": "درخواست مرجوع کردن کالا در گروه مایکروویو، مایکروفر با دلیل \"انصراف از خرید\" تنها در صورتی قابل تایید است که کالا در شرایط اولیه باشد (در صورت پلمب بودن، کالا نباید باز شده باشد)."
+    },
+    "breadcrumb": [
+      {
+        "category_id": null,
+        "title": "دیجی‌کالا",
+        "url": {
+          "base": null,
+          "uri": "/"
+        }
+      },
+      {
+        "category_id": 5753,
+        "title": "لوازم خانگی برقی",
+        "url": {
+          "base": null,
+          "uri": "/main/home-appliance/"
+        }
+      },
+      {
+        "category_id": 5852,
+        "title": "لوازم پخت و پز",
+        "url": {
+          "base": null,
+          "uri": "/search/category-cooking/"
+        }
+      },
+      {
+        "category_id": 5808,
+        "title": "مایکروویو، مایکروفر",
+        "url": {
+          "base": null,
+          "uri": "/search/category-microwave/"
+        }
+      },
+      {
+        "category_id": null,
+        "title": "مایکروویو 900 وات 45 لیتر میکس پلاس مدل MC01 ",
+        "url": {
+          "base": null,
+          "uri": "/product/dkp-22846237/%D9%85%D8%A7%DB%8C%DA%A9%D8%B1%D9%88%D9%88%DB%8C%D9%88-900-%D9%88%D8%A7%D8%AA-45-%D9%84%DB%8C%D8%AA%D8%B1-%D9%85%DB%8C%DA%A9%D8%B3-%D9%BE%D9%84%D8%A7%D8%B3-%D9%85%D8%AF%D9%84-mc01"
+        }
+      }
+    ]
+  }
+}

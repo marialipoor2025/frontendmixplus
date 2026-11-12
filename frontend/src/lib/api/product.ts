@@ -22,6 +22,36 @@ function brandSlugFromId(brandId: string, brandName: string): string {
   return brandName.trim().toLowerCase().replace(/\s+/g, "-") || "brand";
 }
 
+/** Digikala main + list often share the same asset hash with different timestamps. */
+function dedupeGalleryByAsset(
+  images: { id: string; url: string; alt: string }[],
+): { id: string; url: string; alt: string }[] {
+  const seen = new Set<string>();
+  return images.filter((g) => {
+    const hash =
+      g.url.match(/digikala-products\/([a-f0-9]+)_/i)?.[1] ??
+      g.url.split("?")[0] ??
+      g.url;
+    if (!hash || seen.has(hash)) return false;
+    seen.add(hash);
+    return true;
+  });
+}
+
+function truncatePreview(text: string, max = 220): string {
+  const t = text.trim();
+  if (!t) return "";
+  if (t.length <= max) return t;
+  const slice = t.slice(0, max);
+  const breakAt = Math.max(
+    slice.lastIndexOf("\n"),
+    slice.lastIndexOf(" "),
+    slice.lastIndexOf("،"),
+  );
+  const cut = breakAt >= max / 2 ? slice.slice(0, breakAt) : slice;
+  return `${cut.trimEnd()}…`;
+}
+
 function buildLiveNav(
   liveCard: NonNullable<Awaited<ReturnType<typeof getCatalogProductBySlug>>>,
 ): { breadcrumb: BreadcrumbItem[]; titleNav: ProductTitleNavLink[] } {
@@ -32,17 +62,33 @@ function buildLiveNav(
       ? `/categories/${liveCard.categorySlug}`
       : undefined);
   const categoryTitle = liveCard.categoryName?.trim();
+  const path = liveCard.categoryPath?.filter((c) => c.title?.trim()) ?? [];
 
   const breadcrumb: BreadcrumbItem[] = [
     { id: "home", title: siteConfig.nameFa, href: "/" },
-    { id: "appliances", title: "لوازم خانگی برقی", href: "/categories" },
   ];
-  if (categoryTitle && categoryHref) {
+
+  if (path.length > 0) {
+    for (const node of path) {
+      breadcrumb.push({
+        id: node.id,
+        title: node.title,
+        href: node.href || `/categories/${node.slug}`,
+      });
+    }
+  } else {
     breadcrumb.push({
-      id: liveCard.categoryId || "category",
-      title: categoryTitle,
-      href: categoryHref,
+      id: "appliances",
+      title: "لوازم خانگی برقی",
+      href: "/categories",
     });
+    if (categoryTitle && categoryHref) {
+      breadcrumb.push({
+        id: liveCard.categoryId || "category",
+        title: categoryTitle,
+        href: categoryHref,
+      });
+    }
   }
 
   const titleNav: ProductTitleNavLink[] = [
@@ -192,6 +238,13 @@ export async function getProductDetail(
             discountPercent: money.discountPercent,
           };
         })(),
+        // Digikala out-of-stock PDPs hide fulfillment copy (no "in warehouse").
+        ...(liveCard.inStock
+          ? {}
+          : {
+              showDelivery: false,
+              delivery: { title: "", methodLabel: "", costLabel: "" },
+            }),
         // Only show multi-seller savings tip when we actually have competing offers.
         cheaperByAmount: next.buyBox.cheaperByAmount,
       },
@@ -228,11 +281,13 @@ export async function getProductDetail(
       ...next,
       gallery: {
         ...next.gallery,
-        images: liveMedia.map((m) => ({
-          id: m.id,
-          url: m.url,
-          alt: m.alt || next.title,
-        })),
+        images: dedupeGalleryByAsset(
+          liveMedia.map((m) => ({
+            id: m.id,
+            url: m.url,
+            alt: m.alt || next.title,
+          })),
+        ),
       },
     };
   }
@@ -299,12 +354,29 @@ export async function getProductDetail(
 
   // Single-seller (or primary) PDP copy from seller-managed content JSON.
   if (livePdpContent) {
+    if (livePdpContent.galleryImages.length > 0) {
+      next = {
+        ...next,
+        gallery: {
+          ...next.gallery,
+          images: dedupeGalleryByAsset(
+            livePdpContent.galleryImages.map((g) => ({
+              id: g.id,
+              url: g.url,
+              alt: g.alt || next.title,
+            })),
+          ),
+        },
+      };
+    }
+
     const hasSellerCopy =
       Boolean(livePdpContent.intro.preview || livePdpContent.intro.full) ||
       Boolean(
         livePdpContent.expertReview.preview || livePdpContent.expertReview.full,
       ) ||
       livePdpContent.features.length > 0 ||
+      Boolean(livePdpContent.returnNotice) ||
       Boolean(livePdpContent.warranty) ||
       Boolean(
         livePdpContent.deliveryMethodLabel || livePdpContent.deliveryTitle,
@@ -315,6 +387,19 @@ export async function getProductDetail(
       Boolean(livePdpContent.insurance);
 
     if (hasSellerCopy) {
+      const introFull =
+        livePdpContent.intro.full || next.content.intro.full;
+      const introPreview =
+        livePdpContent.intro.preview ||
+        next.content.intro.preview ||
+        truncatePreview(introFull);
+      const expertFull =
+        livePdpContent.expertReview.full || next.content.expertReview.full;
+      const expertPreview =
+        livePdpContent.expertReview.preview ||
+        next.content.expertReview.preview ||
+        truncatePreview(expertFull);
+
       next = {
         ...next,
         features:
@@ -324,6 +409,8 @@ export async function getProductDetail(
                 value: formatFaMeasure(f.value),
               }))
             : next.features,
+        returnNotice:
+          livePdpContent.returnNotice || next.returnNotice,
         insurance: livePdpContent.insurance ?? next.insurance,
         showPricePolicy: livePdpContent.showPricePolicy,
         pricePolicyLabel: livePdpContent.pricePolicyLabel,
@@ -346,24 +433,28 @@ export async function getProductDetail(
                   next.buyBox.delivery.costLabel,
               }
             : { title: "", methodLabel: "", costLabel: "" },
+          ...(livePdpContent.sellerName
+            ? {
+                seller: {
+                  ...next.buyBox.seller,
+                  id: livePdpContent.sellerId || next.buyBox.seller.id,
+                  name: livePdpContent.sellerName,
+                },
+              }
+            : {}),
         },
         content: {
           ...next.content,
           intro: {
-            preview:
-              livePdpContent.intro.preview || next.content.intro.preview,
-            full: livePdpContent.intro.full || next.content.intro.full,
+            preview: introPreview,
+            full: introFull,
           },
           expertReview: {
             title:
               livePdpContent.expertReview.title ||
               next.content.expertReview.title,
-            preview:
-              livePdpContent.expertReview.preview ||
-              next.content.expertReview.preview,
-            full:
-              livePdpContent.expertReview.full ||
-              next.content.expertReview.full,
+            preview: expertPreview,
+            full: expertFull,
           },
         },
       };

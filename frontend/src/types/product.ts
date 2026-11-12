@@ -31,6 +31,8 @@ export type Product = {
   categoryName?: string;
   categorySlug?: string;
   categoryHref?: string;
+  /** Digikala-style ancestry from root to leaf (when API provides it). */
+  categoryPath?: { id: string; title: string; slug: string; href: string }[];
   /** Optional merchant SKU when provided by import/seller. */
   skuCode?: string;
   imageAlt?: string;

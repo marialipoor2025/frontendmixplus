@@ -52,7 +52,7 @@ function mapHomeData(data: HomePageData): HomePageData {
     })),
     brands: data.brands.map((b) => ({
       ...b,
-      logoUrl: absoluteMediaUrl(b.logoUrl),
+      logoUrl: b.logoUrl?.trim() ? absoluteMediaUrl(b.logoUrl) : "",
     })),
     productRails: data.productRails.map((rail) => ({
       ...rail,

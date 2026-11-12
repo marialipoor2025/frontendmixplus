@@ -8,6 +8,8 @@ type BrandShowcaseProps = {
 };
 
 function BrandCard({ brand }: { brand: Brand }) {
+  const logoUrl = brand.logoUrl?.trim() || null;
+
   return (
     <Link
       href={`/brand/${brand.slug}`}
@@ -17,17 +19,23 @@ function BrandCard({ brand }: { brand: Brand }) {
         <div
           role="img"
           aria-label={brand.name}
-          className="leading-none [mix-blend-mode:multiply]"
+          className="flex items-center justify-center leading-none [mix-blend-mode:multiply]"
           style={{ width: 78, height: 78 }}
         >
-          <Image
-            src={brand.logoUrl}
-            alt={brand.name}
-            width={78}
-            height={78}
-            className="inline-block h-full w-full object-contain"
-            unoptimized
-          />
+          {logoUrl ? (
+            <Image
+              src={logoUrl}
+              alt={brand.name}
+              width={78}
+              height={78}
+              className="inline-block h-full w-full object-contain"
+              unoptimized
+            />
+          ) : (
+            <span className="px-1 text-center text-[10px] font-bold leading-tight text-[var(--color-icon-high-emphasis)]">
+              {brand.name}
+            </span>
+          )}
         </div>
       </div>
       <h4 className="w-full truncate px-2 text-center text-xs font-bold leading-[180%] text-[var(--color-icon-high-emphasis)]">

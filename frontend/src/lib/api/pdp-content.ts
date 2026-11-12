@@ -10,6 +10,8 @@ export type ProductPdpContent = {
   intro: ProductIntroContent;
   expertReview: ProductExpertReviewContent;
   features: ProductFeatureItem[];
+  /** Digikala category return_reason_alert under features. */
+  returnNotice?: string;
   showWarranty: boolean;
   warranty: string;
   showDelivery: boolean;
@@ -21,6 +23,7 @@ export type ProductPdpContent = {
   insurance?: ProductInsuranceOffer;
   sellerId: string;
   sellerName: string;
+  galleryImages: { id: string; url: string; alt?: string }[];
 };
 
 type ApiPdpContent = {
@@ -30,6 +33,7 @@ type ApiPdpContent = {
   expertReviewPreview?: string;
   expertReviewFull?: string;
   features?: { id: string; label: string; value: string }[];
+  returnNotice?: string;
   showWarranty?: boolean;
   warranty?: string;
   showDelivery?: boolean;
@@ -45,6 +49,7 @@ type ApiPdpContent = {
   insuranceDiscountPercent?: number | null;
   sellerId?: string;
   sellerName?: string;
+  galleryImages?: { id?: string; url?: string; alt?: string }[];
 };
 
 function apiBase() {
@@ -81,6 +86,7 @@ export async function getProductPdpContent(
           label: f.label,
           value: f.value,
         })),
+      returnNotice: row.returnNotice?.trim() || undefined,
       showWarranty: row.showWarranty === true && Boolean(row.warranty?.trim()),
       warranty: row.warranty ?? "",
       showDelivery:
@@ -115,6 +121,13 @@ export async function getProductPdpContent(
           : undefined,
       sellerId: row.sellerId ?? "",
       sellerName: row.sellerName ?? "",
+      galleryImages: (row.galleryImages ?? [])
+        .filter((g) => Boolean(g.url?.trim()))
+        .map((g, i) => ({
+          id: g.id || `gallery-${i + 1}`,
+          url: g.url!.trim(),
+          alt: g.alt || undefined,
+        })),
     };
   } catch {
     return null;

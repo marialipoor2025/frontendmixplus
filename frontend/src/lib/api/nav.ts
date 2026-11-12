@@ -1,6 +1,11 @@
 import { siteConfig } from "@/config/site";
 import { mockMainNavData } from "@/lib/mocks/nav";
-import type { MainNavData, MegaMenuCategory, MegaMenuColumn, MegaMenuLink } from "@/types/nav";
+import type {
+  MainNavData,
+  MegaMenuCategory,
+  MegaMenuColumn,
+  MegaMenuLink,
+} from "@/types/nav";
 import { apiClient } from "./client";
 
 type CategoryTreeNode = {
@@ -11,6 +16,10 @@ type CategoryTreeNode = {
   children?: CategoryTreeNode[];
 };
 
+function normalizeHref(href: string) {
+  return href.trim().replace(/\/+$/, "").toLowerCase();
+}
+
 function collectHrefs(nodes: CategoryTreeNode[], into = new Set<string>()) {
   for (const node of nodes) {
     if (node.href) into.add(normalizeHref(node.href));
@@ -19,10 +28,6 @@ function collectHrefs(nodes: CategoryTreeNode[], into = new Set<string>()) {
     if (node.children?.length) collectHrefs(node.children, into);
   }
   return into;
-}
-
-function normalizeHref(href: string) {
-  return href.trim().replace(/\/+$/, "").toLowerCase();
 }
 
 function linkAllowed(link: MegaMenuLink, hrefs: Set<string>) {
@@ -46,17 +51,81 @@ function filterCategory(
   return { ...cat, columns };
 }
 
+function treeDepth(nodes: CategoryTreeNode[], depth = 1): number {
+  let max = depth;
+  for (const node of nodes) {
+    if (node.children?.length) {
+      max = Math.max(max, treeDepth(node.children, depth + 1));
+    }
+  }
+  return max;
+}
+
+/** Digikala-style mega menu: L1 → columns of L2 parents + L3 leaves. */
+function megaFromTree(tree: CategoryTreeNode[]): MegaMenuCategory[] {
+  return tree.map((l1) => {
+    const l2 = l1.children ?? [];
+    const columns: MegaMenuColumn[] =
+      l2.length > 0
+        ? l2.map((mid) => {
+            const leaves = mid.children ?? [];
+            const links: MegaMenuLink[] = [
+              {
+                id: `parent-${mid.id}`,
+                title: mid.title,
+                href: mid.href || `/categories/${mid.slug}`,
+                kind: "parent",
+              },
+              ...leaves.map((leaf) => ({
+                id: leaf.id,
+                title: leaf.title,
+                href: leaf.href || `/categories/${leaf.slug}`,
+                kind: "leaf" as const,
+              })),
+            ];
+            return {
+              id: `col-${mid.id}`,
+              links,
+            };
+          })
+        : [
+            {
+              id: `col-${l1.id}`,
+              links: [
+                {
+                  id: l1.id,
+                  title: l1.title,
+                  href: l1.href || `/categories/${l1.slug}`,
+                  kind: "leaf" as const,
+                },
+              ],
+            },
+          ];
+
+    return {
+      id: l1.id,
+      title: l1.title,
+      href: l1.href || `/categories/${l1.slug}`,
+      icon: "appliance",
+      allProductsLabel: `همه کالاهای ${l1.title}`,
+      columns,
+    } satisfies MegaMenuCategory;
+  });
+}
+
 /**
- * Keep mega-menu entries that map to categories with published products.
+ * Prefer nested catalog tree for Digikala-like menus; otherwise filter seeded nav.
  */
-async function filterNavToProductCategories(
-  nav: MainNavData,
-): Promise<MainNavData> {
+async function resolveNavCategories(nav: MainNavData): Promise<MainNavData> {
   try {
     const tree = await apiClient<CategoryTreeNode[]>(
       "/api/catalog/categories/tree",
       { query: { withProductsOnly: true } },
     );
+    if ((tree?.length ?? 0) > 0 && treeDepth(tree) >= 2) {
+      return { ...nav, categories: megaFromTree(tree) };
+    }
+
     const hrefs = collectHrefs(tree ?? []);
     if (hrefs.size === 0) return nav;
 
@@ -64,7 +133,10 @@ async function filterNavToProductCategories(
       .map((c) => filterCategory(c, hrefs))
       .filter((c): c is MegaMenuCategory => c != null);
 
-    return { ...nav, categories: categories.length > 0 ? categories : nav.categories };
+    return {
+      ...nav,
+      categories: categories.length > 0 ? categories : nav.categories,
+    };
   } catch {
     return nav;
   }
@@ -76,5 +148,5 @@ export async function getMainNavData(): Promise<MainNavData> {
   }
 
   const nav = await apiClient<MainNavData>("/api/nav");
-  return filterNavToProductCategories(nav);
+  return resolveNavCategories(nav);
 }

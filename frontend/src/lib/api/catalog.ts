@@ -59,6 +59,9 @@ type CatalogProductDto = {
   categoryHref?: string | null;
   skuCode?: string | null;
   imageAlt?: string | null;
+  categoryPath?:
+    | { id: string; title: string; slug: string; href: string }[]
+    | null;
 };
 
 type CatalogProductsPageDto = {
@@ -138,6 +141,14 @@ function mapProduct(dto: CatalogProductDto): Product {
     categoryName: dto.categoryName ?? undefined,
     categorySlug: dto.categorySlug ?? undefined,
     categoryHref: dto.categoryHref ?? undefined,
+    categoryPath: dto.categoryPath?.length
+      ? dto.categoryPath.map((c) => ({
+          id: c.id,
+          title: c.title,
+          slug: c.slug,
+          href: c.href,
+        }))
+      : undefined,
     skuCode: dto.skuCode ?? undefined,
     imageAlt: dto.imageAlt ?? undefined,
   };

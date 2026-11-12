@@ -44,16 +44,6 @@ const MOBILE_SMALL = 144;
 const MOBILE_STACK_GAP = 12;
 /** Sticky PDP chrome height (search / cart / more). */
 const MOBILE_CHROME_H = 48;
-/** Ensure Digikala mosaic has enough tiles to scroll horizontally. */
-const MOSAIC_TARGET_COUNT = 5;
-const MOSAIC_PAD_URLS = [
-  "/placeholders/product-appliance.png",
-  "/placeholders/cat-appliance.jpg",
-  "/placeholders/cat-appliance.png",
-  "/placeholders/product-appliance.png",
-  "/placeholders/cat-appliance.jpg",
-];
-
 type ProductGalleryProps = {
   title: string;
   slug: string;
@@ -121,29 +111,22 @@ function chunkMosaic(images: ProductGalleryImage[]): MosaicGroup[] {
   return groups;
 }
 
-/** Pad to Digikala mosaic length so [large|2-stack] then [large|…] can scroll. */
-function ensureMosaicImages(
+/** Drop same Digikala asset shown twice (main + list often share the hash). */
+function dedupeGalleryImages(
   images: ProductGalleryImage[],
-  title: string,
 ): ProductGalleryImage[] {
-  if (images.length >= MOSAIC_TARGET_COUNT) {
-    return images;
-  }
-  const out = [...images];
-  let pad = 0;
-  while (out.length < MOSAIC_TARGET_COUNT) {
-    // Prefer repeating real product images so layout matches Digikala without unrelated placeholders.
-    const source = out[pad % Math.max(out.length, 1)] ?? out[0];
-    const url =
-      source?.url ??
-      MOSAIC_PAD_URLS[pad % MOSAIC_PAD_URLS.length] ??
-      "/placeholders/product-appliance.png";
-    out.push({
-      id: `mosaic-pad-${out.length + 1}`,
-      url,
-      alt: `تصویر ${out.length + 1} — ${title}`,
-    });
-    pad += 1;
+  const seen = new Set<string>();
+  const out: ProductGalleryImage[] = [];
+  for (const img of images) {
+    const url = img.url?.trim();
+    if (!url) continue;
+    const hash =
+      url.match(/digikala-products\/([a-f0-9]+)_/i)?.[1] ??
+      url.split("?")[0] ??
+      url;
+    if (seen.has(hash)) continue;
+    seen.add(hash);
+    out.push(img);
   }
   return out;
 }
@@ -173,7 +156,7 @@ export function ProductGallery({
             alt: title,
           },
         ];
-    return ensureMosaicImages(base, title);
+    return dedupeGalleryImages(base);
   }, [images, title]);
   const mosaicGroups = useMemo(() => chunkMosaic(safeImages), [safeImages]);
   const mosaicRef = useRef<HTMLDivElement>(null);

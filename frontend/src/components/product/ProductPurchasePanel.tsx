@@ -51,10 +51,14 @@ export function ProductPurchasePanel({ data }: ProductPurchasePanelProps) {
     setSelected((prev) => ({ ...prev, [groupId]: valueId }));
 
   const skuStock = activeSku?.stock;
-  const inStock =
-    skuStock != null
-      ? skuStock > 0 && (activeSku?.inStock ?? true)
-      : (activeSku?.inStock ?? true);
+  // Digikala OOS products often have zero sellable variants/SKUs — treat that as
+  // out of stock (do not default `true` when activeSku is missing).
+  const inStock = (() => {
+    if (data.variant.skus.length === 0) return false;
+    if (!activeSku) return false;
+    if (skuStock != null) return skuStock > 0 && activeSku.inStock;
+    return activeSku.inStock;
+  })();
 
   const variantLabel = groups
     .map((g) => g.values.find((v) => v.id === selected[g.id])?.label)
@@ -150,7 +154,9 @@ export function ProductPurchasePanel({ data }: ProductPurchasePanelProps) {
         <ProductBuyBox data={buyBox} cartInput={cartInput} inStock={inStock} />
         {!inStock ? (
           <p className="rounded-lg border border-[var(--color-hint-object-error)]/30 bg-red-50 px-3 py-2 text-center text-xs font-medium text-[var(--color-hint-object-error)]">
-            این ترکیب در حال حاضر موجود نیست
+            {data.variant.skus.length === 0
+              ? "این کالا فعلاً ناموجود است"
+              : "این ترکیب در حال حاضر موجود نیست"}
           </p>
         ) : null}
         {data.showPricePolicy !== false ? (

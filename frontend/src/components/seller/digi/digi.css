@@ -13,7 +13,9 @@
 
   --color-brand-primary-500: #1ab1d4;
   --color-brand-primary-700: #1796b4;
+  --color-brand-secondary-300: #02a583;
   --color-brand-secondary-500: #028e71;
+  --color-icon-black: #030a16;
 
   --color-text-heading: #030a16;
   --color-text-high-emphasis: #424750;
@@ -335,23 +337,140 @@
 }
 
 [data-seller-digi-page] .digi-btn-primary {
+  position: relative;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
+  gap: 0;
+  user-select: none;
   padding: 10px 16px;
   border-radius: var(--medium-radius);
   background: var(--color-button-primary);
-  color: #fff;
+  color: var(--color-icon-white);
   font-size: 14px;
   font-weight: 600;
+  line-height: 1.5;
   text-decoration: none;
   border: 0;
   cursor: pointer;
 }
 
+[data-seller-digi-page] .digi-btn-primary--medium {
+  min-height: 40px;
+  padding: 8px;
+}
+
+[data-seller-digi-page] .digi-btn-primary--icon {
+  padding-inline: 8px;
+}
+
+[data-seller-digi-page] .digi-btn-primary__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-inline-end: 4px;
+}
+
 [data-seller-digi-page] .digi-btn-primary:hover {
-  background: var(--color-brand-primary-700);
+  background: linear-gradient(
+      0deg,
+      rgba(255, 255, 255, 0.08),
+      rgba(255, 255, 255, 0.08)
+    ),
+    var(--color-button-primary);
+}
+
+/* Digikala TableHeadAction--desktop */
+[data-seller-digi-page] .digi-table-head-action {
+  display: flex;
+  width: 100%;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  margin-bottom: calc(4 * var(--spacing-base));
+  padding: 0 16px;
+  box-sizing: border-box;
+}
+
+[data-seller-digi-page] .digi-table-head-action__leading {
+  display: flex;
+  flex: 1 1 auto;
+  align-items: center;
+  column-gap: calc(4 * var(--spacing-base));
+}
+
+[data-seller-digi-page] .digi-table-head-action__trailing {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  font-size: 14px;
+  color: var(--color-text-high-emphasis);
+}
+
+[data-seller-digi-page] .digi-table-head-action__count-label {
+  padding-left: 4px;
+  color: var(--color-text-low-emphasis);
+  font-size: 14px;
+  font-weight: 400;
+}
+
+[data-seller-digi-page] .digi-table-head-action__count-value {
+  color: var(--color-text-high-emphasis);
+  font-size: 14px;
+  font-weight: 700;
+}
+
+[data-seller-digi-page] .digi-table-head-action__pagesize {
+  display: flex;
+  flex: 1 1 auto;
+  align-items: center;
+}
+
+[data-seller-digi-page] .digi-table-head-action__pagesize-label {
+  margin-left: 12px;
+  color: var(--color-text-high-emphasis);
+  font-size: 14px;
+  white-space: nowrap;
+}
+
+[data-seller-digi-page] .digi-dropdown {
+  position: relative;
+  display: flex;
+  min-width: 72px;
+  align-items: center;
+  padding: 0 8px;
+  border-radius: var(--medium-radius);
+  background: var(--color-neutral-100);
+  cursor: pointer;
+}
+
+[data-seller-digi-page] .digi-dropdown__native {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  cursor: pointer;
+  border: 0;
+  background: transparent;
+}
+
+[data-seller-digi-page] .digi-dropdown__value {
+  flex: 1 1 auto;
+  overflow: hidden;
+  padding: 8px 0;
+  color: var(--color-neutral-600);
+  font-size: 14px;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+[data-seller-digi-page] .digi-dropdown__chevron {
+  display: inline-flex;
+  margin-right: 12px;
+  color: var(--color-icon-high-emphasis);
+  pointer-events: none;
 }
 
 [data-seller-digi-page] .digi-btn-ai {
@@ -530,7 +649,10 @@
 [data-seller-digi-page] .digi-pipe {
   width: 1px;
   height: 16px;
+  margin-left: 12px;
+  margin-right: 12px;
   background: var(--color-neutral-200);
+  flex-shrink: 0;
 }
 
 [data-seller-digi-page] .digi-pagesize {
@@ -543,22 +665,37 @@
   font-size: 13px;
 }
 
+/* Digikala product-management TableHeader / TableRowDesktop */
 [data-seller-digi-page] .digi-product-grid {
   display: grid;
-  grid-template-columns: 0.7fr 1.6fr 0.9fr 0.7fr 1fr 0.9fr 1fr 0.8fr 0.8fr 0.9fr 1fr 0.5fr;
+  grid-template-columns: 0.4fr 1.5fr 1fr 1fr 1fr 1.5fr 0.8fr 1.3fr 2fr;
   gap: 0;
-  min-width: 1100px;
+  min-width: 1080px;
   align-items: center;
 }
 
 [data-seller-digi-page] .digi-product-grid--head {
   padding: 8px 16px;
   color: var(--color-neutral-700);
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 700;
 }
 
+[data-seller-digi-page] .digi-product-grid--head > div {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  padding-left: 8px;
+  padding-right: 8px;
+}
+
+[data-seller-digi-page] .digi-product-grid__title-head {
+  grid-column: 1 / 3;
+}
+
 [data-seller-digi-page] .digi-product-row {
+  display: grid;
   margin: 12px 0;
   padding: 8px 16px;
   border: 1px solid var(--color-neutral-100);
@@ -569,6 +706,116 @@
 [data-seller-digi-page] .digi-product-row:hover {
   border-color: var(--color-neutral-200);
   box-shadow: var(--shadow-1);
+}
+
+[data-seller-digi-page] .digi-product-row__cell {
+  display: flex;
+  align-items: center;
+  padding-left: 8px;
+  padding-right: 8px;
+  color: var(--color-text-high-emphasis);
+  font-size: 14px;
+}
+
+[data-seller-digi-page] .digi-product-row__title {
+  grid-column: 1 / 3;
+  gap: 16px;
+}
+
+[data-seller-digi-page] .digi-product-row__thumb {
+  position: relative;
+  width: 60px;
+  height: 60px;
+  min-width: 60px;
+  min-height: 60px;
+  overflow: hidden;
+  border-radius: 4px;
+  background: var(--color-neutral-100);
+}
+
+[data-seller-digi-page] .digi-product-row__title-meta {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 4px;
+}
+
+[data-seller-digi-page] .digi-product-row__title-link {
+  color: var(--color-text-high-emphasis);
+  text-decoration: none;
+}
+
+[data-seller-digi-page] .digi-product-row__title-link:hover {
+  color: var(--color-text-primary);
+}
+
+[data-seller-digi-page] .digi-product-row__title-text {
+  display: -webkit-box;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  font-size: 14px;
+}
+
+[data-seller-digi-page] .digi-link-secondary {
+  color: var(--color-brand-secondary-300, #02a583);
+  cursor: pointer;
+  font-size: 14px;
+}
+
+[data-seller-digi-page] .digi-product-row__actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+[data-seller-digi-page] .digi-btn-row-primary,
+[data-seller-digi-page] .digi-btn-row-outline {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 36px;
+  padding: 6px 12px;
+  border-radius: var(--medium-radius);
+  font-size: 13px;
+  font-weight: 600;
+  text-decoration: none;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+[data-seller-digi-page] .digi-btn-row-primary {
+  border: 0;
+  background: var(--color-button-primary);
+  color: #fff;
+}
+
+[data-seller-digi-page] .digi-btn-row-primary:hover {
+  background: linear-gradient(
+      0deg,
+      rgba(255, 255, 255, 0.08),
+      rgba(255, 255, 255, 0.08)
+    ),
+    var(--color-button-primary);
+}
+
+[data-seller-digi-page] .digi-btn-row-outline {
+  border: 1px solid var(--color-brand-primary-500);
+  background: #fff;
+  color: var(--color-text-primary);
+}
+
+[data-seller-digi-page] .digi-btn-row-outline:hover {
+  background: rgba(26, 177, 212, 0.08);
+}
+
+[data-seller-digi-page] .digi-header-info {
+  display: inline-flex;
+  margin-right: 4px;
+  color: var(--color-icon-black, #030a16);
+  vertical-align: middle;
 }
 
 [data-seller-digi-page] .digi-dkp-badge {

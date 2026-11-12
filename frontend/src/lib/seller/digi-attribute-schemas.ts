@@ -100,8 +100,94 @@ const DEFAULT_FIELDS: DigiAttrField[] = [
   { id: "warranty", label: "گارانتی", kind: "text", required: false },
 ];
 
+/** Reverse-engineered from Digikala create + DKP-22846237 (category 5808 مایکروویو، مایکروفر). */
+const MICROWAVE_FIELDS: DigiAttrField[] = [
+  {
+    id: "mw_type",
+    label: "نوع مایکروویو، مایکروفر",
+    kind: "multiselect",
+    required: true,
+    options: [
+      "سولاردام",
+      "مایکروویو",
+      "مایکروویو توکار",
+      "همراه با کانوکشن",
+      "همراه با گریل",
+    ],
+  },
+  { id: "mw_width", label: "پهنا", kind: "text", unit: "میلی‌متر", required: true },
+  { id: "mw_depth", label: "عمق", kind: "text", unit: "میلی‌متر", required: true },
+  { id: "mw_height", label: "ارتفاع", kind: "text", unit: "میلی‌متر", required: true },
+  { id: "mw_weight", label: "وزن", kind: "text", unit: "کیلوگرم", required: true },
+  {
+    id: "mw_features",
+    label: "امکانات و قابلیت‌های مایکروویو/مایکروفر",
+    kind: "multiselect",
+    required: true,
+    options: ["تنظیم میزان حرارت", "تایمر", "چرخش سینی", "قفل کودک", "یخ‌زدایی"],
+  },
+  {
+    id: "mw_door",
+    label: "جهت باز شدن در",
+    kind: "select",
+    required: true,
+    options: ["به سمت پایین", "به سمت چپ", "به سمت راست"],
+  },
+  { id: "mw_capacity", label: "ظرفیت", kind: "text", unit: "لیتر", required: true },
+  {
+    id: "mw_cooking",
+    label: "امکانات آماده سازی غذا",
+    kind: "multiselect",
+    required: true,
+    options: ["گریل", "برنامه پخت", "پخت ترکیبی", "کانوکشن", "بخار"],
+  },
+  {
+    id: "mw_programs",
+    label: "تعداد برنامه مایکروویو",
+    kind: "text",
+    unit: "عدد",
+    required: true,
+  },
+  {
+    id: "mw_power",
+    label: "توان مصرفی مایکروویو",
+    kind: "text",
+    unit: "وات",
+    required: true,
+  },
+  {
+    id: "mw_display",
+    label: "توضیحات صفحه نمایش",
+    kind: "text",
+    required: false,
+  },
+  {
+    id: "mw_safety",
+    label: "سیستم ایمنی",
+    kind: "multiselect",
+    required: false,
+    options: ["سیستم خاموشی خودکار", "قفل کودک", "هشدار دما"],
+  },
+  {
+    id: "mw_sku",
+    label: "شناسه کالا",
+    kind: "text",
+    required: true,
+    helper: "در این گروه کالایی شناسه کالا اجباری است و کالای غیر اصل مجاز نیست.",
+  },
+  {
+    id: "_11246",
+    label: "برند روی بسته‌بندی",
+    kind: "text",
+    required: false,
+  },
+];
+
 const BY_LEAF: Record<string, DigiAttrField[]> = {
   هود: HOOD_FIELDS,
+  "مایکروویو، مایکروفر": MICROWAVE_FIELDS,
+  مایکروویو: MICROWAVE_FIELDS,
+  مایکروفر: MICROWAVE_FIELDS,
   "گاز صفحه ای": [
     {
       id: "burners",

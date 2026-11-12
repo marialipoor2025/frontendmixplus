@@ -32,6 +32,13 @@ function mediaRemotePatterns() {
     pathname: "/**",
   });
 
+  // Digikala seller scrape product images.
+  patterns.push({
+    protocol: "https",
+    hostname: "dkstatics-public.digikala.com",
+    pathname: "/**",
+  });
+
   return patterns;
 }
 

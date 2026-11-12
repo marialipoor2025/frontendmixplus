@@ -10,11 +10,26 @@ import {
   setSellerProductPublished,
   type SellerProductListItem,
 } from "@/lib/api/seller";
-import { formatPrice } from "@/lib/format";
 import { emptyPage, type PagedResult } from "@/types/paging";
 
 type PublishFilter = "all" | "published" | "draft";
 type StockFilter = "all" | "in" | "out";
+
+function guessCategoryLabel(title: string) {
+  const t = title.toLowerCase();
+  if (t.includes("مایکروویو") || t.includes("مایکروفر")) {
+    return "مایکروویو، مایکروفر";
+  }
+  if (t.includes("سینک")) return "سینک";
+  if (t.includes("هود")) return "هود";
+  if (t.includes("اجاق") || t.includes("فر ")) return "اجاق گاز";
+  if (t.includes("یخچال")) return "یخچال و فریزر";
+  if (t.includes("لباسشویی") || t.includes("ماشین لباسشویی")) {
+    return "ماشین لباسشویی";
+  }
+  if (t.includes("ظرفشویی")) return "ماشین ظرفشویی";
+  return "لوازم خانگی";
+}
 
 const FILTER_CHIPS = [
   { id: "categories", label: "گروه اصلی", kind: "option" as const },
@@ -227,45 +242,60 @@ export default function DigiSellerProductsPage() {
           </div>
         </section>
 
-        {/* Actions: ثبت کالای جدید + results */}
-        <div className="mb-4 flex flex-wrap items-center justify-between gap-3 px-4">
-          <Link
-            href="/seller/digi/products/create/initial"
-            className="digi-btn-primary"
-          >
-            <PlusIcon />
-            ثبت کالای جدید
-          </Link>
-          <div className="flex flex-wrap items-center gap-3 text-sm">
+        {/* TableHeadAction — Digikala product-management */}
+        <div className="digi-table-head-action">
+          <div className="digi-table-head-action__leading">
+            <Link
+              href="/seller/digi/products/create/initial"
+              className="digi-btn-primary digi-btn-primary--icon digi-btn-primary--medium"
+            >
+              <span className="digi-btn-primary__icon" aria-hidden>
+                <PlusIcon />
+              </span>
+              افزودن کالای جدید
+            </Link>
+          </div>
+          <div className="digi-table-head-action__trailing">
             <div>
-              <span className="pl-1 text-[var(--color-text-low-emphasis)]">
+              <span className="digi-table-head-action__count-label">
                 تعداد نتایج:
               </span>
-              <span className="font-bold text-[var(--color-text-high-emphasis)]">
+              <span className="digi-table-head-action__count-value">
                 {result.totalCount.toLocaleString("fa-IR")}
               </span>
             </div>
             <span className="digi-pipe" aria-hidden />
-            <label className="flex items-center gap-2">
-              <span>تعداد نمایش</span>
-              <select
-                className="digi-pagesize"
-                value={pageSize}
-                onChange={(e) =>
-                  void load({
-                    page: 1,
-                    pageSize: Number(e.target.value),
-                    soft: true,
-                  })
-                }
-              >
-                {[10, 20, 50].map((n) => (
-                  <option key={n} value={n}>
-                    {n.toLocaleString("fa-IR")}
-                  </option>
-                ))}
-              </select>
-            </label>
+            <div className="digi-table-head-action__pagesize">
+              <span className="digi-table-head-action__pagesize-label">
+                تعداد نمایش
+              </span>
+              <label className="digi-dropdown">
+                <select
+                  className="digi-dropdown__native"
+                  value={pageSize}
+                  aria-label="تعداد نمایش"
+                  onChange={(e) =>
+                    void load({
+                      page: 1,
+                      pageSize: Number(e.target.value),
+                      soft: true,
+                    })
+                  }
+                >
+                  {[10, 20, 50].map((n) => (
+                    <option key={n} value={n}>
+                      {n.toLocaleString("fa-IR")}
+                    </option>
+                  ))}
+                </select>
+                <span className="digi-dropdown__value" role="listbox">
+                  {pageSize.toLocaleString("fa-IR")}
+                </span>
+                <span className="digi-dropdown__chevron" aria-hidden>
+                  <ChevronTiny />
+                </span>
+              </label>
+            </div>
           </div>
         </div>
 
@@ -297,27 +327,34 @@ export default function DigiSellerProductsPage() {
                 refreshing ? "opacity-70 transition-opacity" : "transition-opacity"
               }
             >
-              <div className="digi-product-grid digi-product-grid--head">
-                <div />
-                <div>عنوان کالا</div>
+              <section className="digi-product-grid digi-product-grid--head">
+                <div className="digi-product-grid__title-head">عنوان کالا</div>
+                <div>گروه کالایی</div>
+                <div>کانال فروش</div>
+                <div>برند کالا</div>
                 <div>وضعیت</div>
-                <div>کمیسیون</div>
-                <div>قیمت مرجع (ریال)</div>
-                <div>نوع قیمت کالا</div>
-                <div>کمترین قیمت در MixPlus</div>
-                <div>تعداد فروشندگان</div>
-                <div>حداقل کالا در سبد</div>
-                <div>برچسب محصول</div>
-                <div>وضعیت فروش</div>
+                <div>تعداد تنوع</div>
+                <div>
+                  برچسب محصول
+                  <span className="digi-header-info" aria-hidden>
+                    <InfoIcon />
+                  </span>
+                </div>
                 <div />
-              </div>
+              </section>
 
               {result.items.map((row) => {
-                const sellable = row.isPublished && row.inStock;
+                const manageHref = `/seller/digi/products/${encodeURIComponent(row.id)}/manage`;
+                const variantHref = `${manageHref}?step=variants`;
+                const categoryLabel = guessCategoryLabel(row.title);
+                const variantCount = row.inStock ? 1 : 0;
                 return (
-                  <div key={row.id} className="digi-product-row digi-product-grid">
-                    <div className="flex items-center">
-                      <div className="relative size-[60px] overflow-hidden rounded bg-[var(--color-neutral-100)]">
+                  <section
+                    key={row.id}
+                    className="digi-product-row digi-product-grid"
+                  >
+                    <div className="digi-product-row__cell digi-product-row__title">
+                      <div className="digi-product-row__thumb">
                         {row.imageUrl ? (
                           <Image
                             src={row.imageUrl}
@@ -329,97 +366,120 @@ export default function DigiSellerProductsPage() {
                           />
                         ) : null}
                       </div>
-                    </div>
-                    <div className="min-w-0">
-                      <Link
-                        href={`/seller/digi/products/${encodeURIComponent(row.id)}/manage`}
-                        className="block"
-                      >
-                        <p
-                          className="line-clamp-2 text-sm text-[var(--color-text-high-emphasis)]"
+                      <div className="digi-product-row__title-meta">
+                        <Link
+                          href={manageHref}
+                          className="digi-product-row__title-link"
                           title={row.title}
                         >
-                          {row.title}
-                        </p>
-                        <span className="digi-dkp-badge mt-1 inline-block">
+                          <span className="digi-product-row__title-text">
+                            {row.title}
+                          </span>
+                        </Link>
+                        <span className="digi-dkp-badge">
                           {productCode(row.id)}
                         </span>
-                      </Link>
+                      </div>
                     </div>
-                    <div className="text-sm">
-                      {row.isPublished ? "قابل فروش" : "تکمیل‌نشده"}
+
+                    <div className="digi-product-row__cell">
+                      <span className="digi-link-secondary">{categoryLabel}</span>
                     </div>
-                    <div className="text-sm">--</div>
-                    <div className="text-sm tabular-nums">
-                      {formatPrice(row.price?.amount ?? 0)}
+
+                    <div className="digi-product-row__cell">
+                      <span className="digi-badge-neutral">میکس پلاس</span>
                     </div>
-                    <div>
-                      <span className="digi-badge-neutral">
-                        {row.brandName ? "پیشنهادی" : "چاپ شده"}
+
+                    <div className="digi-product-row__cell">
+                      <span className="digi-link-secondary">
+                        {row.brandName || "میکس پلاس"}
                       </span>
                     </div>
-                    <div className="text-sm tabular-nums">۰</div>
-                    <div className="text-sm tabular-nums">۱</div>
-                    <div className="text-sm tabular-nums">۱</div>
-                    <div />
-                    <div>
+
+                    <div className="digi-product-row__cell">
                       <span
                         className={
-                          sellable ? "digi-badge-success" : "digi-badge-error"
+                          row.isPublished
+                            ? "digi-badge-success"
+                            : "digi-badge-error"
                         }
                       >
-                        {sellable ? "قابل‌فروش" : "غیر‌قابل‌فروش"}
+                        {row.isPublished ? "تایید شده" : "تکمیل‌نشده"}
                       </span>
                     </div>
-                    <div className="relative flex justify-end">
-                      <button
-                        type="button"
-                        className="digi-more-btn"
-                        aria-label="عملیات"
-                        onClick={() =>
-                          setMenuId((prev) => (prev === row.id ? null : row.id))
-                        }
-                      >
-                        <MoreIcon />
-                      </button>
-                      {menuId === row.id ? (
-                        <div className="digi-row-menu">
-                          <Link
-                            href={`/seller/digi/products/${encodeURIComponent(row.id)}/manage`}
-                            className="digi-row-menu__item"
-                          >
-                            مدیریت کالا
-                          </Link>
-                          <Link
-                            href={`/seller/digi/products/${encodeURIComponent(row.id)}/manage?step=pricing`}
-                            className="digi-row-menu__item"
-                          >
-                            قیمت و موجودی
-                          </Link>
-                          <button
-                            type="button"
-                            className="digi-row-menu__item"
-                            onClick={() => {
-                              void (async () => {
-                                try {
-                                  await setSellerProductPublished(
-                                    row.id,
-                                    !row.isPublished,
-                                  );
-                                  setMenuId(null);
-                                  await load({ soft: true });
-                                } catch {
-                                  setError("تغییر وضعیت انتشار ناموفق بود");
-                                }
-                              })();
-                            }}
-                          >
-                            {row.isPublished ? "لغو انتشار" : "انتشار در سایت"}
-                          </button>
-                        </div>
-                      ) : null}
+
+                    <div className="digi-product-row__cell">
+                      {variantCount.toLocaleString("fa-IR")}
                     </div>
-                  </div>
+
+                    <div className="digi-product-row__cell" />
+
+                    <div className="digi-product-row__cell digi-product-row__actions">
+                      <Link href={variantHref} className="digi-btn-row-primary">
+                        افزودن تنوع
+                      </Link>
+                      {row.isPublished ? (
+                        <Link
+                          href="/seller/digi/marketing"
+                          className="digi-btn-row-outline"
+                        >
+                          افزایش فروش
+                        </Link>
+                      ) : null}
+                      <div className="relative">
+                        <button
+                          type="button"
+                          className="digi-more-btn"
+                          aria-label="عملیات"
+                          onClick={() =>
+                            setMenuId((prev) =>
+                              prev === row.id ? null : row.id,
+                            )
+                          }
+                        >
+                          <MoreIcon />
+                        </button>
+                        {menuId === row.id ? (
+                          <div className="digi-row-menu">
+                            <Link
+                              href={manageHref}
+                              className="digi-row-menu__item"
+                            >
+                              مدیریت کالا
+                            </Link>
+                            <Link
+                              href={`${manageHref}?step=pricing`}
+                              className="digi-row-menu__item"
+                            >
+                              قیمت و موجودی
+                            </Link>
+                            <button
+                              type="button"
+                              className="digi-row-menu__item"
+                              onClick={() => {
+                                void (async () => {
+                                  try {
+                                    await setSellerProductPublished(
+                                      row.id,
+                                      !row.isPublished,
+                                    );
+                                    setMenuId(null);
+                                    await load({ soft: true });
+                                  } catch {
+                                    setError("تغییر وضعیت انتشار ناموفق بود");
+                                  }
+                                })();
+                              }}
+                            >
+                              {row.isPublished
+                                ? "لغو انتشار"
+                                : "انتشار در سایت"}
+                            </button>
+                          </div>
+                        ) : null}
+                      </div>
+                    </div>
+                  </section>
                 );
               })}
             </div>
@@ -516,13 +576,14 @@ function FilterIcon() {
 
 function PlusIcon() {
   return (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden>
-      <path
-        d="M12 5v14M5 12h14"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-      />
+    <svg
+      width="24"
+      height="24"
+      viewBox="0 0 24 24"
+      aria-hidden
+      style={{ fill: "var(--color-icon-white)" }}
+    >
+      <path d="M19 11h-6V5a1 1 0 1 0-2 0v6H5a1 1 0 1 0 0 2h6v6a1 1 0 1 0 2 0v-6h6a1 1 0 1 0 0-2Z" />
     </svg>
   );
 }
@@ -547,6 +608,20 @@ function MoreIcon() {
       <circle cx="12" cy="6" r="1.5" fill="currentColor" />
       <circle cx="12" cy="12" r="1.5" fill="currentColor" />
       <circle cx="12" cy="18" r="1.5" fill="currentColor" />
+    </svg>
+  );
+}
+
+function InfoIcon() {
+  return (
+    <svg
+      width="24"
+      height="24"
+      viewBox="0 0 24 24"
+      aria-hidden
+      style={{ fill: "var(--color-icon-black)" }}
+    >
+      <path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20Zm1 15h-2v-6h2v6Zm0-8h-2V7h2v2Z" />
     </svg>
   );
 }

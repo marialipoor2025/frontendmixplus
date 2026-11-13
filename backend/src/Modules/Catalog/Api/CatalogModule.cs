@@ -86,14 +86,31 @@ public sealed class CatalogModule : IModule
                     }
                     else if (IsSellerHouseBrandSlug(slug))
                     {
-                        // Curated house brands (e.g. Mix+) are sellers, not manufacturer brands.
-                        // Show that seller's published catalog instead of 404/empty brand PLP.
-                        query = query.Where(x =>
-                            EF.Functions.ILike(x.SellerName, "%mix%")
-                            || EF.Functions.ILike(x.SellerName, "%میکس%")
-                            || EF.Functions.ILike(x.BrandName, "%mix+%")
-                            || EF.Functions.ILike(x.BrandName, "%mixplus%")
-                            || EF.Functions.ILike(x.BrandName, "%میکس%"));
+                        // Showcase uses /brand/mixplus, but Digi seed stores brand slug hashes
+                        // (e.g. e1bf07ea) with Persian name «میکس پلاس». Resolve by name/key.
+                        var houseKeys = await db.Brands.AsNoTracking()
+                            .Where(b => b.IsActive && (
+                                EF.Functions.ILike(b.Name, "%میکس%پلاس%")
+                                || EF.Functions.ILike(b.Name, "%میکس پلاس%")
+                                || EF.Functions.ILike(b.Name, "%mix+%")
+                                || EF.Functions.ILike(b.Name, "%mixplus%")
+                                || b.Slug == "mixplus"))
+                            .Select(b => b.ExternalKey)
+                            .ToListAsync(ct);
+
+                        if (houseKeys.Count > 0)
+                        {
+                            query = query.Where(x => houseKeys.Contains(x.BrandExternalKey));
+                        }
+                        else
+                        {
+                            query = query.Where(x =>
+                                EF.Functions.ILike(x.BrandName, "%میکس%")
+                                || EF.Functions.ILike(x.BrandName, "%mix+%")
+                                || EF.Functions.ILike(x.BrandName, "%mixplus%")
+                                || EF.Functions.ILike(x.SellerName, "%میکس%")
+                                || x.SellerExternalKey.StartsWith("sel-portal-"));
+                        }
                     }
                     else
                     {

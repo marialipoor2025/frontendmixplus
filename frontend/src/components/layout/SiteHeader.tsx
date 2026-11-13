@@ -1,5 +1,5 @@
-import Image from "next/image";
 import Link from "next/link";
+import { MarketplaceLogo } from "@/components/brand/MarketplaceLogo";
 import { HeaderQuickLinks } from "@/components/layout/HeaderQuickLinks";
 import { HeaderSearch } from "@/components/layout/HeaderSearch";
 import { HeaderTopBar } from "@/components/layout/HeaderTopBar";
@@ -10,7 +10,7 @@ import { siteConfig } from "@/config/site";
 const OFFER_HREF = "/incredible-offers";
 
 /**
- * MixPlus header aligned to Barghchi desktop structure.
+ * Oriya Market header (Digikala/Barghchi-style chrome).
  * Mobile: logo + offers → search → quick links.
  * Desktop: top bar → logo | search | offers | actions (generous spacing).
  */
@@ -27,17 +27,15 @@ export function SiteHeader() {
         <div className="mb-2 flex w-full items-center justify-between gap-3 py-1">
           <Link
             href="/"
-            data-cro-id="header-mixplus-logo-mobile"
+            data-cro-id="header-oriya-logo-mobile"
             aria-label={`لوگوی ${siteConfig.nameFa}`}
             className="flex shrink-0 items-center justify-end"
           >
-            <Image
-              src="/brand/mixplus-logo.svg"
-              alt={`لوگوی ${siteConfig.nameFa}`}
-              width={108}
-              height={30}
+            <MarketplaceLogo
               priority
-              className="h-[30px] w-[108px] object-contain object-right"
+              width={152}
+              height={52}
+              className="h-[42px] w-[152px]"
             />
           </Link>
 
@@ -72,16 +70,14 @@ export function SiteHeader() {
             <Link
               href="/"
               className="shrink-0"
-              data-cro-id="header-mixplus-logo"
+              data-cro-id="header-oriya-logo"
               aria-label={`لوگوی ${siteConfig.nameFa}`}
             >
-              <Image
-                src="/brand/mixplus-logo.svg"
-                alt={`لوگوی ${siteConfig.nameFa}`}
-                width={133}
-                height={30}
+              <MarketplaceLogo
                 priority
-                className="h-[30px] w-[133px] object-contain"
+                width={176}
+                height={60}
+                className="h-[48px] w-[176px]"
               />
             </Link>
 

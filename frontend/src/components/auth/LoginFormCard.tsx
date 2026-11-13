@@ -1,9 +1,9 @@
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useId, useState, type FormEvent } from "react";
+import { MarketplaceLogo } from "@/components/brand/MarketplaceLogo";
 import { siteConfig } from "@/config/site";
 import { getAdminStaffMe } from "@/lib/api/admin/staff";
 import {
@@ -324,13 +324,11 @@ export function LoginFormCard({
           aria-label={`لوگوی ${siteConfig.nameFa}`}
           className="inline-flex items-center justify-center"
         >
-          <Image
-            src="/brand/mixplus-logo.svg"
-            alt={siteConfig.name}
-            width={148}
-            height={40}
+          <MarketplaceLogo
             priority
-            className="h-9 w-auto object-contain sm:h-10"
+            width={200}
+            height={70}
+            className="h-12 w-[200px] sm:h-14 sm:w-[220px]"
           />
         </Link>
       </header>

@@ -66,7 +66,7 @@ function BrandSlide({ brand }: { brand: Brand }) {
     <Link
       href={`/brand/${brand.slug}`}
       data-brand-slide
-      className="flex h-[110px] w-[160px] shrink-0 items-center justify-center overflow-hidden rounded-md border border-[var(--color-neutral-100)] bg-white px-4 transition duration-300 ease-in-out hover:border-[var(--color-neutral-300)] hover:shadow-sm sm:w-[180px] md:w-[200px]"
+      className="flex h-[110px] w-[160px] shrink-0 items-center justify-center rounded-md border border-[var(--color-neutral-100)] bg-white px-3 py-3 transition duration-300 ease-in-out hover:border-[var(--color-neutral-300)] hover:shadow-sm sm:w-[180px] md:w-[200px]"
       title={brand.name}
     >
       {logo ? (
@@ -75,7 +75,7 @@ function BrandSlide({ brand }: { brand: Brand }) {
         <img
           src={logo}
           alt={brand.name}
-          className="max-h-[64px] max-w-[140px] object-contain md:max-h-[72px] md:max-w-[160px]"
+          className="max-h-[70px] max-w-full object-contain object-center md:max-h-[78px]"
           loading="lazy"
         />
       ) : (

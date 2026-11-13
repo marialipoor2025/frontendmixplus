@@ -3,45 +3,22 @@ import { MainNav } from "@/components/layout/MainNav";
 import { SiteFooter } from "@/components/layout/SiteFooter";
 import { SiteHeader } from "@/components/layout/SiteHeader";
 import { StickyHeaderShell } from "@/components/layout/StickyHeaderShell";
-import { getBrands } from "@/lib/api/catalog";
+import { ProductBreadcrumb } from "@/components/product/ProductBreadcrumb";
+import { siteConfig } from "@/config/site";
 import { getMainNavData } from "@/lib/api/nav";
 import { SHOWCASE_BRANDS } from "@/lib/showcase-brands";
-import type { Brand } from "@/types/brand";
 
 export const metadata = { title: "برندها" };
 
-function mergeBrandLists(apiBrands: Brand[], showcase: Brand[]): Brand[] {
-  const bySlug = new Map<string, Brand>();
-
-  for (const brand of apiBrands) {
-    const slug = brand.slug?.trim().toLowerCase();
-    if (!slug) continue;
-    bySlug.set(slug, brand);
-  }
-
-  // Curated logos win; ensure every showcase brand appears on the brands page.
-  for (const brand of showcase) {
-    const slug = brand.slug.trim().toLowerCase();
-    const existing = bySlug.get(slug);
-    bySlug.set(slug, {
-      id: existing?.id ?? brand.id,
-      name: existing?.name || brand.name,
-      slug: existing?.slug || brand.slug,
-      logoUrl: brand.logoUrl || existing?.logoUrl || "",
-    });
-  }
-
-  return Array.from(bySlug.values()).sort((a, b) =>
-    a.name.localeCompare(b.name, "en", { sensitivity: "base" }),
-  );
-}
+const BREADCRUMB = [
+  { id: "home", title: siteConfig.nameFa, href: "/" },
+  { id: "brands", title: "برندها", href: "/brand" },
+];
 
 export default async function BrandsIndexPage() {
-  const [nav, apiBrands] = await Promise.all([getMainNavData(), getBrands()]);
-  const brands =
-    SHOWCASE_BRANDS.length > 0
-      ? mergeBrandLists(apiBrands, SHOWCASE_BRANDS)
-      : apiBrands;
+  const nav = await getMainNavData();
+  // Curated list only (foreign → Iranian). No Digi seller+brand composites.
+  const brands = SHOWCASE_BRANDS;
 
   return (
     <>
@@ -51,6 +28,7 @@ export default async function BrandsIndexPage() {
       </StickyHeaderShell>
 
       <div className="site-container flex-1 py-6">
+        <ProductBreadcrumb items={BREADCRUMB} />
         <h1 className="mb-6 text-lg font-bold text-[var(--color-neutral-900)]">
           برندها
         </h1>
@@ -67,9 +45,9 @@ export default async function BrandsIndexPage() {
                   <img
                     src={brand.logoUrl}
                     alt={brand.name}
-                    width={72}
+                    width={120}
                     height={72}
-                    className="h-[72px] w-[72px] object-contain"
+                    className="h-[72px] w-full max-w-[120px] object-contain object-center"
                     loading="lazy"
                   />
                 ) : (

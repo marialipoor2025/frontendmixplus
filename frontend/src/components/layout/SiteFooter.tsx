@@ -8,18 +8,13 @@ import {
   getFooterSettings,
   subscribeFooterEmail,
 } from "@/lib/api/footer";
+import {
+  getFooterCategoriesWithProducts,
+  type FooterCategoryLink,
+} from "@/lib/api/catalog";
 import { getSiteSettings } from "@/lib/api/site-settings";
 
 type FooterLink = { label: string; href: string };
-
-const PRODUCT_CATEGORIES: FooterLink[] = [
-  { label: "لوازم خانگی برقی", href: "/search/?q=%D9%84%D9%88%D8%A7%D8%B2%D9%85+%D8%AE%D8%A7%D9%86%DA%AF%DB%8C" },
-  { label: "یخچال و فریزر", href: "/search/?q=%DB%8C%D8%AE%DA%86%D8%A7%D9%84" },
-  { label: "ماشین لباسشویی", href: "/search/?q=%D9%84%D8%A8%D8%A7%D8%B3%D8%B4%D9%88%DB%8C%DB%8C" },
-  { label: "جاروبرقی", href: "/search/?q=%D8%AC%D8%A7%D8%B1%D9%88%D8%A8%D8%B1%D9%82%DB%8C" },
-  { label: "تلویزیون", href: "/search/?q=%D8%AA%D9%84%D9%88%DB%8C%D8%B2%DB%8C%D9%88%D9%86" },
-  { label: "لوازم آشپزخانه", href: "/search/?q=%D8%A2%D8%B4%D9%BE%D8%B2%D8%AE%D8%A7%D9%86%D9%87" },
-];
 
 const CUSTOMER_SERVICE: FooterLink[] = [
   { label: "درخواست پیش فاکتور", href: "/proforma-invoice" },
@@ -345,20 +340,26 @@ export function SiteFooter() {
     "از ۹ صبح تا ۱۷ عصر به‌جز روزهای تعطیل",
   );
   const [blogUrl, setBlogUrl] = useState("https://mixplusshop.ir");
+  const [productCategories, setProductCategories] = useState<FooterCategoryLink[]>(
+    [],
+  );
 
   useEffect(() => {
     let cancelled = false;
-    void Promise.all([getFooterSettings(), getSiteSettings()]).then(
-      ([settings, site]) => {
-        if (cancelled) return;
-        setShowTrust(settings.showTrustSeals);
-        if (settings.headerPhone) setPhonePrimary(settings.headerPhone);
-        else if (settings.phonePrimary) setPhonePrimary(settings.phonePrimary);
-        if (settings.phoneSecondary) setPhoneSecondary(settings.phoneSecondary);
-        if (settings.hoursLine) setHoursLine(settings.hoursLine);
-        if (site.blogUrl) setBlogUrl(site.blogUrl);
-      },
-    );
+    void Promise.all([
+      getFooterSettings(),
+      getSiteSettings(),
+      getFooterCategoriesWithProducts(8),
+    ]).then(([settings, site, categories]) => {
+      if (cancelled) return;
+      setShowTrust(settings.showTrustSeals);
+      if (settings.headerPhone) setPhonePrimary(settings.headerPhone);
+      else if (settings.phonePrimary) setPhonePrimary(settings.phonePrimary);
+      if (settings.phoneSecondary) setPhoneSecondary(settings.phoneSecondary);
+      if (settings.hoursLine) setHoursLine(settings.hoursLine);
+      if (site.blogUrl) setBlogUrl(site.blogUrl);
+      setProductCategories(categories);
+    });
     return () => {
       cancelled = true;
     };
@@ -387,12 +388,14 @@ export function SiteFooter() {
               <div className="footer-top flex flex-wrap pt-2 lg:pt-0">
                 <div className="w-full">
                   <div className="footer-menus-wrap flex-wrap lg:flex">
-                    <FooterMenuColumn
-                      title="دسته‌بندی محصولات"
-                      links={PRODUCT_CATEGORIES}
-                      open={!!openMenus.categories}
-                      onToggle={() => toggleMenu("categories")}
-                    />
+                    {productCategories.length > 0 ? (
+                      <FooterMenuColumn
+                        title="دسته‌بندی محصولات"
+                        links={productCategories}
+                        open={!!openMenus.categories}
+                        onToggle={() => toggleMenu("categories")}
+                      />
+                    ) : null}
                     <FooterMenuColumn
                       title="خدمات مشتریان"
                       links={CUSTOMER_SERVICE}

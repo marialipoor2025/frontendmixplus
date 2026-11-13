@@ -198,6 +198,45 @@ type CatalogCategoryDto = {
   slug: string;
 };
 
+type CatalogCategoryTreeNode = {
+  id: string;
+  title: string;
+  slug: string;
+  href?: string | null;
+  children?: CatalogCategoryTreeNode[];
+};
+
+export type FooterCategoryLink = {
+  label: string;
+  href: string;
+};
+
+/**
+ * Top-level categories that have at least one published product in their subtree.
+ * Used by the storefront footer product-category column.
+ */
+export async function getFooterCategoriesWithProducts(
+  limit = 8,
+): Promise<FooterCategoryLink[]> {
+  if (siteConfig.useMocks || !siteConfig.apiBaseUrl) return [];
+
+  try {
+    const tree = await apiClient<CatalogCategoryTreeNode[]>(
+      "/api/catalog/categories/tree",
+      { query: { withProductsOnly: true } },
+    );
+    return (tree ?? [])
+      .filter((c) => c.title?.trim())
+      .slice(0, limit)
+      .map((c) => ({
+        label: c.title.trim(),
+        href: (c.href?.trim() || `/categories/${c.slug}`).replace(/\/+$/, "") || "/",
+      }));
+  } catch {
+    return [];
+  }
+}
+
 /** Persian titles keyed by slug / href for category PLP breadcrumbs. */
 export async function getCategoryTitleLookup(): Promise<CategoryTitleLookup> {
   const bySlug = new Map<string, string>();

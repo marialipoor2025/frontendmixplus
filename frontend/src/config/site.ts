@@ -3,7 +3,12 @@ export const siteConfig = {
   name: "Oriya Market",
   /** Persian marketplace label used in UI copy (search hint, offers, etc.) */
   nameFa: "اوریا مارکت",
-  description: "بازار تخصصی لوازم خانگی ایران — چند فروشنده، چند برند.",
+  /**
+   * Browser tab / SEO default title (barghchi-style: brand / specialty tagline).
+   * Home appliances — mirrors barghchi’s «مرجع تخصصی فروش تجهیزات».
+   */
+  title: "اوریا مارکت | مرجع تخصصی فروش لوازم خانگی",
+  description: "مرجع تخصصی فروش لوازم خانگی — یخچال، لباسشویی، تلویزیون و برندهای معتبر.",
   locale: "fa",
   direction: "rtl" as "ltr" | "rtl",
   /** Marketplace logo — Persian mark with site blue→red gradient. */

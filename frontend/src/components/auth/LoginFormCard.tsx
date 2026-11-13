@@ -21,7 +21,6 @@ import type { VerifyOtpResponse } from "@/types/auth";
 
 type Step =
   | "username"
-  | "method"
   | "otp"
   | "password"
   | "forgot-otp"
@@ -123,15 +122,15 @@ export function LoginFormCard({
     return null;
   }
 
-  function handleUsernameSubmit(e: FormEvent<HTMLFormElement>) {
-    e.preventDefault();
+  function beginPasswordLogin() {
     const err = validateUsername();
     if (err) {
       setError(err);
       return;
     }
     setError(null);
-    setStep("method");
+    setPassword("");
+    setStep("password");
   }
 
   async function beginOtpLogin() {
@@ -274,12 +273,8 @@ export function LoginFormCard({
 
   function goBack() {
     setError(null);
-    if (step === "method") {
-      setStep("username");
-      return;
-    }
     if (step === "otp" || step === "password") {
-      setStep("method");
+      setStep("username");
       setCode("");
       setPassword("");
       return;
@@ -345,7 +340,7 @@ export function LoginFormCard({
                 : "لطفا شماره موبایل یا ایمیل خود را وارد کنید")}
           </p>
 
-          <form className="mt-5" onSubmit={handleUsernameSubmit} noValidate>
+          <div className="mt-5">
             <GradientInputShell error={Boolean(error)}>
               <input
                 id={usernameId}
@@ -367,42 +362,25 @@ export function LoginFormCard({
               />
             </GradientInputShell>
             <ErrorText error={error} />
-            <SubmitButton submitting={submitting}>ادامه</SubmitButton>
-          </form>
-        </>
-      ) : null}
-
-      {step === "method" ? (
-        <>
-          <h1 className="text-base font-bold leading-8 text-[#0c0c0c] sm:text-[15px]">
-            نحوه ورود را انتخاب کنید
-          </h1>
-          <p className="mt-2 text-sm font-medium leading-7 text-[#81858b]">
-            ورود برای <span dir="ltr">{username.trim()}</span>
-          </p>
-          <div className="mt-5 space-y-3">
-            <button
-              type="button"
-              disabled={submitting}
-              onClick={() => void beginOtpLogin()}
-              className="flex w-full items-center justify-center rounded-lg bg-gradient-to-l from-[#1672dd] to-[#ed1944] px-4 py-3.5 text-sm font-bold text-white transition hover:brightness-105 disabled:opacity-70"
-            >
-              {submitting ? "لطفاً صبر کنید…" : "ورود با کد یک‌بارمصرف"}
-            </button>
-            <button
-              type="button"
-              disabled={submitting}
-              onClick={() => {
-                setError(null);
-                setPassword("");
-                setStep("password");
-              }}
-              className="flex w-full items-center justify-center rounded-lg border border-[#e0e0e2] bg-white px-4 py-3.5 text-sm font-bold text-[#0c0c0c] transition hover:bg-[#f5f5f5] disabled:opacity-70"
-            >
-              ورود با رمز عبور
-            </button>
+            <div className="mt-4 space-y-3">
+              <button
+                type="button"
+                disabled={submitting}
+                onClick={() => void beginOtpLogin()}
+                className="flex w-full items-center justify-center rounded-lg bg-gradient-to-l from-[#1672dd] to-[#ed1944] px-4 py-3.5 text-sm font-bold text-white transition hover:brightness-105 disabled:opacity-70"
+              >
+                {submitting ? "لطفاً صبر کنید…" : "ورود با کد یک‌بارمصرف"}
+              </button>
+              <button
+                type="button"
+                disabled={submitting}
+                onClick={beginPasswordLogin}
+                className="flex w-full items-center justify-center rounded-lg border border-[#e0e0e2] bg-white px-4 py-3.5 text-sm font-bold text-[#0c0c0c] transition hover:bg-[#f5f5f5] disabled:opacity-70"
+              >
+                ورود با رمز عبور
+              </button>
+            </div>
           </div>
-          <ErrorText error={error} />
         </>
       ) : null}
 
@@ -558,7 +536,7 @@ export function LoginFormCard({
         </>
       ) : null}
 
-      {step === "username" || step === "method" ? (
+      {step === "username" ? (
         <p className="mt-6 text-xs font-medium leading-6 text-[#81858b]">
           ورود شما به معنای پذیرش{" "}
           <Link href="/page/terms" className="text-[#19bfd3] hover:underline">

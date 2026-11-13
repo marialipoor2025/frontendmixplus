@@ -257,3 +257,69 @@ export function resolveShowcaseBrand(slug: string): Brand | null {
     null
   );
 }
+
+function normalizeBrandKey(value: string): string {
+  return value
+    .trim()
+    .toLowerCase()
+    .replace(/\u200c/g, "") // ZWNJ in ال‌جی etc.
+    .replace(/['’.]/g, "")
+    .replace(/\s+/g, "")
+    .replace(/پلاس/g, "plus")
+    .replace(/\+/g, "plus");
+}
+
+/** Digi / Persian display names → curated showcase slug. */
+const BRAND_NAME_ALIASES: Record<string, string> = {
+  mixplus: "mixplus",
+  "میکسplus": "mixplus",
+  تفال: "tefal",
+  اسپرتج: "sportage",
+  اسپورتاج: "sportage",
+  اسنوا: "snowa",
+  الجی: "lg",
+  ایکسویژن: "x-vision",
+  بوش: "bosch",
+  دوو: "daewoo",
+  سامسونگ: "samsung",
+  شیائومی: "xiaomi",
+  فیلیپس: "philips",
+  مولینکس: "moulinex",
+  moulinex: "moulinex",
+  هواوی: "huawei",
+  هوآوی: "huawei",
+  پاکشوما: "pakshoma",
+};
+
+const BAD_SHARED_LOGOS = new Set([
+  "/brand/mixplus-logo.svg",
+  "/placeholders/product-appliance.png",
+]);
+
+/** Curated logo by slug/Persian alias — Digi often reuses Mix+ LogoUrl on every brand. */
+export function resolveShowcaseBrandLogo(
+  brand: Pick<Brand, "slug" | "name" | "logoUrl">,
+): string {
+  const bySlug = resolveShowcaseBrand(brand.slug);
+  if (bySlug?.logoUrl?.trim()) return bySlug.logoUrl.trim();
+
+  const nameKey = normalizeBrandKey(brand.name);
+  if (nameKey) {
+    const aliasSlug = BRAND_NAME_ALIASES[nameKey];
+    if (aliasSlug) {
+      const aliased = resolveShowcaseBrand(aliasSlug);
+      if (aliased?.logoUrl?.trim()) return aliased.logoUrl.trim();
+    }
+
+    const byName = SHOWCASE_BRANDS.find(
+      (b) =>
+        normalizeBrandKey(b.name) === nameKey ||
+        normalizeBrandKey(b.slug) === nameKey,
+    );
+    if (byName?.logoUrl?.trim()) return byName.logoUrl.trim();
+  }
+
+  const fromApi = brand.logoUrl?.trim() ?? "";
+  if (!fromApi || BAD_SHARED_LOGOS.has(fromApi)) return "";
+  return fromApi;
+}

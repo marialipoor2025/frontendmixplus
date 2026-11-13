@@ -13,6 +13,7 @@ import {
   NAV_LINK_CLASS,
 } from "@/components/layout/navMenuShared";
 import { getBrandsByCategorySlug } from "@/lib/api/catalog";
+import { resolveShowcaseBrandLogo } from "@/lib/showcase-brands";
 import type { Brand } from "@/types/brand";
 import type {
   MainNavData,
@@ -163,17 +164,33 @@ function MegaDropdown({
                 برندی در این دسته نیست
               </span>
             ) : (
-            brands.map((brand) => (
-              <Link
-                key={brand.id}
-                href={`/brand/${brand.slug}`}
-                data-cro-id="mega-menu-brand"
-                className="group flex h-10 shrink-0 origin-bottom items-center justify-center rounded-md px-2.5 py-1 text-[11px] font-medium text-[var(--color-neutral-700)] transition-transform duration-200 ease-out hover:z-10 hover:scale-110 hover:bg-[#F1F9FF] hover:text-[var(--color-secondary-500)]"
-                title={brand.name}
-              >
-                <span className="whitespace-nowrap">{brand.name}</span>
-              </Link>
-            ))
+            brands.map((brand) => {
+              const logo = resolveShowcaseBrandLogo(brand);
+              return (
+                <Link
+                  key={brand.id}
+                  href={`/brand/${brand.slug}`}
+                  data-cro-id="mega-menu-brand"
+                  className="group flex h-11 w-[72px] shrink-0 origin-bottom items-center justify-center rounded-md border border-[var(--color-neutral-100)] bg-white px-1.5 py-1 transition-transform duration-200 ease-out hover:z-10 hover:scale-110 hover:border-[var(--color-neutral-200)] hover:bg-[#F1F9FF]"
+                  title={brand.name}
+                >
+                  {logo ? (
+                    // Local brand assets include svg/avif/webp/png/jpg — use native img.
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
+                      src={logo}
+                      alt={brand.name}
+                      className="max-h-8 max-w-full object-contain"
+                      loading="lazy"
+                    />
+                  ) : (
+                    <span className="line-clamp-2 text-center text-[10px] font-medium leading-tight text-[var(--color-neutral-500)]">
+                      {brand.name}
+                    </span>
+                  )}
+                </Link>
+              );
+            })
             )}
           </div>
         </div>

@@ -14,7 +14,7 @@ export const NAV_ACTION_LINKS = [
   },
   {
     id: "invoice",
-    href: "/enquiry",
+    href: "/proforma-invoice",
     title: "صدور پیش فاکتور",
     icon: "invoice",
   },

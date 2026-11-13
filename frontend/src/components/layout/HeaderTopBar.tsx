@@ -10,6 +10,7 @@ const DEFAULT_PHONE_TEL = "+982161930000";
 
 /**
  * Top utility strip (desktop only) — white, same as the search row.
+ * Icons sit on the physical left of each label (RTL-safe via row-reverse).
  */
 export function HeaderTopBar() {
   const [hours, setHours] = useState(DEFAULT_HOURS);
@@ -32,7 +33,7 @@ export function HeaderTopBar() {
   return (
     <div className="hidden w-full bg-[var(--color-neutral-000)] lg:block">
       <div className="site-container flex items-center justify-between gap-4 py-2.5 text-xs text-[var(--color-neutral-600)]">
-        <p className="flex items-center gap-1.5">
+        <p className="flex flex-row-reverse items-center gap-1.5">
           <svg
             xmlns="http://www.w3.org/2000/svg"
             width="14"
@@ -62,7 +63,7 @@ export function HeaderTopBar() {
         <div className="flex items-center gap-5">
           <a
             href={`tel:${phoneTel}`}
-            className="flex items-center gap-1.5 transition hover:text-[var(--color-neutral-800)]"
+            className="flex flex-row-reverse items-center gap-1.5 transition hover:text-[var(--color-neutral-800)]"
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -86,7 +87,7 @@ export function HeaderTopBar() {
 
           <a
             href="/page/contact-us"
-            className="flex items-center gap-1.5 transition hover:text-[var(--color-neutral-800)]"
+            className="flex flex-row-reverse items-center gap-1.5 transition hover:text-[var(--color-neutral-800)]"
           >
             <BottomNavChatIcon className="h-3.5 w-3.5" />
             <span>گفتگو با کارشناسان</span>

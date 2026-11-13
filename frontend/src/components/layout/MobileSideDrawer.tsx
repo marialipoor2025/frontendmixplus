@@ -1,8 +1,8 @@
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
 import { useEffect, type ReactNode } from "react";
+import { MarketplaceLogo } from "@/components/brand/MarketplaceLogo";
 import { siteConfig } from "@/config/site";
 
 type MobileSideDrawerProps = {
@@ -66,12 +66,10 @@ export function MobileSideDrawer({
               aria-label={`لوگوی ${siteConfig.nameFa}`}
               className="shrink-0"
             >
-              <Image
-                src="/brand/mixplus-logo.svg"
-                alt={`لوگوی ${siteConfig.nameFa}`}
-                width={96}
-                height={28}
-                className="h-7 w-auto object-contain"
+              <MarketplaceLogo
+                width={132}
+                height={46}
+                className="h-9 w-[132px]"
               />
             </Link>
             <span

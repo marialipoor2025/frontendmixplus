@@ -1,8 +1,8 @@
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
+import { MarketplaceLogo } from "@/components/brand/MarketplaceLogo";
 import { siteConfig } from "@/config/site";
 import { getFooterSettings } from "@/lib/api/footer";
 import {
@@ -209,12 +209,10 @@ export function MobileSupportChat({ open, onClose }: MobileSupportChatProps) {
                 )}
               </svg>
             </button>
-            <Image
-              src="/brand/mixplus-logo.svg"
-              alt={siteConfig.nameFa}
-              width={96}
-              height={30}
-              className="brightness-0 invert"
+            <MarketplaceLogo
+              width={128}
+              height={44}
+              className="h-9 w-[128px] rounded bg-white/95 px-1 py-0.5"
             />
             <span className="w-6" />
           </div>

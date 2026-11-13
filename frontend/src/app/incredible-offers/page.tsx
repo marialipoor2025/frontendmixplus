@@ -1,4 +1,5 @@
 import { ProductListingShell } from "@/components/catalog/ProductListingShell";
+import { siteConfig } from "@/config/site";
 import { getHomePageData } from "@/lib/api/home";
 import { getMainNavData } from "@/lib/api/nav";
 import {
@@ -29,7 +30,7 @@ export default async function IncredibleOffersPage({ searchParams }: PageProps) 
         subtitle: "همه کالاهای شگفت‌انگیز و تخفیف‌دار",
         basePath: "/incredible-offers",
         breadcrumb: [
-          { id: "home", title: "خانه", href: "/" },
+          { id: "home", title: siteConfig.nameFa, href: "/" },
           {
             id: "incredible-offers",
             title: "پیشنهادهای ویژه",

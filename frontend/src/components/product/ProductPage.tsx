@@ -75,7 +75,7 @@ export function ProductPage({ data, nav }: ProductPageProps) {
 
       <div className="relative w-full min-w-0 flex-1 lg:pt-2">
         <div className="site-container hidden lg:block">
-          <ProductBreadcrumb items={data.breadcrumb} />
+          <ProductBreadcrumb items={data.breadcrumb} showSellerCta />
         </div>
 
         {/*

@@ -5,16 +5,19 @@ import type { BreadcrumbItem } from "@/types/product-detail";
 
 type ProductBreadcrumbProps = {
   items: BreadcrumbItem[];
-  /** Desktop-only CTA on the opposite side of the trail. */
+  /** Desktop-only «فروش در …» CTA — PDP only; off by default for listing/brand pages. */
+  showSellerCta?: boolean;
   sellerCtaHref?: string;
   sellerCtaLabel?: string;
 };
 
 /**
- * PDP breadcrumb row under the main nav: trail + optional «فروش در …» CTA.
+ * Storefront breadcrumb under the main nav.
+ * Trail starts with Oriya home name; optional seller CTA is PDP-only.
  */
 export function ProductBreadcrumb({
   items,
+  showSellerCta = false,
   sellerCtaHref = "/seller/login",
   sellerCtaLabel = `فروش در ${siteConfig.nameFa}`,
 }: ProductBreadcrumbProps) {
@@ -54,15 +57,17 @@ export function ProductBreadcrumb({
         </ol>
       </nav>
 
-      <div className="mr-auto hidden items-center py-2 lg:flex">
-        <Link
-          href={sellerCtaHref}
-          className="flex items-center text-xs leading-[1.8] text-[var(--color-neutral-400)] transition hover:text-[var(--color-neutral-600)] lg:text-[13px]"
-        >
-          <span>{sellerCtaLabel}</span>
-          <SellerShopIcon className="mr-2 size-[18px] text-[var(--color-neutral-400)]" />
-        </Link>
-      </div>
+      {showSellerCta ? (
+        <div className="mr-auto hidden items-center py-2 lg:flex">
+          <Link
+            href={sellerCtaHref}
+            className="flex items-center text-xs leading-[1.8] text-[var(--color-neutral-400)] transition hover:text-[var(--color-neutral-600)] lg:text-[13px]"
+          >
+            <span>{sellerCtaLabel}</span>
+            <SellerShopIcon className="mr-2 size-[18px] text-[var(--color-neutral-400)]" />
+          </Link>
+        </div>
+      ) : null}
     </div>
   );
 }

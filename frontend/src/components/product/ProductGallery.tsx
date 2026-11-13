@@ -492,7 +492,7 @@ export function ProductGallery({
         <div className="h-12 bg-transparent" aria-hidden />
         {breadcrumb.length ? (
           <div className="pointer-events-auto relative z-[2] bg-white px-4">
-            <ProductBreadcrumb items={breadcrumb} />
+            <ProductBreadcrumb items={breadcrumb} showSellerCta />
           </div>
         ) : null}
       </div>

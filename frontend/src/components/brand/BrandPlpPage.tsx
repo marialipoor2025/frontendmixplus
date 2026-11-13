@@ -1,4 +1,5 @@
 import { ProductListingShell } from "@/components/catalog/ProductListingShell";
+import { siteConfig } from "@/config/site";
 import {
   applyProductListing,
   parseListingSearchParams,
@@ -30,7 +31,7 @@ export function BrandPlpPage({
       context={{
         title: `محصولات ${brand.name}`,
         breadcrumb: [
-          { id: "home", title: "خانه", href: "/" },
+          { id: "home", title: siteConfig.nameFa, href: "/" },
           { id: "brands", title: "برندها", href: "/brand" },
           { id: brand.id, title: brand.name, href: `/brand/${brand.slug}` },
         ],

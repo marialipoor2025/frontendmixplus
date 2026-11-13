@@ -62,7 +62,7 @@ export function PdpComponentPreview({ draft, stepId, override }: Props) {
     <div className="max-h-[28rem] overflow-auto rounded-lg bg-white p-2 shadow-sm ring-1 ring-[var(--color-neutral-200)]">
       {stepId === "basics" ? (
         <div className="space-y-3">
-          <ProductBreadcrumb items={data.breadcrumb} />
+          <ProductBreadcrumb items={data.breadcrumb} showSellerCta />
           <ProductTitle title={data.title} links={data.titleNav} />
         </div>
       ) : null}

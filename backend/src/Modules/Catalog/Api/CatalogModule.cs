@@ -247,13 +247,50 @@ public sealed class CatalogModule : IModule
             })
             .WithName("GetCatalogProduct");
 
-        group.MapGet("/brands", async (CatalogDbContext db, string? slug, CancellationToken ct) =>
+        group.MapGet("/brands", async (
+                CatalogDbContext db,
+                string? slug,
+                string? categorySlug,
+                CancellationToken ct) =>
             {
                 var query = db.Brands.AsNoTracking().Where(x => x.IsActive);
                 if (!string.IsNullOrWhiteSpace(slug))
                 {
                     var normalized = slug.Trim().ToLowerInvariant();
                     query = query.Where(x => x.Slug == normalized);
+                }
+
+                // Brands that actually have published products under a category (incl. descendants).
+                if (!string.IsNullOrWhiteSpace(categorySlug))
+                {
+                    var catKey = categorySlug.Trim().ToLowerInvariant();
+                    var category = await db.Categories.AsNoTracking()
+                        .FirstOrDefaultAsync(
+                            c => c.IsActive && (c.Slug == catKey || c.ExternalKey == catKey),
+                            ct);
+                    if (category is null)
+                    {
+                        return Results.Ok(Array.Empty<BrandDto>());
+                    }
+
+                    var allCategories = await db.Categories.AsNoTracking()
+                        .Where(c => c.IsActive)
+                        .Select(c => new { c.Id, c.ParentId })
+                        .ToListAsync(ct);
+                    var categoryIds = CollectCategorySubtreeIds(
+                        allCategories.Select(c => (c.Id, c.ParentId)).ToList(),
+                        category.Id);
+
+                    var brandKeys = await db.Products.AsNoTracking()
+                        .Where(p =>
+                            p.IsPublished
+                            && p.CategoryId != null
+                            && categoryIds.Contains(p.CategoryId.Value))
+                        .Select(p => p.BrandExternalKey)
+                        .Distinct()
+                        .ToListAsync(ct);
+
+                    query = query.Where(b => brandKeys.Contains(b.ExternalKey));
                 }
 
                 var rows = await query
@@ -549,5 +586,37 @@ public sealed class CatalogModule : IModule
         }
 
         return terms.ToList();
+    }
+
+    private static HashSet<Guid> CollectCategorySubtreeIds(
+        IReadOnlyList<(Guid Id, Guid? ParentId)> categories,
+        Guid rootId)
+    {
+        var childrenByParent = categories
+            .Where(c => c.ParentId is not null)
+            .GroupBy(c => c.ParentId!.Value)
+            .ToDictionary(g => g.Key, g => g.Select(x => x.Id).ToList());
+
+        var ids = new HashSet<Guid> { rootId };
+        var stack = new Stack<Guid>();
+        stack.Push(rootId);
+        while (stack.Count > 0)
+        {
+            var current = stack.Pop();
+            if (!childrenByParent.TryGetValue(current, out var kids))
+            {
+                continue;
+            }
+
+            foreach (var kid in kids)
+            {
+                if (ids.Add(kid))
+                {
+                    stack.Push(kid);
+                }
+            }
+        }
+
+        return ids;
     }
 }

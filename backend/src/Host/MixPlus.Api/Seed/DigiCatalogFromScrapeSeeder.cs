@@ -224,7 +224,7 @@ public static class DigiCatalogFromScrapeSeeder
                 showWarranty = false,
                 warranty = "",
                 showDelivery = true,
-                deliveryTitle = "ارسال دیجی‌کالا",
+                deliveryTitle = "ارسال فروشنده",
                 deliveryMethodLabel = "ارسال فروشنده",
                 deliveryCostLabel = "",
                 showPricePolicy = false,
@@ -378,11 +378,24 @@ public static class DigiCatalogFromScrapeSeeder
 
         var slug = SlugifyLatin(brandName);
         var key = $"b-digi-{slug}";
+        // MixPlus is a seller/brand on Oriya — only that brand gets the MixPlus mark.
+        var isMixPlus =
+            brandName.Contains("میکس پلاس", StringComparison.OrdinalIgnoreCase)
+            || brandName.Contains("mixplus", StringComparison.OrdinalIgnoreCase)
+            || brandName.Contains("mix plus", StringComparison.OrdinalIgnoreCase);
+        // Only MixPlus keeps the MixPlus mark — never reuse it for Tefal/etc.
+        var logoUrl = isMixPlus ? "/brand/mixplus-logo.svg" : "";
         var existing = await catalog.Brands.FirstOrDefaultAsync(x => x.ExternalKey == key, ct);
         if (existing is null)
         {
-            existing = Brand.Create(key, brandName, slug, "/brand/mixplus-logo.svg");
+            existing = Brand.Create(key, brandName, slug, logoUrl);
             catalog.Brands.Add(existing);
+            await catalog.SaveChangesAsync(ct);
+        }
+        else if (!string.Equals(existing.LogoUrl, logoUrl, StringComparison.Ordinal)
+                 || !string.Equals(existing.Name, brandName, StringComparison.Ordinal))
+        {
+            existing.Update(brandName, slug, logoUrl);
             await catalog.SaveChangesAsync(ct);
         }
 
@@ -493,7 +506,7 @@ public static class DigiCatalogFromScrapeSeeder
                 "rail-popular",
                 "محبوب‌ترین‌ها",
                 99,
-                "کالاهای اسکرپ‌شده فروشنده دیجی‌کالا",
+                "محبوب‌ترین کالاها نزد خریداران",
                 "/search?sort=popular",
                 showUsedLabel: false);
             popular.SetProductKeys(allKeys);

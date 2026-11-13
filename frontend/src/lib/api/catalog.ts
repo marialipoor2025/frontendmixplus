@@ -8,6 +8,7 @@ import {
   absoluteMediaUrl,
   normalizeDiscountPricing,
 } from "@/lib/media-url";
+import type { CategoryTitleLookup } from "@/lib/category-path";
 import type { Brand } from "@/types/brand";
 import type { Product, ProductBadge } from "@/types/product";
 import type { ProductListingQuery } from "@/types/product-listing";
@@ -103,7 +104,7 @@ function mapBrand(dto: CatalogBrandDto): Brand {
     id: dto.id,
     name: dto.name,
     slug: dto.slug,
-    logoUrl: dto.logoUrl,
+    logoUrl: dto.logoUrl?.trim() ? absoluteMediaUrl(dto.logoUrl) : "",
   };
 }
 
@@ -163,6 +164,22 @@ export async function getBrands(): Promise<Brand[]> {
   return rows.map(mapBrand);
 }
 
+/** Brands that have published products under a category (and its descendants). */
+export async function getBrandsByCategorySlug(
+  categorySlug: string,
+): Promise<Brand[]> {
+  const slug = categorySlug.trim();
+  if (!slug) return [];
+  if (siteConfig.useMocks || !siteConfig.apiBaseUrl) {
+    return getMockBrands();
+  }
+
+  const rows = await apiClient<CatalogBrandDto[]>("/api/catalog/brands", {
+    query: { categorySlug: slug },
+  });
+  return rows.map(mapBrand);
+}
+
 export async function getBrandBySlug(slug: string): Promise<Brand | null> {
   if (siteConfig.useMocks || !siteConfig.apiBaseUrl) {
     return resolveMockBrand(slug);
@@ -172,6 +189,39 @@ export async function getBrandBySlug(slug: string): Promise<Brand | null> {
     query: { slug },
   });
   return rows[0] ? mapBrand(rows[0]) : null;
+}
+
+type CatalogCategoryDto = {
+  id: string;
+  title: string;
+  href: string;
+  slug: string;
+};
+
+/** Persian titles keyed by slug / href for category PLP breadcrumbs. */
+export async function getCategoryTitleLookup(): Promise<CategoryTitleLookup> {
+  const bySlug = new Map<string, string>();
+  const byHref = new Map<string, string>();
+
+  if (siteConfig.useMocks || !siteConfig.apiBaseUrl) {
+    return { bySlug, byHref };
+  }
+
+  try {
+    const rows = await apiClient<CatalogCategoryDto[]>("/api/catalog/categories");
+    for (const row of rows) {
+      const title = row.title?.trim();
+      if (!title) continue;
+      const slug = row.slug?.trim().toLowerCase();
+      if (slug) bySlug.set(slug, title);
+      const href = row.href?.trim().replace(/\/+$/, "");
+      if (href) byHref.set(href, title);
+    }
+  } catch {
+    // Leave empty maps; resolveCategoryPath will use nav titles.
+  }
+
+  return { bySlug, byHref };
 }
 
 async function fetchCatalogProducts(

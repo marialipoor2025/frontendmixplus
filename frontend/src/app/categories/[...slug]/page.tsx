@@ -1,5 +1,8 @@
 import { CategoryPlpPage } from "@/components/categories/CategoryPlpPage";
-import { getProductsByCategorySlug } from "@/lib/api/catalog";
+import {
+  getCategoryTitleLookup,
+  getProductsByCategorySlug,
+} from "@/lib/api/catalog";
 import { getMainNavData } from "@/lib/api/nav";
 import { resolveCategoryPath } from "@/lib/category-path";
 import { parseListingSearchParams } from "@/lib/product-listing";
@@ -11,8 +14,11 @@ type PageProps = {
 
 export async function generateMetadata({ params }: PageProps) {
   const { slug } = await params;
-  const nav = await getMainNavData();
-  const category = resolveCategoryPath(slug, nav);
+  const [nav, titles] = await Promise.all([
+    getMainNavData(),
+    getCategoryTitleLookup(),
+  ]);
+  const category = resolveCategoryPath(slug, nav, titles);
   return { title: category.title };
 }
 
@@ -22,8 +28,11 @@ export default async function CategorySlugPage({
 }: PageProps) {
   const { slug } = await params;
   const sp = await searchParams;
-  const nav = await getMainNavData();
-  const category = resolveCategoryPath(slug, nav);
+  const [nav, titles] = await Promise.all([
+    getMainNavData(),
+    getCategoryTitleLookup(),
+  ]);
+  const category = resolveCategoryPath(slug, nav, titles);
   const listingQuery = parseListingSearchParams(sp);
   const products = await getProductsByCategorySlug(
     slug,

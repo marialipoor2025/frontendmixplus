@@ -336,7 +336,7 @@ public static class DigiCategoryHierarchySeeder
                 "rail-popular",
                 "محبوب‌ترین‌ها",
                 99,
-                "کالاهای اسکرپ‌شده فروشنده دیجی‌کالا",
+                "محبوب‌ترین کالاها نزد خریداران",
                 "/search?sort=popular",
                 showUsedLabel: false);
             rail.SetProductKeys(popular);

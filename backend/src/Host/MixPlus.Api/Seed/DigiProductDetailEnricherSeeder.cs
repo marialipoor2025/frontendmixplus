@@ -239,7 +239,7 @@ public static class DigiProductDetailEnricherSeeder
             showWarranty = !string.IsNullOrWhiteSpace(warranty),
             warranty,
             showDelivery = true,
-            deliveryTitle = "ارسال دیجی‌کالا",
+            deliveryTitle = "ارسال فروشنده",
             deliveryMethodLabel = "موجود در انبار فروشنده",
             deliveryCostLabel = "",
             showPricePolicy = false,

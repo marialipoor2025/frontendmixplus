@@ -215,8 +215,8 @@ export async function getProductDetail(
         slug: brandSlug,
       },
       breadcrumb:
-        next.breadcrumb.length > 0 ? next.breadcrumb : nav.breadcrumb,
-      titleNav: next.titleNav.length > 0 ? next.titleNav : nav.titleNav,
+        nav.breadcrumb.length > 0 ? nav.breadcrumb : next.breadcrumb,
+      titleNav: nav.titleNav.length > 0 ? nav.titleNav : next.titleNav,
       buyBox: {
         ...next.buyBox,
         seller: {

@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 
 /** Discount code printed on the ticket banner image. */
-const FIRST_ORDER_DISCOUNT_CODE = "krS2Bqv";
+const FIRST_ORDER_DISCOUNT_CODE = "Orya10";
 
 /**
  * barghchi-style dual promo strip under the header:
@@ -43,7 +43,7 @@ export function HomePromoBanners() {
         >
           <Image
             src="/images/index/ticket.jpg"
-            alt="تخفیفات ویژه"
+            alt={`تخفیفات ویژه — کد ${FIRST_ORDER_DISCOUNT_CODE}`}
             width={648}
             height={160}
             className="h-auto w-full transition duration-[400ms] hover:scale-[1.01]"

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { OPEN_SUPPORT_CHAT_EVENT } from "@/components/layout/DesktopSupportChat";
 import { BottomNavChatIcon } from "@/components/layout/icons";
 import { getFooterSettings } from "@/lib/api/footer";
 
@@ -85,13 +86,16 @@ export function HeaderTopBar() {
             <span dir="ltr">{phone}</span>
           </a>
 
-          <a
-            href="/page/contact-us"
+          <button
+            type="button"
+            onClick={() => {
+              window.dispatchEvent(new Event(OPEN_SUPPORT_CHAT_EVENT));
+            }}
             className="flex flex-row-reverse items-center gap-1.5 transition hover:text-[var(--color-neutral-800)]"
           >
             <BottomNavChatIcon className="h-3.5 w-3.5" />
             <span>گفتگو با کارشناسان</span>
-          </a>
+          </button>
         </div>
       </div>
     </div>

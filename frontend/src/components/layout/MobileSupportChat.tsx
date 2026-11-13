@@ -48,12 +48,16 @@ export function MobileSupportChat({ open, onClose }: MobileSupportChatProps) {
   useEffect(() => {
     if (!open) return;
 
-    const previousOverflow = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.key === "Escape") onClose();
     };
+
+    // Lock scroll on mobile full-screen only; desktop widget stays corner-anchored.
+    const mq = window.matchMedia("(min-width: 1024px)");
+    const previousOverflow = document.body.style.overflow;
+    if (!mq.matches) {
+      document.body.style.overflow = "hidden";
+    }
 
     window.addEventListener("keydown", onKeyDown);
     return () => {
@@ -165,15 +169,20 @@ export function MobileSupportChat({ open, onClose }: MobileSupportChatProps) {
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 z-50" role="dialog" aria-modal="true" dir="rtl">
+    <div
+      className="fixed inset-0 z-50 lg:inset-auto lg:bottom-7 lg:right-7 lg:h-[39.5rem] lg:max-h-[calc(100vh-3.5rem)] lg:w-[360px]"
+      role="dialog"
+      aria-modal="true"
+      dir="rtl"
+    >
       <button
         type="button"
         aria-label="بستن"
-        className="absolute inset-0 bg-black/35 lg:bg-black/20"
+        className="absolute inset-0 bg-black/35 lg:hidden"
         onClick={onClose}
       />
 
-      <div className="absolute inset-x-0 bottom-0 top-0 flex h-full max-h-full w-full flex-col overflow-hidden bg-white shadow-sm transition-all duration-200 lg:inset-auto lg:bottom-7 lg:end-7 lg:start-auto lg:top-auto lg:h-[39.5rem] lg:max-h-[calc(100vh-3.5rem)] lg:w-[360px] lg:rounded-2xl">
+      <div className="absolute inset-x-0 bottom-0 top-0 flex h-full max-h-full w-full flex-col overflow-hidden bg-white shadow-lg transition-all duration-200 lg:static lg:inset-auto lg:h-full lg:rounded-2xl lg:shadow-xl">
         <div className="shrink-0 bg-gradient-to-l from-[#5eb8f0] to-[var(--color-primary)] text-white">
           <div className="flex items-center justify-between gap-3 p-4">
             <button

@@ -104,7 +104,7 @@ const SOCIAL = [
   },
   {
     label: "اینستاگرام",
-    href: "https://www.instagram.com/oriyamarket",
+    href: "https://www.instagram.com/oriyamarket?vrfl=MWF5MWRkcnZ0OG8zdg==",
     Icon: SocialInstagramIcon,
   },
   {
@@ -284,40 +284,6 @@ function BaleIcon({ className }: { className?: string }) {
   );
 }
 
-function EitaaIcon({ className }: { className?: string }) {
-  return (
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      viewBox="0 0 32 32"
-      className={className}
-      aria-hidden
-    >
-      <circle cx="16" cy="16" r="16" fill="#F57C00" />
-      <path
-        fill="#fff"
-        d="M8.2 16.8c0-4.4 3.5-7.9 7.8-7.9 2.1 0 4 .8 5.4 2.2l-1.7 1.7a5.4 5.4 0 0 0-3.7-1.5c-3 0-5.4 2.4-5.4 5.5s2.4 5.5 5.4 5.5c2.3 0 4.3-1.5 5.1-3.6h-5.1v-2.4h8v1.2c0 4.5-3.5 7.8-8 7.8-4.3 0-7.8-3.5-7.8-7.9z"
-      />
-    </svg>
-  );
-}
-
-function RubikaIcon({ className }: { className?: string }) {
-  return (
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      viewBox="0 0 32 32"
-      className={className}
-      aria-hidden
-    >
-      <rect width="32" height="32" rx="8" fill="#7B2FF7" />
-      <path
-        fill="#fff"
-        d="M9 8.5h7.2c3.4 0 5.8 2.1 5.8 5.2 0 2.4-1.3 4.2-3.5 4.9L22 23.5h-3.2l-3.2-4.7H12v4.7H9V8.5zm3 7.6h3.8c1.7 0 2.8-1 2.8-2.5s-1.1-2.5-2.8-2.5H12v5z"
-      />
-    </svg>
-  );
-}
-
 type OtherChannel = {
   label: string;
   href: string;
@@ -351,14 +317,16 @@ const OTHER_CHANNELS: OtherChannel[] = [
   {
     label: "کانال ایتا",
     href: "https://eitaa.com/oriyamarket",
-    Icon: EitaaIcon,
-    iconClassName: "h-7 w-7 rounded-full",
+    src: "/images/social-icons/eitaa.png",
+    imgSize: 28,
+    iconClassName: "h-7 w-7",
   },
   {
     label: "کانال روبیکا",
     href: "https://rubika.ir/oriyamarket",
-    Icon: RubikaIcon,
-    iconClassName: "h-7 w-7 rounded-lg",
+    src: "/images/social-icons/rubika.png",
+    imgSize: 28,
+    iconClassName: "h-7 w-7",
   },
 ];
 

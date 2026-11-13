@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useState, type ReactNode } from "react";
+import type { ReactNode } from "react";
 import { NavMenuIcon } from "@/components/layout/NavMenuIcon";
 import { NAV_ACTION_LINKS } from "@/components/layout/navMenuShared";
 
@@ -15,30 +15,26 @@ type HeaderQuickLinksProps = {
 function ButtonLabel({
   label,
   icon,
-  active,
 }: {
   label: string;
   icon: ReactNode;
-  active: boolean;
 }) {
   return (
     <span className="inline-flex items-center justify-center gap-1.5 leading-tight">
-      <span className={active ? "text-white" : "text-current"}>{icon}</span>
+      <span>{icon}</span>
       <span>{label}</span>
     </span>
   );
 }
 
 /**
- * Gradient action buttons with Barghchi-style icons.
- * فروشنده شو is the default active tab.
+ * Quick-access action buttons.
+ * Only «فروشنده شو» uses the filled gradient; hover scales all buttons up.
  */
 export function HeaderQuickLinks({ variant = "mobile" }: HeaderQuickLinksProps) {
-  const [activeId, setActiveId] = useState<(typeof NAV_ACTION_LINKS)[number]["id"]>(
-    "seller",
-  );
-
   const isDesktop = variant === "desktop";
+  const hoverGrow =
+    "origin-center transition-transform duration-200 ease-out hover:z-10 hover:scale-110";
 
   return (
     <div
@@ -51,26 +47,24 @@ export function HeaderQuickLinks({ variant = "mobile" }: HeaderQuickLinksProps) 
       aria-label="دسترسی سریع"
     >
       {NAV_ACTION_LINKS.map(({ id, href, title, icon }) => {
-        const active = id === activeId;
+        const isSeller = id === "seller";
 
-        if (active) {
+        if (isSeller) {
           return (
             <Link
               key={id}
               href={href}
               role="tab"
               aria-selected
-              onClick={() => setActiveId(id)}
               className={
                 isDesktop
-                  ? "inline-flex h-10 min-w-[8.5rem] items-center justify-center rounded-xl px-3 text-center text-[13px] font-medium text-white shadow-sm"
-                  : "inline-flex min-h-9 items-center justify-center rounded-lg px-1.5 text-center text-[11px] font-medium text-white shadow-sm"
+                  ? `inline-flex h-10 min-w-[8.5rem] items-center justify-center rounded-xl px-3 text-center text-[13px] font-medium text-white shadow-sm ${hoverGrow}`
+                  : `inline-flex min-h-9 items-center justify-center rounded-lg px-1.5 text-center text-[11px] font-medium text-white shadow-sm ${hoverGrow}`
               }
               style={{ backgroundImage: GRADIENT }}
             >
               <ButtonLabel
                 label={title}
-                active
                 icon={<NavMenuIcon name={icon} className="h-4 w-4 text-white" />}
               />
             </Link>
@@ -83,11 +77,10 @@ export function HeaderQuickLinks({ variant = "mobile" }: HeaderQuickLinksProps) 
             href={href}
             role="tab"
             aria-selected={false}
-            onClick={() => setActiveId(id)}
             className={
               isDesktop
-                ? "inline-flex h-10 min-w-[8.5rem] items-center justify-center rounded-xl p-px text-center text-[13px] font-medium"
-                : "inline-flex min-h-9 items-center justify-center rounded-lg p-px text-center text-[11px] font-medium"
+                ? `inline-flex h-10 min-w-[8.5rem] items-center justify-center rounded-xl p-px text-center text-[13px] font-medium ${hoverGrow}`
+                : `inline-flex min-h-9 items-center justify-center rounded-lg p-px text-center text-[11px] font-medium ${hoverGrow}`
             }
             style={{ backgroundImage: GRADIENT }}
           >
@@ -100,7 +93,6 @@ export function HeaderQuickLinks({ variant = "mobile" }: HeaderQuickLinksProps) 
             >
               <ButtonLabel
                 label={title}
-                active={false}
                 icon={
                   <NavMenuIcon
                     name={icon}

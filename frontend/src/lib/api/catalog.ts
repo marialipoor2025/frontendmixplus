@@ -9,6 +9,7 @@ import {
   normalizeDiscountPricing,
 } from "@/lib/media-url";
 import type { CategoryTitleLookup } from "@/lib/category-path";
+import { resolveShowcaseBrand } from "@/lib/showcase-brands";
 import type { Brand } from "@/types/brand";
 import type { Product, ProductBadge } from "@/types/product";
 import type { ProductListingQuery } from "@/types/product-listing";
@@ -182,13 +183,15 @@ export async function getBrandsByCategorySlug(
 
 export async function getBrandBySlug(slug: string): Promise<Brand | null> {
   if (siteConfig.useMocks || !siteConfig.apiBaseUrl) {
-    return resolveMockBrand(slug);
+    return resolveMockBrand(slug) ?? resolveShowcaseBrand(slug);
   }
 
   const rows = await apiClient<CatalogBrandDto[]>("/api/catalog/brands", {
     query: { slug },
   });
-  return rows[0] ? mapBrand(rows[0]) : null;
+  if (rows[0]) return mapBrand(rows[0]);
+  // Curated marks (e.g. Mix+) may not exist as Catalog Brands rows.
+  return resolveShowcaseBrand(slug);
 }
 
 type CatalogCategoryDto = {

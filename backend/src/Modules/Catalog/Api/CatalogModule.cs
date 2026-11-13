@@ -80,12 +80,25 @@ public sealed class CatalogModule : IModule
                         .Select(b => b.ExternalKey)
                         .FirstOrDefaultAsync(ct);
 
-                    if (brandKey is null)
+                    if (brandKey is not null)
+                    {
+                        query = query.Where(x => x.BrandExternalKey == brandKey);
+                    }
+                    else if (IsSellerHouseBrandSlug(slug))
+                    {
+                        // Curated house brands (e.g. Mix+) are sellers, not manufacturer brands.
+                        // Show that seller's published catalog instead of 404/empty brand PLP.
+                        query = query.Where(x =>
+                            EF.Functions.ILike(x.SellerName, "%mix%")
+                            || EF.Functions.ILike(x.SellerName, "%میکس%")
+                            || EF.Functions.ILike(x.BrandName, "%mix+%")
+                            || EF.Functions.ILike(x.BrandName, "%mixplus%")
+                            || EF.Functions.ILike(x.BrandName, "%میکس%"));
+                    }
+                    else
                     {
                         return Results.Ok(Array.Empty<ProductCardDto>());
                     }
-
-                    query = query.Where(x => x.BrandExternalKey == brandKey);
                 }
 
                 if (!string.IsNullOrWhiteSpace(categorySlug))
@@ -587,6 +600,12 @@ public sealed class CatalogModule : IModule
 
         return terms.ToList();
     }
+
+    /// <summary>
+    /// Storefront curated marks that represent a seller shop (not a manufacturer brand row).
+    /// </summary>
+    private static bool IsSellerHouseBrandSlug(string slug) =>
+        slug is "mixplus" or "mix+" or "mix-plus";
 
     private static HashSet<Guid> CollectCategorySubtreeIds(
         IReadOnlyList<(Guid Id, Guid? ParentId)> categories,

@@ -154,7 +154,7 @@ export const DIGI_SELLER_NAV: SellerNavGroup[] = [
       },
       {
         id: "marketing-shop",
-        title: "فروشگاه شما در MixPlus",
+        title: "فروشگاه شما در اوریا مارکت",
         href: "/seller/digi/settings",
         badge: "جدید",
       },

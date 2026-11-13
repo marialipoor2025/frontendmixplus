@@ -248,8 +248,112 @@
   background: var(--color-neutral-200);
 }
 
+[data-seller-digi-page] .digi-shell-body {
+  display: flex;
+  min-height: 100dvh;
+  padding-top: var(--authenticated-header-height);
+}
+
+[data-seller-digi-page] .digi-shell-content {
+  flex: 1;
+  min-width: 0;
+}
+
 [data-seller-digi-page] .digi-main {
-  padding-top: calc(var(--authenticated-header-height) + 16px);
+  padding-top: 16px;
+}
+
+/* Digi seller sidebar — same IA as former header menus */
+[data-seller-digi-page] {
+  --digi-sidebar-width: 260px;
+}
+
+[data-seller-digi-page] .digi-sidebar {
+  position: sticky;
+  top: var(--authenticated-header-height);
+  z-index: 20;
+  display: block;
+  width: min(var(--digi-sidebar-width), 42vw);
+  max-width: var(--digi-sidebar-width);
+  height: calc(100dvh - var(--authenticated-header-height));
+  flex-shrink: 0;
+  overflow-y: auto;
+  background: #fff;
+  border-inline-end: 1px solid var(--color-neutral-200);
+}
+
+@media (min-width: 1024px) {
+  [data-seller-digi-page] .digi-sidebar {
+    width: var(--digi-sidebar-width);
+  }
+}
+
+[data-seller-digi-page] .digi-sidebar__nav {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 12px 10px 24px;
+}
+
+[data-seller-digi-page] .digi-sidebar__group-btn {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 10px 12px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--color-text-high-emphasis);
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.5;
+  cursor: pointer;
+  text-align: start;
+  text-decoration: none;
+}
+
+[data-seller-digi-page] .digi-sidebar__group-btn:hover,
+[data-seller-digi-page] .digi-sidebar__group-btn.is-active,
+[data-seller-digi-page] .digi-sidebar__group-btn[data-active="true"] {
+  background: var(--color-neutral-100);
+  color: var(--color-text-primary);
+}
+
+[data-seller-digi-page] .digi-sidebar__group.is-open > .digi-sidebar__group-btn svg {
+  transform: rotate(180deg);
+}
+
+[data-seller-digi-page] .digi-sidebar__list {
+  margin: 0 0 4px;
+  padding: 0 0 0 6px;
+  list-style: none;
+}
+
+[data-seller-digi-page] .digi-sidebar__link {
+  display: flex;
+  align-items: center;
+  padding: 8px 12px;
+  border-radius: 8px;
+  color: var(--color-neutral-500);
+  font-size: 13px;
+  line-height: 1.6;
+  text-decoration: none;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+[data-seller-digi-page] .digi-sidebar__link:hover,
+[data-seller-digi-page] .digi-sidebar__link.is-active,
+[data-seller-digi-page] .digi-sidebar__link[data-active="true"] {
+  background: rgba(239, 86, 97, 0.08);
+  color: var(--color-text-primary);
+}
+
+[data-seller-digi-page] .digi-sidebar__link--top {
+  margin-bottom: 6px;
+  font-weight: 600;
+  color: var(--color-text-high-emphasis);
 }
 
 /* —— Digikala TableCard (product list) —— */

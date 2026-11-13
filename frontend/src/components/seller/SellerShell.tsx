@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import type { ReactNode } from "react";
@@ -26,9 +27,15 @@ export function SellerShell({ children }: { children: ReactNode }) {
       <header className="border-b border-[var(--color-neutral-200)] bg-white">
         <div className="mx-auto flex max-w-[1100px] items-center justify-between gap-3 px-4 py-3">
           <div className="flex items-center gap-3">
-            <div className="rounded-lg bg-gradient-to-l from-[#1672dd] to-[#ed1944] px-3 py-1.5 text-sm font-black text-white">
-              MixPlus
-            </div>
+            <Image
+              src="/brand/mixplus-logo.svg"
+              alt="میکس‌پلاس"
+              width={120}
+              height={36}
+              priority
+              unoptimized
+              className="h-8 w-auto object-contain object-start"
+            />
             <div>
               <p className="text-sm font-bold text-[var(--color-neutral-900)]">
                 پنل فروشنده

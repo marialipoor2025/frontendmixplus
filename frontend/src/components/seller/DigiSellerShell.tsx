@@ -1,8 +1,9 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { useEffect, useId, useRef, useState, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import {
   DIGI_SELLER_NAV,
   isSellerGroupActive,
@@ -10,36 +11,24 @@ import {
   type SellerNavGroup,
 } from "@/components/seller/sellerNav";
 import { useAuth } from "@/lib/auth/useAuth";
+import { siteConfig } from "@/config/site";
 import "@/components/seller/digi/digi.css";
 
 /**
- * Digikala AuthenticatedHeaderDesktop — structure + tokens from live seller panel.
+ * Digikala-style seller shell: top chrome + vertical sidebar (same IA as header menus).
  */
 export function DigiSellerShell({ children }: { children: ReactNode }) {
   const pathname = usePathname() || "/seller/digi/dashboard";
   const router = useRouter();
   const { user, logout } = useAuth();
   const [openId, setOpenId] = useState<string | null>(null);
-  const [mobileOpen, setMobileOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
-  const headerRef = useRef<HTMLElement>(null);
 
   useEffect(() => {
-    setOpenId(null);
-    setMobileOpen(false);
+    const active = DIGI_SELLER_NAV.find((g) => isSellerGroupActive(pathname, g));
+    setOpenId(active?.id ?? null);
     setProfileOpen(false);
   }, [pathname]);
-
-  useEffect(() => {
-    function onDocClick(e: MouseEvent) {
-      if (!headerRef.current?.contains(e.target as Node)) {
-        setOpenId(null);
-        setProfileOpen(false);
-      }
-    }
-    document.addEventListener("mousedown", onDocClick);
-    return () => document.removeEventListener("mousedown", onDocClick);
-  }, []);
 
   async function handleLogout() {
     await logout();
@@ -49,47 +38,25 @@ export function DigiSellerShell({ children }: { children: ReactNode }) {
 
   return (
     <div className="min-h-dvh" data-seller-digi-page>
-      <header ref={headerRef} className="digi-auth-header">
-        {/* Left cluster in RTL = logo + menus (Digikala: d-flex ai-center) */}
+      <header className="digi-auth-header">
         <div className="flex items-center overflow-visible">
           <Link
             href="/seller/digi/dashboard"
-            className="ms-8 flex shrink-0 flex-col leading-none"
-            aria-label="خانه — مرکز فروشندگان"
+            className="flex shrink-0 items-center gap-2"
+            aria-label="خانه — پنل فروشنده میکس‌پلاس"
           >
-            <span
-              className="text-[17px] font-black tracking-tight"
-              style={{ color: "var(--color-text-heading)" }}
-            >
-              mixplus
-            </span>
-            <span
-              className="text-[9px] font-bold uppercase tracking-[0.14em]"
-              style={{ color: "var(--color-text-primary)" }}
-            >
-              Seller Center
-            </span>
+            <Image
+              src="/brand/mixplus-logo.svg"
+              alt="میکس‌پلاس"
+              width={120}
+              height={36}
+              priority
+              unoptimized
+              className="h-8 w-auto object-contain object-start sm:h-9"
+            />
           </Link>
-
-          <nav
-            aria-label="منوی پنل فروشندگان"
-            className="ms-2 hidden items-center lg:flex"
-          >
-            {DIGI_SELLER_NAV.map((group) => (
-              <HeaderMenu
-                key={group.id}
-                group={group}
-                pathname={pathname}
-                open={openId === group.id}
-                onOpen={() =>
-                  setOpenId((prev) => (prev === group.id ? null : group.id))
-                }
-              />
-            ))}
-          </nav>
         </div>
 
-        {/* Right actions — questions, notifications, wallet, profile */}
         <div className="flex shrink-0 items-center">
           <Link
             href="/seller/dashboard"
@@ -148,19 +115,13 @@ export function DigiSellerShell({ children }: { children: ReactNode }) {
               data-pw="profile-menu-trigger"
               className="digi-auth-header__icon-btn gap-1 px-3"
               aria-expanded={profileOpen}
-              onClick={() => {
-                setOpenId(null);
-                setProfileOpen((v) => !v);
-              }}
+              onClick={() => setProfileOpen((v) => !v)}
             >
               <ProfileIcon />
               <ChevronIcon />
             </button>
             {profileOpen ? (
-              <ul
-                className="digi-auth-header__menu-list is-open"
-                role="menu"
-              >
+              <ul className="digi-auth-header__menu-list is-open" role="menu">
                 <li>
                   <div className="border-b border-[var(--color-neutral-100)] px-4 py-2">
                     <p
@@ -210,167 +171,140 @@ export function DigiSellerShell({ children }: { children: ReactNode }) {
               </ul>
             ) : null}
           </div>
-
-          <button
-            type="button"
-            className="digi-auth-header__icon-btn ms-1 border border-[var(--color-neutral-200)] lg:hidden"
-            aria-expanded={mobileOpen}
-            aria-label="منو"
-            onClick={() => setMobileOpen((v) => !v)}
-          >
-            ☰
-          </button>
         </div>
       </header>
 
-      {mobileOpen ? (
-        <div
-          className="fixed inset-x-0 z-30 max-h-[70vh] space-y-2 overflow-y-auto border-b border-[var(--color-neutral-200)] bg-white px-4 py-3 lg:hidden"
-          style={{ top: "var(--authenticated-header-height)" }}
-        >
-          <Link
-            href="/seller/digi/dashboard"
-            className="block rounded-lg px-3 py-2 text-sm font-medium"
-          >
-            خانه
-          </Link>
-          {DIGI_SELLER_NAV.map((group) => (
-            <div
-              key={group.id}
-              className="rounded-lg border border-[var(--color-neutral-200)] p-2"
+      <div className="digi-shell-body">
+        <aside className="digi-sidebar" aria-label="منوی پنل فروشندگان">
+          <nav className="digi-sidebar__nav">
+            <Link
+              href="/seller/digi/dashboard"
+              className={[
+                "digi-sidebar__link digi-sidebar__link--top",
+                pathname.startsWith("/seller/digi/dashboard")
+                  ? "is-active"
+                  : "",
+              ].join(" ")}
             >
-              <p
-                className="px-2 text-[11px] font-bold"
-                style={{ color: "var(--color-text-low-emphasis)" }}
-              >
-                {group.title}
-              </p>
-              {group.href && group.items.length === 0 ? (
-                <Link
-                  href={group.href}
-                  className="mt-1 block rounded-lg px-2 py-2 text-sm"
-                >
-                  {group.title}
-                </Link>
-              ) : (
-                <div className="mt-1 flex flex-col">
-                  {group.items.map((item) => (
-                    <Link
-                      key={item.id}
-                      href={item.href}
-                      className="rounded-lg px-2 py-2 text-sm"
-                      style={{
-                        color: isSellerNavActive(pathname, item.href)
-                          ? "var(--color-text-primary)"
-                          : "var(--color-text-high-emphasis)",
-                      }}
-                    >
-                      {item.title}
-                    </Link>
-                  ))}
-                </div>
-              )}
+              خانه
+            </Link>
+            {DIGI_SELLER_NAV.map((group) => (
+              <SidebarGroup
+                key={group.id}
+                group={group}
+                pathname={pathname}
+                open={openId === group.id}
+                onToggle={() =>
+                  setOpenId((prev) => (prev === group.id ? null : group.id))
+                }
+              />
+            ))}
+          </nav>
+        </aside>
+
+        <div className="digi-shell-content">
+          <main className="digi-main mx-auto max-w-[1440px] px-3 sm:px-4 lg:px-6">
+            {children}
+          </main>
+
+          <footer className="mt-10 border-t border-[var(--color-neutral-200)] bg-white">
+            <div
+              className="mx-auto flex max-w-[1440px] flex-wrap items-center justify-center gap-x-5 gap-y-2 px-4 py-4 text-[11px] lg:justify-between"
+              style={{ color: "var(--color-text-low-emphasis)" }}
+            >
+              <div className="flex flex-wrap items-center justify-center gap-x-4">
+                <Link href="/seller/digi/settings">ثبت درخواست پشتیبانی</Link>
+                <a href="tel:02161930600" dir="ltr">
+                  ۰۲۱ - ۶۱۹۳۰۶۰۰
+                </a>
+              </div>
+              <p>میکس‌پلاس · {siteConfig.nameFa}</p>
             </div>
-          ))}
+          </footer>
         </div>
-      ) : null}
-
-      <main className="digi-main mx-auto max-w-[1440px] px-3 sm:px-4 lg:px-6">
-        {children}
-      </main>
-
-      <footer className="mt-10 border-t border-[var(--color-neutral-200)] bg-white">
-        <div
-          className="mx-auto flex max-w-[1440px] flex-wrap items-center justify-center gap-x-5 gap-y-2 px-4 py-4 text-[11px] lg:justify-between"
-          style={{ color: "var(--color-text-low-emphasis)" }}
-        >
-          <div className="flex flex-wrap items-center justify-center gap-x-4">
-            <Link href="/seller/digi/settings">ثبت درخواست پشتیبانی</Link>
-            <a href="tel:02161930600" dir="ltr">
-              ۰۲۱ - ۶۱۹۳۰۶۰۰
-            </a>
-          </div>
-          <p>MixPlus Seller Center</p>
-        </div>
-      </footer>
+      </div>
     </div>
   );
 }
 
-function HeaderMenu({
+function SidebarGroup({
   group,
   pathname,
   open,
-  onOpen,
+  onToggle,
 }: {
   group: SellerNavGroup;
   pathname: string;
   open: boolean;
-  onOpen: () => void;
+  onToggle: () => void;
 }) {
-  const menuId = useId();
   const active = isSellerGroupActive(pathname, group);
 
   if (group.href && group.items.length === 0) {
     return (
-      <div className="digi-header-menu">
+      <div className="digi-sidebar__group">
         <Link
           href={group.href}
-          className="digi-auth-header__nav-btn"
+          className={[
+            "digi-sidebar__group-btn",
+            active ? "is-active" : "",
+          ].join(" ")}
           data-active={active ? "true" : "false"}
         >
-          <span className="me-2">{group.title}</span>
+          <span>{group.title}</span>
         </Link>
       </div>
     );
   }
 
   return (
-    <div
-      className={[
-        "digi-header-menu",
-        open ? "digi-header-menu--open" : "",
-      ].join(" ")}
-    >
+    <div className={["digi-sidebar__group", open ? "is-open" : ""].join(" ")}>
       <button
         type="button"
-        className="digi-auth-header__nav-btn"
+        className={[
+          "digi-sidebar__group-btn",
+          active || open ? "is-active" : "",
+        ].join(" ")}
         aria-expanded={open}
-        aria-controls={menuId}
-        aria-haspopup="menu"
         data-active={active || open ? "true" : "false"}
-        onClick={onOpen}
+        onClick={onToggle}
       >
-        <span className="me-2">{group.title}</span>
-        {group.updateBadge ? (
-          <span className="digi-auth-header__update-badge" aria-hidden />
-        ) : null}
+        <span className="inline-flex items-center gap-1">
+          {group.title}
+          {group.updateBadge ? (
+            <span className="digi-auth-header__update-badge" aria-hidden />
+          ) : null}
+        </span>
         <ChevronIcon />
       </button>
-      {/* Always mounted — Digikala hover reveal via CSS */}
-      <ul id={menuId} className="digi-auth-header__menu-list" role="menu">
-        {group.items.map((item) => (
-          <li key={item.id} className="text-[var(--color-neutral-500)]">
-            <Link
-              role="menuitem"
-              href={item.href}
-              className="digi-auth-header__menu-item"
-              data-active={
-                isSellerNavActive(pathname, item.href) ? "true" : "false"
-              }
-            >
-              <span className="inline-flex items-center">
-                {item.title}
-                {item.badge ? (
-                  <span className="digi-auth-header__new-badge">
-                    {item.badge}
+      {open ? (
+        <ul className="digi-sidebar__list" role="list">
+          {group.items.map((item) => {
+            const itemActive = isSellerNavActive(pathname, item.href);
+            return (
+              <li key={item.id}>
+                <Link
+                  href={item.href}
+                  className={[
+                    "digi-sidebar__link",
+                    itemActive ? "is-active" : "",
+                  ].join(" ")}
+                  data-active={itemActive ? "true" : "false"}
+                >
+                  <span className="inline-flex items-center">
+                    {item.title}
+                    {item.badge ? (
+                      <span className="digi-auth-header__new-badge">
+                        {item.badge}
+                      </span>
+                    ) : null}
                   </span>
-                ) : null}
-              </span>
-            </Link>
-          </li>
-        ))}
-      </ul>
+                </Link>
+              </li>
+            );
+          })}
+        </ul>
+      ) : null}
     </div>
   );
 }

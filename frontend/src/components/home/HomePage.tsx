@@ -3,10 +3,10 @@ import { BottomBanners } from "@/components/home/BottomBanners";
 import { BrandShowcase } from "@/components/home/BrandShowcase";
 import { CategoriesSection } from "@/components/home/CategoriesSection";
 import { HeroSlider } from "@/components/home/HeroSlider";
+import { HomePromoBanners } from "@/components/home/HomePromoBanners";
 import { MidBanners } from "@/components/home/MidBanners";
 import { ProductRails } from "@/components/home/ProductRail";
 import { SiteFeatures } from "@/components/home/SiteFeatures";
-import { TopBanner } from "@/components/home/TopBanner";
 import { MainNav } from "@/components/layout/MainNav";
 import { SiteFooter } from "@/components/layout/SiteFooter";
 import { SiteHeader } from "@/components/layout/SiteHeader";
@@ -32,7 +32,7 @@ export function HomePage({ data, nav }: HomePageProps) {
         <MainNav data={nav} />
       </StickyHeaderShell>
       <main className="site-container flex-1 space-y-6 py-6">
-        <TopBanner banner={data.topBanner} />
+        <HomePromoBanners />
         <HeroSlider slides={data.heroSlides} />
         <SiteFeatures />
         <AmazingOffers products={data.amazingOffers} />

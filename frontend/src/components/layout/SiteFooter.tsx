@@ -478,7 +478,7 @@ export function SiteFooter() {
           {/* Contact + address */}
           <div className="lg:grid lg:grid-cols-12">
             <div className="col-span-5 mx-auto max-w-[400px] leading-7 md:mx-0">
-              <div className="text-center md:text-right">
+              <div className="mb-3 text-center md:mb-4 md:text-right">
                 <p className="text-xs font-bold text-[var(--color-primary)]">
                   پاسخ‌گوی شما هستیم
                 </p>
@@ -551,20 +551,22 @@ export function SiteFooter() {
             </div>
 
             <div className="col-span-7 w-full justify-between border-t border-[var(--color-neutral-100)] pt-2 leading-7 md:border-none md:pt-0">
-              <div className="mb-2 text-xs font-bold text-[var(--color-primary)]">
+              <div className="mb-3 text-xs font-bold text-[var(--color-primary)] md:mb-4">
                 آدرس ما
               </div>
-              <div className="text-xs md:flex">
-                <div className="pl-1 font-bold text-[var(--color-neutral-900)]">
-                  آدرس فروشگاه:{" "}
+              <div className="space-y-2 text-xs">
+                <div className="md:flex">
+                  <div className="pl-1 font-bold text-[var(--color-neutral-900)]">
+                    آدرس فروشگاه:{" "}
+                  </div>
+                  <div>{STORE_ADDRESS}</div>
                 </div>
-                <div>{STORE_ADDRESS}</div>
-              </div>
-              <div className="text-xs md:flex">
-                <div className="pl-1 font-bold text-[var(--color-neutral-900)]">
-                  دفتر مرکزی:{" "}
+                <div className="md:flex">
+                  <div className="pl-1 font-bold text-[var(--color-neutral-900)]">
+                    دفتر مرکزی:{" "}
+                  </div>
+                  <div>{OFFICE_ADDRESS}</div>
                 </div>
-                <div>{OFFICE_ADDRESS}</div>
               </div>
             </div>
           </div>

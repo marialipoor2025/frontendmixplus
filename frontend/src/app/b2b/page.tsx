@@ -1,7 +1,6 @@
-import { renderStaticPage, staticPageMetadata } from "@/lib/render-static-page";
+import { redirect } from "next/navigation";
 
-export const metadata = staticPageMetadata("b2b");
-
+/** Legacy B2B path — organizational purchase now lives on /enquiry. */
 export default function B2bPage() {
-  return renderStaticPage("b2b");
+  redirect("/enquiry");
 }

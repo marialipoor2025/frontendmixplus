@@ -83,8 +83,8 @@ export const STATIC_PAGES: Record<string, StaticPageDef> = {
     description: "خرید عمده و سازمانی از میکپلاس.",
   },
   enquiry: {
-    title: "صدور پیش‌فاکتور",
-    description: "درخواست صدور پیش‌فاکتور برای خریدهای سازمانی و عمده.",
+    title: "استعلام قیمت همکار",
+    description: "فروش همکاری و سازمانی — ثبت درخواست استعلام قیمت.",
   },
   "sellers/join": {
     title: "فروشنده شو",

@@ -29,10 +29,8 @@ export default async function BrandsIndexPage() {
 
       <div className="site-container flex-1 py-6">
         <ProductBreadcrumb items={BREADCRUMB} />
-        <h1 className="mb-6 text-lg font-bold text-[var(--color-neutral-900)]">
-          برندها
-        </h1>
-        <ul className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6">
+        <h1 className="sr-only">برندها</h1>
+        <ul className="mt-2 grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6">
           {brands.map((brand) => (
             <li key={brand.id}>
               <Link

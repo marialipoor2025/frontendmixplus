@@ -8,7 +8,7 @@ export const NAV_ACTION_LINKS = [
   },
   {
     id: "b2b",
-    href: "/b2b",
+    href: "/enquiry",
     title: "خرید سازمانی",
     icon: "b2b",
   },

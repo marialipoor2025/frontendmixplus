@@ -1,12 +1,12 @@
 namespace MixPlus.Modules.Identity.Application.Abstractions;
 
 /// <summary>
-/// Outbound SMS port. Swap Mock → Melipayamak via <c>Sms:Provider</c>.
+/// Outbound SMS port. <c>Sms:Provider</c>: Melipayamak (default, falls back to sms.ir), SmsIr, or Mock.
 /// </summary>
 public interface ISmsSender
 {
     /// <summary>
-    /// Provider-native OTP delivery (Melipayamak SendOtp template).
+    /// Provider-native OTP delivery (verify template or OTP SMS API).
     /// </summary>
     Task SendOtpAsync(string phone, string code, CancellationToken cancellationToken = default);
 }

@@ -163,14 +163,25 @@ public sealed class OtpAuthService(
 
     private bool IsMockSms()
     {
-        var provider = configuration["Sms:Provider"] ?? "Mock";
-        var meliUser = configuration["Sms:Melipayamak:Username"];
-        var meliPass = configuration["Sms:Melipayamak:Password"];
-        var melipayamakReady =
-            string.Equals(provider, "Melipayamak", StringComparison.OrdinalIgnoreCase)
-            && !string.IsNullOrWhiteSpace(meliUser)
-            && !string.IsNullOrWhiteSpace(meliPass);
-        return !melipayamakReady;
+        var provider = configuration["Sms:Provider"] ?? "Melipayamak";
+        if (string.Equals(provider, "Mock", StringComparison.OrdinalIgnoreCase))
+        {
+            return true;
+        }
+
+        // Real gateway chain (Melipayamak ± sms.ir) — never expose OTP on the form.
+        var meliReady =
+            !string.IsNullOrWhiteSpace(configuration["Sms:Melipayamak:Username"])
+            && !string.IsNullOrWhiteSpace(configuration["Sms:Melipayamak:Password"]);
+        var smsIrReady = !string.IsNullOrWhiteSpace(configuration["Sms:SmsIr:ApiKey"]);
+
+        if (string.Equals(provider, "SmsIr", StringComparison.OrdinalIgnoreCase))
+        {
+            return !smsIrReady;
+        }
+
+        // Melipayamak (default) or any other real provider name.
+        return !meliReady && !smsIrReady;
     }
 
     private StartOtpResponse ToStartResponse(OtpChallenge challenge, string plainCode, DateTime utcNow)

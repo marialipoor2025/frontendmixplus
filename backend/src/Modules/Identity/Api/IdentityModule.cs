@@ -29,22 +29,44 @@ public sealed class IdentityModule : IModule
                 typeof(IdentityDbContext).Assembly.GetName().Name));
 
         services.Configure<MelipayamakOptions>(configuration.GetSection(MelipayamakOptions.SectionName));
+        services.Configure<SmsIrOptions>(configuration.GetSection(SmsIrOptions.SectionName));
         services.Configure<AdminStaffOptions>(configuration.GetSection(AdminStaffOptions.SectionName));
 
-        var provider = configuration["Sms:Provider"] ?? "Mock";
-        var meliUser = configuration["Sms:Melipayamak:Username"];
-        var meliPass = configuration["Sms:Melipayamak:Password"];
-        var useMelipayamak =
-            string.Equals(provider, "Melipayamak", StringComparison.OrdinalIgnoreCase)
-            && !string.IsNullOrWhiteSpace(meliUser)
-            && !string.IsNullOrWhiteSpace(meliPass);
-
-        if (useMelipayamak)
+        // Concrete gateways always registered; ISmsSender picks Mock / SmsIr-only / Melipayamak→sms.ir.
+        services.AddHttpClient<MelipayamakSmsSender>(client =>
         {
-            services.AddHttpClient<ISmsSender, MelipayamakSmsSender>(client =>
-            {
-                client.Timeout = TimeSpan.FromSeconds(30);
-            });
+            client.Timeout = TimeSpan.FromSeconds(30);
+        });
+        services.AddHttpClient<SmsIrSmsSender>(client =>
+        {
+            client.Timeout = TimeSpan.FromSeconds(30);
+        });
+
+        var provider = configuration["Sms:Provider"] ?? "Melipayamak";
+        var smsIrReady = !string.IsNullOrWhiteSpace(configuration["Sms:SmsIr:ApiKey"]);
+        var meliReady =
+            !string.IsNullOrWhiteSpace(configuration["Sms:Melipayamak:Username"])
+            && !string.IsNullOrWhiteSpace(configuration["Sms:Melipayamak:Password"]);
+
+        if (string.Equals(provider, "Mock", StringComparison.OrdinalIgnoreCase))
+        {
+            services.AddSingleton<ISmsSender, MockSmsSender>();
+        }
+        else if (string.Equals(provider, "SmsIr", StringComparison.OrdinalIgnoreCase) && smsIrReady)
+        {
+            services.AddSingleton<ISmsSender>(sp => sp.GetRequiredService<SmsIrSmsSender>());
+        }
+        else if (meliReady)
+        {
+            // Default path: Melipayamak first, sms.ir second, then password-login message.
+            services.AddSingleton<ISmsSender>(sp => new FallbackSmsSender(
+                sp.GetRequiredService<MelipayamakSmsSender>(),
+                smsIrReady ? sp.GetRequiredService<SmsIrSmsSender>() : null,
+                sp.GetRequiredService<Microsoft.Extensions.Logging.ILogger<FallbackSmsSender>>()));
+        }
+        else if (smsIrReady)
+        {
+            services.AddSingleton<ISmsSender>(sp => sp.GetRequiredService<SmsIrSmsSender>());
         }
         else
         {

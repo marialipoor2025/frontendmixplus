@@ -61,16 +61,28 @@ function NavArrow({ flipped = false }: { flipped?: boolean }) {
 }
 
 function BrandSlide({ brand }: { brand: Brand }) {
+  const logo = brand.logoUrl?.trim();
   return (
     <Link
       href={`/brand/${brand.slug}`}
       data-brand-slide
-      className="flex h-[110px] w-[160px] shrink-0 items-center justify-center overflow-hidden rounded-md sm:w-[180px] md:w-[200px]"
+      className="flex h-[110px] w-[160px] shrink-0 items-center justify-center overflow-hidden rounded-md border border-[var(--color-neutral-100)] bg-white px-4 transition duration-300 ease-in-out hover:border-[var(--color-neutral-300)] hover:shadow-sm sm:w-[180px] md:w-[200px]"
       title={brand.name}
     >
-      <span className="line-clamp-2 px-3 text-center text-base font-bold leading-relaxed text-[var(--color-neutral-400)] transition duration-300 ease-in-out hover:text-[var(--color-neutral-800)] md:text-lg">
-        {brand.name}
-      </span>
+      {logo ? (
+        // Local brand assets include svg/avif/webp/png/jpg — use native img.
+        // eslint-disable-next-line @next/next/no-img-element
+        <img
+          src={logo}
+          alt={brand.name}
+          className="max-h-[64px] max-w-[140px] object-contain md:max-h-[72px] md:max-w-[160px]"
+          loading="lazy"
+        />
+      ) : (
+        <span className="line-clamp-2 px-3 text-center text-base font-bold leading-relaxed text-[var(--color-neutral-400)] transition duration-300 ease-in-out hover:text-[var(--color-neutral-800)] md:text-lg">
+          {brand.name}
+        </span>
+      )}
     </Link>
   );
 }

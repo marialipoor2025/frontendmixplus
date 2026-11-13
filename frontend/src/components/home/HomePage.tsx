@@ -11,6 +11,7 @@ import { MainNav } from "@/components/layout/MainNav";
 import { SiteFooter } from "@/components/layout/SiteFooter";
 import { SiteHeader } from "@/components/layout/SiteHeader";
 import { StickyHeaderShell } from "@/components/layout/StickyHeaderShell";
+import { SHOWCASE_BRANDS } from "@/lib/showcase-brands";
 import type { HomePageData } from "@/types/home";
 import type { MainNavData } from "@/types/nav";
 
@@ -39,7 +40,9 @@ export function HomePage({ data, nav }: HomePageProps) {
         <CategoriesSection categories={data.categories} />
         <MidBanners banners={data.midBanners} />
         <ProductRails rails={data.productRails} />
-        <BrandShowcase brands={data.brands} />
+        <BrandShowcase
+          brands={SHOWCASE_BRANDS.length > 0 ? SHOWCASE_BRANDS : data.brands}
+        />
         <BottomBanners banners={data.bottomBanners} />
       </main>
       <SiteFooter />

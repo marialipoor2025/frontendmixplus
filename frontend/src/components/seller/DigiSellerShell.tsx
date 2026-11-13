@@ -2,13 +2,14 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState, type ReactNode } from "react";
 import {
   DIGI_SELLER_NAV,
   isSellerGroupActive,
-  isSellerNavActive,
+  isSellerNavItemActive,
   type SellerNavGroup,
+  type SellerNavItem,
 } from "@/components/seller/sellerNav";
 import { useAuth } from "@/lib/auth/useAuth";
 import { siteConfig } from "@/config/site";
@@ -19,16 +20,20 @@ import "@/components/seller/digi/digi.css";
  */
 export function DigiSellerShell({ children }: { children: ReactNode }) {
   const pathname = usePathname() || "/seller/digi/dashboard";
+  const searchParams = useSearchParams();
+  const search = searchParams?.toString() ? `?${searchParams.toString()}` : "";
   const router = useRouter();
   const { user, logout } = useAuth();
   const [openId, setOpenId] = useState<string | null>(null);
   const [profileOpen, setProfileOpen] = useState(false);
 
   useEffect(() => {
-    const active = DIGI_SELLER_NAV.find((g) => isSellerGroupActive(pathname, g));
+    const active = DIGI_SELLER_NAV.find((g) =>
+      isSellerGroupActive(pathname, search, g),
+    );
     setOpenId(active?.id ?? null);
     setProfileOpen(false);
-  }, [pathname]);
+  }, [pathname, search]);
 
   async function handleLogout() {
     await logout();
@@ -193,6 +198,7 @@ export function DigiSellerShell({ children }: { children: ReactNode }) {
                 key={group.id}
                 group={group}
                 pathname={pathname}
+                search={search}
                 open={openId === group.id}
                 onToggle={() =>
                   setOpenId((prev) => (prev === group.id ? null : group.id))
@@ -230,26 +236,34 @@ export function DigiSellerShell({ children }: { children: ReactNode }) {
 function SidebarGroup({
   group,
   pathname,
+  search,
   open,
   onToggle,
 }: {
   group: SellerNavGroup;
   pathname: string;
+  search: string;
   open: boolean;
   onToggle: () => void;
 }) {
-  const active = isSellerGroupActive(pathname, group);
+  const active = isSellerGroupActive(pathname, search, group);
 
   if (group.href && group.items.length === 0) {
+    const leaf: SellerNavItem = {
+      id: group.id,
+      title: group.title,
+      href: group.href,
+    };
+    const leafActive = isSellerNavItemActive(pathname, search, leaf);
     return (
       <div className="digi-sidebar__group">
         <Link
           href={group.href}
           className={[
             "digi-sidebar__group-btn",
-            active ? "is-active" : "",
+            leafActive ? "is-active" : "",
           ].join(" ")}
-          data-active={active ? "true" : "false"}
+          data-active={leafActive ? "true" : "false"}
         >
           <span>{group.title}</span>
         </Link>
@@ -263,10 +277,10 @@ function SidebarGroup({
         type="button"
         className={[
           "digi-sidebar__group-btn",
-          active || open ? "is-active" : "",
+          active ? "is-active" : "",
         ].join(" ")}
         aria-expanded={open}
-        data-active={active || open ? "true" : "false"}
+        data-active={active ? "true" : "false"}
         onClick={onToggle}
       >
         <span className="inline-flex items-center gap-1">
@@ -280,7 +294,7 @@ function SidebarGroup({
       {open ? (
         <ul className="digi-sidebar__list" role="list">
           {group.items.map((item) => {
-            const itemActive = isSellerNavActive(pathname, item.href);
+            const itemActive = isSellerNavItemActive(pathname, search, item);
             return (
               <li key={item.id}>
                 <Link

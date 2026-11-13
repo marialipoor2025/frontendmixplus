@@ -27,6 +27,9 @@ export const CLASSIC_SELLER_NAV: SellerNavItem[] = [
 /**
  * Digikala AuthenticatedHeaderDesktop IA — exact labels from live HTML.
  * Used only by `/seller/digi/*`.
+ *
+ * Items that share a page use `?nav=<item.id>` so only one submenu row is
+ * active and clicks always change the URL (Next.js same-href is a no-op).
  */
 export const DIGI_SELLER_NAV: SellerNavGroup[] = [
   {
@@ -34,13 +37,11 @@ export const DIGI_SELLER_NAV: SellerNavGroup[] = [
     title: "کالا",
     items: [
       {
-        // Digikala: /pwa/product/list
         id: "products-search",
         title: "جستجو و ثبت کالا",
-        href: "/seller/digi/products",
+        href: "/seller/digi/products/create/initial",
       },
       {
-        // Digikala: /pwa/product-management
         id: "products",
         title: "مدیریت کالا و افزودن تنوع",
         href: "/seller/digi/products",
@@ -53,12 +54,12 @@ export const DIGI_SELLER_NAV: SellerNavGroup[] = [
       {
         id: "video",
         title: "مدیریت ویدیو",
-        href: "/seller/digi/products",
+        href: "/seller/digi/products?nav=video",
       },
       {
         id: "inventory-report",
         title: "گزارش موجودی کالا",
-        href: "/seller/digi/inventory",
+        href: "/seller/digi/inventory?nav=inventory-report",
       },
     ],
   },
@@ -74,12 +75,12 @@ export const DIGI_SELLER_NAV: SellerNavGroup[] = [
       {
         id: "orders-history",
         title: "تاریخچه سفارش‌ها",
-        href: "/seller/digi/orders",
+        href: "/seller/digi/orders?nav=orders-history",
       },
       {
         id: "orders-tracking",
         title: "رهگیری ارسال با میاره",
-        href: "/seller/digi/orders",
+        href: "/seller/digi/orders?nav=orders-tracking",
       },
     ],
   },
@@ -95,22 +96,22 @@ export const DIGI_SELLER_NAV: SellerNavGroup[] = [
       {
         id: "shipping-consignment",
         title: "ایجاد محموله برای انبارش",
-        href: "/seller/digi/shipping",
+        href: "/seller/digi/shipping?nav=shipping-consignment",
       },
       {
         id: "shipping-packages",
         title: "لیست محموله‌ها",
-        href: "/seller/digi/shipping",
+        href: "/seller/digi/shipping?nav=shipping-packages",
       },
       {
         id: "shipping-returns",
         title: "پس گرفتن کالا از انبار",
-        href: "/seller/digi/shipping",
+        href: "/seller/digi/shipping?nav=shipping-returns",
       },
       {
         id: "shipping-claims",
         title: "پیگیری درخواست‌های خسارت",
-        href: "/seller/digi/shipping",
+        href: "/seller/digi/shipping?nav=shipping-claims",
       },
     ],
   },
@@ -128,12 +129,12 @@ export const DIGI_SELLER_NAV: SellerNavGroup[] = [
       {
         id: "finance-invoice",
         title: "صورت‌حساب‌ها",
-        href: "/seller/digi/finance",
+        href: "/seller/digi/finance?nav=finance-invoice",
       },
       {
         id: "finance-commission",
         title: "کمیسیون، هزینه‌ها و جریمه‌ها",
-        href: "/seller/digi/finance",
+        href: "/seller/digi/finance?nav=finance-commission",
       },
     ],
   },
@@ -150,35 +151,35 @@ export const DIGI_SELLER_NAV: SellerNavGroup[] = [
       {
         id: "marketing-manage",
         title: "مدیریت پروموشن‌ها",
-        href: "/seller/digi/marketing",
+        href: "/seller/digi/marketing?nav=marketing-manage",
       },
       {
         id: "marketing-shop",
         title: "فروشگاه شما در اوریا مارکت",
-        href: "/seller/digi/settings",
+        href: "/seller/digi/settings?nav=marketing-shop",
         badge: "جدید",
       },
       {
         id: "marketing-smart",
         title: "تخفیف هوشمند",
-        href: "/seller/digi/marketing",
+        href: "/seller/digi/marketing?nav=marketing-smart",
       },
       {
         id: "marketing-list",
         title: "ایجاد لیست اختصاصی",
-        href: "/seller/digi/marketing",
+        href: "/seller/digi/marketing?nav=marketing-list",
       },
       {
         id: "marketing-voucher",
         title: "کد تخفیف",
-        href: "/seller/digi/marketing",
+        href: "/seller/digi/marketing?nav=marketing-voucher",
       },
     ],
   },
   {
     id: "ads",
     title: "تبلیغات",
-    href: "/seller/digi/marketing",
+    href: "/seller/digi/marketing?nav=ads",
     items: [],
   },
   {
@@ -193,22 +194,22 @@ export const DIGI_SELLER_NAV: SellerNavGroup[] = [
       {
         id: "analytics-returns",
         title: "مرجوعی",
-        href: "/seller/digi/analytics",
+        href: "/seller/digi/analytics?nav=analytics-returns",
       },
       {
         id: "analytics-promo",
         title: "گزارش پروموشن‌ها",
-        href: "/seller/digi/analytics",
+        href: "/seller/digi/analytics?nav=analytics-promo",
       },
       {
         id: "analytics-smart",
         title: "گزارش تخفیف‌های هوشمند",
-        href: "/seller/digi/analytics",
+        href: "/seller/digi/analytics?nav=analytics-smart",
       },
       {
         id: "analytics-commitment",
         title: "گزارش تعهد ارسال",
-        href: "/seller/digi/orders",
+        href: "/seller/digi/orders?nav=analytics-commitment",
       },
     ],
   },
@@ -219,17 +220,17 @@ export const DIGI_SELLER_NAV: SellerNavGroup[] = [
       {
         id: "services-digital",
         title: "سرویس‌های دیجیتال",
-        href: "/seller/digi/settings",
+        href: "/seller/digi/settings?nav=services-digital",
       },
       {
         id: "services-ops",
         title: "سرویس‌های عملیاتی",
-        href: "/seller/digi/settings",
+        href: "/seller/digi/settings?nav=services-ops",
       },
       {
         id: "services-token",
         title: "توکن اختصاصی",
-        href: "/seller/digi/settings",
+        href: "/seller/digi/settings?nav=services-token",
       },
     ],
   },
@@ -240,24 +241,24 @@ export const DIGI_SELLER_NAV: SellerNavGroup[] = [
       {
         id: "help-academy",
         title: "مرکز آموزش فروشندگان",
-        href: "/seller/digi/settings",
+        href: "/seller/digi/settings?nav=help-academy",
       },
       {
         id: "help-forbidden",
         title: "کالاهای غیرمجاز",
-        href: "/seller/digi/settings",
+        href: "/seller/digi/settings?nav=help-forbidden",
       },
       {
         id: "help-faq",
         title: "سوالات متداول",
-        href: "/seller/digi/settings",
+        href: "/seller/digi/settings?nav=help-faq",
       },
     ],
   },
   {
     id: "support",
     title: "پشتیبانی",
-    href: "/seller/digi/settings",
+    href: "/seller/digi/settings?nav=support",
     items: [],
   },
 ];
@@ -265,6 +266,24 @@ export const DIGI_SELLER_NAV: SellerNavGroup[] = [
 /** @deprecated use DIGI_SELLER_NAV or CLASSIC_SELLER_NAV explicitly */
 export const SELLER_NAV = DIGI_SELLER_NAV;
 
+function normalizePath(path: string): string {
+  if (!path) return "/";
+  const trimmed = path.replace(/\/+$/, "");
+  return trimmed.length > 0 ? trimmed : "/";
+}
+
+function parseHref(href: string): { pathname: string; nav: string | null } {
+  const url = new URL(href, "https://seller.local");
+  return {
+    pathname: normalizePath(url.pathname),
+    nav: url.searchParams.get("nav"),
+  };
+}
+
+/**
+ * Classic / simple active check (pathname only). Prefer
+ * {@link isSellerNavItemActive} for Digi sidebar rows.
+ */
 export function isSellerNavActive(pathname: string, href: string): boolean {
   const digi = href.startsWith("/seller/digi");
   const productsHref = digi ? "/seller/digi/products" : "/seller/products";
@@ -275,30 +294,81 @@ export function isSellerNavActive(pathname: string, href: string): boolean {
     ? "/seller/digi/products/create"
     : "/seller/products/create";
   const dashboardHref = digi ? "/seller/digi/dashboard" : "/seller/dashboard";
+  const path = normalizePath(pathname);
+  const { pathname: hrefPath } = parseHref(href);
 
-  if (href === dashboardHref) {
-    return pathname === dashboardHref || pathname === `${dashboardHref}/`;
+  if (hrefPath === normalizePath(dashboardHref)) {
+    return path === normalizePath(dashboardHref);
   }
-  if (href === productsHref) {
-    // Product list + Digikala create/initial chooser (جستجو و ثبت کالا)
-    if (pathname.startsWith(productsCreateHref)) return true;
+  if (hrefPath === normalizePath(productsHref)) {
+    if (path.startsWith(normalizePath(productsCreateHref))) return true;
     return (
-      pathname === productsHref ||
-      pathname === `${productsHref}/` ||
-      (pathname.startsWith(`${productsHref}/`) &&
-        !pathname.startsWith(productsNewHref))
+      path === normalizePath(productsHref) ||
+      (path.startsWith(`${normalizePath(productsHref)}/`) &&
+        !path.startsWith(normalizePath(productsNewHref)))
     );
   }
-  if (href === productsNewHref) {
-    return pathname.startsWith(productsNewHref);
+  if (hrefPath === normalizePath(productsNewHref)) {
+    return path.startsWith(normalizePath(productsNewHref));
   }
-  return pathname === href || pathname.startsWith(`${href}/`);
+  return path === hrefPath || path.startsWith(`${hrefPath}/`);
+}
+
+/** Digi sidebar: exactly one row active; honors `?nav=` disambiguation. */
+export function isSellerNavItemActive(
+  pathname: string,
+  search: string,
+  item: SellerNavItem,
+): boolean {
+  const path = normalizePath(pathname);
+  const qs = new URLSearchParams(
+    search.startsWith("?") ? search.slice(1) : search,
+  );
+  const currentNav = qs.get("nav");
+  const { pathname: hrefPath, nav: itemNav } = parseHref(item.href);
+
+  if (currentNav) {
+    return item.id === currentNav || itemNav === currentNav;
+  }
+
+  // No ?nav= in URL — only the default (no-nav) item for this path wins.
+  if (itemNav) return false;
+
+  if (item.id === "products-search") {
+    return (
+      path.startsWith("/seller/digi/products/create") ||
+      path.startsWith("/seller/digi/products/new")
+    );
+  }
+
+  if (item.id === "products") {
+    if (path.startsWith("/seller/digi/products/create")) return false;
+    if (path.startsWith("/seller/digi/products/new")) return false;
+    return (
+      path === "/seller/digi/products" ||
+      path.startsWith("/seller/digi/products/")
+    );
+  }
+
+  return path === hrefPath;
 }
 
 export function isSellerGroupActive(
   pathname: string,
+  search: string,
   group: SellerNavGroup,
 ): boolean {
-  if (group.href && isSellerNavActive(pathname, group.href)) return true;
-  return group.items.some((item) => isSellerNavActive(pathname, item.href));
+  if (
+    group.href &&
+    isSellerNavItemActive(pathname, search, {
+      id: group.id,
+      title: group.title,
+      href: group.href,
+    })
+  ) {
+    return true;
+  }
+  return group.items.some((item) =>
+    isSellerNavItemActive(pathname, search, item),
+  );
 }
